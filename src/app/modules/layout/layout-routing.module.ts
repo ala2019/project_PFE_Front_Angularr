@@ -3,6 +3,15 @@ import { RouterModule, Routes } from '@angular/router';
 import { LayoutComponent } from './layout.component';
 import { ArticlesComponent } from '../articles/articles.component';
 import { CmdAchatComponent } from '../commande/commandeachat/cmdachat.component';
+import { CmdTransfertComponent } from '../commande/commandetransfert/cmdtransfert.component';
+import { CmdventetComponent } from '../commande/commandevente/cmdvente.component';
+import { StockComponent } from '../stock/stock.component';
+import { MouvementComponent } from '../mouvement/mouvement.component';
+import { DeviseComponent } from '../parametrage/devise/devise.component';
+import { FounisseurComponent } from '../parametrage/fournisseur/fournisseur.component';
+import { RegionComponent } from '../parametrage/region/region.component';
+import { MagasinComponent } from '../parametrage/magasin/magasin.component';
+import { ClientComponent } from '../parametrage/client/client.component';
 
 const routes: Routes = [
   {
@@ -27,6 +36,42 @@ const routes: Routes = [
       {
         path: 'commandes/achat',
         component: CmdAchatComponent,
+      },
+      {
+        path: 'commandes/transfert',
+        component: CmdTransfertComponent,
+      },
+      {
+        path: 'commandes/vente',
+        component: CmdventetComponent,
+      },
+      {
+        path: 'stock',
+        component: StockComponent,
+      },
+      {
+        path: 'mouvement',
+        component: MouvementComponent,
+      },
+      {
+        path: 'parametrage/client',
+        component: ClientComponent,
+      },
+      {
+        path: 'parametrage/devise',
+        component: DeviseComponent,
+      },
+      {
+        path: 'parametrage/fouenisseur',
+        component: FounisseurComponent,
+      },
+      {
+        path: 'parametrage/region',
+        component: RegionComponent,
+      },
+      {
+        path: 'parametrage/magasin',
+        component: MagasinComponent,
       },
     ],
   },
