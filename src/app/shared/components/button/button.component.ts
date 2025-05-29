@@ -13,7 +13,6 @@ type ButtonProps = {
 
 @Component({
   selector: 'app-button',
-  imports: [CommonModule],
   templateUrl: './button.component.html',
   styleUrl: './button.component.scss',
 })

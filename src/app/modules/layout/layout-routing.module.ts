@@ -12,6 +12,7 @@ import { FounisseurComponent } from '../parametrage/fournisseur/fournisseur.comp
 import { RegionComponent } from '../parametrage/region/region.component';
 import { MagasinComponent } from '../parametrage/magasin/magasin.component';
 import { ClientComponent } from '../parametrage/client/client.component';
+import { CategoriearticleComponent } from '../parametrage/categoriearticle/categoriearticle.component';
 
 const routes: Routes = [
   {
@@ -46,7 +47,7 @@ const routes: Routes = [
         component: CmdventetComponent,
       },
       {
-        path: 'stock',
+        path: 'etatstock',
         component: StockComponent,
       },
       {
@@ -66,12 +67,16 @@ const routes: Routes = [
         component: FounisseurComponent,
       },
       {
-        path: 'parametrage/region',
+        path: 'parametrage/regions',
         component: RegionComponent,
       },
       {
         path: 'parametrage/magasin',
         component: MagasinComponent,
+      },
+      {
+        path: 'parametrage/categoriearticle',
+        component: CategoriearticleComponent,
       },
     ],
   },

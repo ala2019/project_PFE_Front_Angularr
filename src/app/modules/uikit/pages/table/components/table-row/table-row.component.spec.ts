@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableContentComponent } from './table-content.component';
+import { beforeEach, describe, it } from 'node:test';
+import { expect } from '@playwright/test';
 
 describe('TableContentComponent', () => {
   let component: TableContentComponent;
@@ -8,9 +10,8 @@ describe('TableContentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TableContentComponent]
-    })
-    .compileComponents();
+      imports: [TableContentComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TableContentComponent);
     component = fixture.componentInstance;

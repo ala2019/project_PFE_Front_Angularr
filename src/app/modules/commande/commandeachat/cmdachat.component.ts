@@ -1,16 +1,16 @@
 import { Component, signal } from '@angular/core';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { TableRowComponent } from '../../uikit/pages/table/components/table-row/table-row.component';
-import { TableFooterComponent } from '../../uikit/pages/table/components/table-footer/table-footer.component';
 import { User } from '../../uikit/pages/table/model/user.model';
 import { dummyData } from 'src/app/shared/dummy/user.dummy';
 import { TableHeaderComponent } from '../../uikit/pages/table/components/table-header/table-header.component';
+import { TableFooterComponent } from '../../uikit/pages/table/components/table-footer/table-footer.component';
 
 @Component({
   selector: 'app-cmdachat',
   templateUrl: 'cmdachat.component.html',
   styleUrl: 'cmdachat.component.scss',
-  imports: [AngularSvgIconModule, TableRowComponent, TableFooterComponent, TableHeaderComponent],
+  imports: [AngularSvgIconModule, TableRowComponent, TableHeaderComponent, TableFooterComponent],
 })
 export class CmdAchatComponent {
   users = signal<User[]>([]);
