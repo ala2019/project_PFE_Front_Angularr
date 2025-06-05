@@ -41,8 +41,13 @@ export class Menu {
         // },
         {
           icon: 'assets/icons/heroicons/outline/cog.svg',
-          label: 'Articles',
+          label: 'Liste des articles',
           route: '/articles',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/cog.svg',
+          label: 'Etat des stocks',
+          route: '/etatstock',
         },
         {
           icon: 'assets/icons/heroicons/outline/cog.svg',
@@ -56,17 +61,18 @@ export class Menu {
         },
         {
           icon: 'assets/icons/heroicons/outline/cog.svg',
-          label: 'Liste des mouvements',
-          route: '/mouvement',
+          label: 'Liste des lots ',
+          route: '/lot',
         },
         {
           icon: 'assets/icons/heroicons/outline/cog.svg',
-          label: 'Etat des stocks',
-          route: '/etatstock',
+          label: 'Liste des mouvements',
+          route: '/mouvement',
         },
+
         {
           icon: 'assets/icons/heroicons/outline/test.svg',
-          label: 'Pramaétrage globale',
+          label: 'Paramétrage globale',
           route: '/parametrage',
           children: [
             { label: 'Categorie Article ', route: '/parametrage/categoriearticle' },

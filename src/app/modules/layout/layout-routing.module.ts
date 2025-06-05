@@ -13,6 +13,8 @@ import { RegionComponent } from '../parametrage/region/region.component';
 import { MagasinComponent } from '../parametrage/magasin/magasin.component';
 import { ClientComponent } from '../parametrage/client/client.component';
 import { CategoriearticleComponent } from '../parametrage/categoriearticle/categoriearticle.component';
+import { LotComponent } from '../Lot/Lot.component';
+import { HttpClientModule } from '@angular/common/module.d-CnjH8Dlt';
 
 const routes: Routes = [
   {
@@ -53,6 +55,10 @@ const routes: Routes = [
       {
         path: 'mouvement',
         component: MouvementComponent,
+      },
+      {
+        path: 'lot',
+        component: LotComponent,
       },
       {
         path: 'parametrage/client',

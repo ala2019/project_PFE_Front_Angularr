@@ -3,7 +3,7 @@
     <h3 class="text-foreground font-semibold">Team Members</h3>
     <div class="text-muted-foreground space-x-1 text-xs font-medium">
       <a href="" class="hover:text-primary">All Members:</a>
-      <span class="text-foreground">{{ users().length }}</span>
+      <!-- <span class="text-foreground">{{ users().length }}</span> -->
     </div>
   </div>
   <div class="inline-block space-x-4">
@@ -12,15 +12,15 @@
       Import CSV
     </button>
     <button class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold">
-      Add Member
+      Nouveau
     </button>
   </div>
 </div>
 
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
   <div class="flex flex-wrap items-center justify-between gap-2 py-3 px-5">
-    <h3 class="text-muted-foreground text-sm font-medium">Showing 08 of {{ users().length }} users</h3>
-    <div class="flex flex-wrap gap-2">
+    <!-- <h3 class="text-muted-foreground text-sm font-medium">Showing 08 of {{ users().length }} users</h3> -->
+    <!-- <div class="flex flex-wrap gap-2">
       <div class="flex">
         <label class="text-muted-foreground relative">
           <div class="absolute left-2.5 top-2.5">
@@ -33,9 +33,9 @@
             type="text"
             value=""
             (input)="onSearchChange($event)" />
-        </label>
-      </div>
-      <div class="flex flex-wrap gap-2.5">
+        </label> 
+      </div> --->
+    <!-- <div class="flex flex-wrap gap-2.5">
         <select name="status" class="text-muted-foreground w-28! p-2" (change)="onStatusChange($event)">
           <option value="">All</option>
           <option value="1">Active</option>
@@ -48,25 +48,120 @@
         </select>
       </div>
     </div>
-  </div>
+  </div> -->
 
-  <div
-    class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
-    <table
-      class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
-      <thead class="border-muted/20 text-muted-foreground border text-xs">
-        <tr app-table-header (onCheck)="toggleUsers($event)"></tr>
-      </thead>
-      <tbody>
-        @for (user of filteredUsers(); track $index) {
-        <tr class="hover:bg-card/50" app-table-row [user]="user"></tr>
-        } @empty {
-        <tr>
-          <td class="py-4 text-center text-sm" colspan="7">No users found</td>
-        </tr>
-        }
-      </tbody>
-    </table>
+    <div
+      class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
+      <table
+        class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
+        <!-- <table class="table">
+          <thead class="text-primary">
+             <th>ID</th>
+            <th>Code</th>
+            <th>Réference</th>
+            <th>Description</th>
+            <th>prixAchat</th>
+            <th>image</th>
+            <th>categorie</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let article of articles">
+              <td>{{ article.code }}</td>
+              <td>{{ article.reference }}</td>
+              <td>{{ article.description }}</td>
+              <td class="text-primary">${{ article.prixAchat }}</td>
+              <td>
+                <img src="{{ article.image }}" width="25%" height="25%" />
+              </td>
+              <td>{{ article.categorie.nom }}</td>
+              <td>
+                <button type="button" class="btn btn-info">Info</button>
+
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  (click)="openModal(article)"
+                >
+                  Update
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  (click)="deleteArticles(article.idArticle)"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+       <thead class="border-muted/20 text-muted-foreground border text-xs">
+          <tr app-table-header (onCheck)="toggleUsers($event)"></tr>
+        </thead> -->
+        <!-- <tbody>
+          @for (user of filteredUsers(); track $index) {
+          <tr class="hover:bg-card/50" app-table-row [user]="user"></tr>
+          } @empty {
+          <tr>
+            <td class="py-4 text-center text-sm" colspan="7">No users found</td>
+          </tr>
+          }
+        </tbody> 
+      </table> -->
+
+        <table class="table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
+          <thead class="text-primary">
+            <tr>
+              <th>ID</th>
+              <th>Code</th>
+              <th>Référence</th>
+              <th>Description</th>
+              <th>Prix Achat</th>
+              <th>Prix Vente</th>
+              <th>Stock Min</th>
+              <th>Image</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (article of articles; track $index) {
+            <tr>
+              <td>{{ article.idArticle }}</td>
+              <td>{{ article.code }}</td>
+              <td>{{ article.reference }}</td>
+              <td>{{ article.description }}</td>
+              <td>{{ article.prixAchat }}</td>
+              <td>{{ article.prixVente }}</td>
+              <td>{{ article.stockMin }}</td>
+              <td>
+                @if (article.image) {
+                <img [src]="'data:image/jpeg;base64,' + article.image" width="60" height="60" />
+                }
+              </td>
+              <td>
+                <!-- <span [ngClass]="{
+                  'text-green-600': article.status === 1,
+                  'text-red-600': article.status === 0
+                }"> -->
+                {{ article.status === 1 ? 'Actif' : 'Inactif' }}
+                <!-- </span> -->
+              </td>
+              <td class="space-x-1">
+                <button class="btn btn-info">Info</button>
+                <button class="btn btn-success" (click)="openModal(article)">Update</button>
+                <button class="btn btn-danger" (click)="deleteArticles(article.idArticle)">Delete</button>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+
+        <div></div>
+
+        <!-- <app-table-footer></app-table-footer> -->
+      </table>
+    </div>
   </div>
-  <app-table-footer></app-table-footer>
 </div>
