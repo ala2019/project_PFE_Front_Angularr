@@ -8,6 +8,6 @@ import { TableHeaderComponent } from '../uikit/pages/table/components/table-head
   selector: 'app-devise',
   templateUrl: 'stock.component.html',
   styleUrl: 'stock.component.scss',
-  imports: [AngularSvgIconModule, TableRowComponent, TableFooterComponent, TableHeaderComponent],
+  imports: [AngularSvgIconModule, TableRowComponent, TableFooterComponent],
 })
 export class StockComponent {}
