@@ -81,6 +81,7 @@ export class Menu {
             { label: 'List des clients ', route: '/parametrage/client' },
             { label: 'List des regions ', route: '/parametrage/regions' },
             { label: 'List des magasins ', route: '/parametrage/magasin' },
+            { label: 'Region / Magasin ', route: '/region-magasin' },
           ],
         },
       ],

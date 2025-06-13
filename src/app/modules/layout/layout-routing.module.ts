@@ -14,6 +14,7 @@ import { MagasinComponent } from '../parametrage/magasin/magasin.component';
 import { ClientComponent } from '../parametrage/client/client.component';
 import { CategoriearticleComponent } from '../parametrage/categoriearticle/categoriearticle.component';
 import { LotComponent } from '../Lot/Lot.component';
+import { RegionMagasinComponent } from '../region-magasin/region-magasin.component';
 
 const routes: Routes = [
   {
@@ -82,6 +83,10 @@ const routes: Routes = [
       {
         path: 'parametrage/categoriearticle',
         component: CategoriearticleComponent,
+      },
+      {
+        path: 'region-magasin',
+        component: RegionMagasinComponent,
       },
     ],
   },

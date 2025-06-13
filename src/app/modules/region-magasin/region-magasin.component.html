@@ -1,0 +1,12 @@
+<div class="flex flex-col gap-3">
+  <div class="flex flex-row gap-2">
+    <button class="cursor-pointer bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold" (click)="component = 'region'">Region</button>
+    <button class="cursor-pointer bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold" (click)="component = 'magasin'">magasin</button>
+  </div>
+
+  @if (component === 'region') {
+  <app-region />
+  } @if (component === 'magasin') {
+  <app-magasin />
+  }
+</div>

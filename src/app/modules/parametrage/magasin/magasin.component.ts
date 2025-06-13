@@ -8,6 +8,6 @@ import { TableHeaderComponent } from '../../uikit/pages/table/components/table-h
   selector: 'app-magasin',
   templateUrl: 'magasin.component.html',
   styleUrl: 'magasin.component.scss',
-  imports: [AngularSvgIconModule, TableRowComponent, TableFooterComponent, TableHeaderComponent],
+  imports: [AngularSvgIconModule],
 })
 export class MagasinComponent {}

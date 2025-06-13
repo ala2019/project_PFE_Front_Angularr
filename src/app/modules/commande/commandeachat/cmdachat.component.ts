@@ -15,7 +15,7 @@ import { PopupComponent } from '../../shared/popup/popup.component';
 })
 export class CmdAchatComponent {
   users = signal<User[]>([]);
-  protected showPopUp: boolean = true;
+  protected showPopUp: boolean = false;
   constructor() {
     this.users.set(dummyData);
   }
