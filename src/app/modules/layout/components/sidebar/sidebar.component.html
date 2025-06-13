@@ -6,15 +6,8 @@
     <div
       [ngClass]="menuService.showSideBar ? 'justify-between' : 'justify-center'"
       class="mx-4 mb-2 flex h-9 items-center">
-      <div class="flex items-center" *ngIf="menuService.showSideBar">
-        <a
-          (click)="toggleSidebar()"
-          class="bg-primary flex cursor-pointer items-center justify-center rounded-sm p-2 focus:outline-hidden focus:ring-1">
-          <svg-icon src="assets/icons/logo.svg"> </svg-icon>
-        </a>
-        <b class="text-foreground ps-2 ml-1 grow text-sm font-bold">
-          {{ appJson.displayName }}
-        </b>
+      <div class="flex items-center" *ngIf="menuService.showSideBar" (click)="toggleSidebar()">
+        <img src="assets/logo.png" alt="">
       </div>
       <button
         (click)="toggleSidebar()"
@@ -31,27 +24,4 @@
     </div>
   </div>
 
-  <div class="mx-4 my-4 space-y-1">
-    <!-- Version -->
-    <a
-      target="_blank"
-      href="https://github.com/luciano-work/angular-tailwind"
-      class="-sm hover:bg-card group flex h-9 cursor-pointer items-center justify-start p-2">
-      <svg-icon
-        src="assets/icons/heroicons/outline/information-circle.svg"
-        [svgClass]="'h-5 w-5 text-muted-foreground/50'">
-      </svg-icon>
-
-      <div class="ml-3 truncate text-[10px] font-semibold tracking-wide focus:outline-hidden">
-        <span class="bg-primary/10 text-primary px-2 font-semibold">v{{ appJson.version }}</span>
-      </div>
-
-      <div class="fixed w-full" *ngIf="!menuService.showSideBar">
-        <span
-          class="z-1 bg-foreground text-background absolute left-12 -top-4 w-auto min-w-max origin-left scale-0 p-2 text-xs font-bold shadow-md transition-all duration-200 group-hover:scale-100">
-          v{{ appJson.version }}
-        </span>
-      </div>
-    </a>
-  </div>
 </nav>

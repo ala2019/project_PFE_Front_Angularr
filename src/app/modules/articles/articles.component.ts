@@ -1,7 +1,7 @@
 // import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ArticleService } from './article.service';
+import { ArticleService } from '../../core/services/article.service';
 import { CategorieArticleService } from '../parametrage/categoriearticle/categoriearticle.service'; // Assure-toi du bon chemin
 import { DomSanitizer } from '@angular/platform-browser';
 import { take } from 'rxjs';
@@ -100,6 +100,7 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
         },
       });
     }
+    
   }
 
   fetchData() {
@@ -141,4 +142,6 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
       },
     );
   }
+
+  
 }

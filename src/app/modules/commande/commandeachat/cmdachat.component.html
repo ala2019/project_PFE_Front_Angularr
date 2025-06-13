@@ -1,3 +1,13 @@
+@if (showPopUp) {
+<app-popup>
+  <div popup-content>
+    <h3 class="text-lg font-semibold">Popup Title</h3>
+    <p class="text-sm text-gray-600">This is some content inside the popup!</p>
+    <button class="mt-3 text-sm text-red-500 hover:underline" (click)="$event.stopPropagation()">Close</button>
+  </div>
+</app-popup>
+}
+
 <div class="mb-4 flex justify-between">
   <div class="inline-block">
     <h3 class="text-foreground font-semibold">Team Members</h3>
@@ -7,7 +17,9 @@
     </div>
   </div>
   <div class="inline-block space-x-4">
-    <button class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold">
+    <button
+      (click)="showPopUp = !showPopUp"
+      class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
       Ajouter Commande Achat
     </button>
   </div>

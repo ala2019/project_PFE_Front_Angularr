@@ -5,15 +5,17 @@ import { User } from '../../uikit/pages/table/model/user.model';
 import { dummyData } from 'src/app/shared/dummy/user.dummy';
 import { TableHeaderComponent } from '../../uikit/pages/table/components/table-header/table-header.component';
 import { TableFooterComponent } from '../../uikit/pages/table/components/table-footer/table-footer.component';
+import { PopupComponent } from '../../shared/popup/popup.component';
 
 @Component({
   selector: 'app-cmdachat',
   templateUrl: 'cmdachat.component.html',
   styleUrl: 'cmdachat.component.scss',
-  imports: [AngularSvgIconModule, TableRowComponent, TableHeaderComponent, TableFooterComponent],
+  imports: [AngularSvgIconModule, TableRowComponent, TableHeaderComponent, PopupComponent],
 })
 export class CmdAchatComponent {
   users = signal<User[]>([]);
+  protected showPopUp: boolean = true;
   constructor() {
     this.users.set(dummyData);
   }
