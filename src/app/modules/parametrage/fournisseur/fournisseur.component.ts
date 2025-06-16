@@ -10,4 +10,5 @@ import { TableHeaderComponent } from '../../uikit/pages/table/components/table-h
   styleUrl: 'fournisseur.component.scss',
   imports: [AngularSvgIconModule, TableRowComponent, TableFooterComponent, TableHeaderComponent],
 })
-export class FounisseurComponent {}
+export class FounisseurComponent {
+}
