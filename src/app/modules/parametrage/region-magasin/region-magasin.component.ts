@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { MagasinComponent } from '../parametrage/magasin/magasin.component';
-import { RegionComponent } from '../parametrage/region/region.component';
+import { MagasinComponent } from '../magasin/magasin.component';
+import { RegionComponent } from '../region/region.component';
 
 @Component({
   selector: 'app-region-magasin',

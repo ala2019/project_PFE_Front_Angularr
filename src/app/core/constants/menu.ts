@@ -59,11 +59,11 @@ export class Menu {
             { label: 'Commande Vente', route: '/commandes/vente' },
           ],
         },
-        {
-          icon: 'assets/icons/heroicons/outline/cog.svg',
-          label: 'Liste des lots ',
-          route: '/lot',
-        },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/cog.svg',
+        //   label: 'Liste des lots ',
+        //   route: '/lot',
+        // },
         {
           icon: 'assets/icons/heroicons/outline/cog.svg',
           label: 'Liste des mouvements',
@@ -77,11 +77,14 @@ export class Menu {
           children: [
             { label: 'Categorie Article ', route: '/parametrage/categoriearticle' },
             { label: 'Devises ', route: '/parametrage/devise' },
-            { label: 'List des fournisseurs ', route: '/parametrage/fouenisseur' },
-            { label: 'List des clients ', route: '/parametrage/client' },
-            { label: 'List des regions ', route: '/parametrage/regions' },
-            { label: 'List des magasins ', route: '/parametrage/magasin' },
+            { label: 'Fournisseur / Client ', route: '/fournisseur-client' },
             { label: 'Region / Magasin ', route: '/region-magasin' },
+            { label: 'Gestion Utilisateurs ', route: '/gestionusers' },
+              // { label: 'List des fournisseurs ', route: '/parametrage/fouenisseur' },
+            //{ label: 'List des clients ', route: '/parametrage/client' },
+            //{ label: 'List des regions ', route: '/parametrage/regions' },
+           // { label: 'List des magasins ', route: '/parametrage/magasin' },
+
           ],
         },
       ],

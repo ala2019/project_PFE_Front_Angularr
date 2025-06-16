@@ -14,7 +14,9 @@ import { MagasinComponent } from '../parametrage/magasin/magasin.component';
 import { ClientComponent } from '../parametrage/client/client.component';
 import { CategoriearticleComponent } from '../parametrage/categoriearticle/categoriearticle.component';
 import { LotComponent } from '../Lot/Lot.component';
-import { RegionMagasinComponent } from '../region-magasin/region-magasin.component';
+import { RegionMagasinComponent } from '../parametrage/region-magasin/region-magasin.component';
+import { FournisseurClientComponent } from '../parametrage/fournisseur-client/fournisseur-client.component';
+import { GestionusersComponent } from '../parametrage/GestionUsers/gestionusers.component';
 
 const routes: Routes = [
   {
@@ -56,37 +58,42 @@ const routes: Routes = [
         path: 'mouvement',
         component: MouvementComponent,
       },
-      {
-        path: 'lot',
-        component: LotComponent,
-      },
-      {
-        path: 'parametrage/client',
-        component: ClientComponent,
-      },
+      
+      // {
+      //   path: 'parametrage/client',
+      //   component: ClientComponent,
+      // },
       {
         path: 'parametrage/devise',
         component: DeviseComponent,
       },
-      {
-        path: 'parametrage/fouenisseur',
-        component: FounisseurComponent,
-      },
-      {
-        path: 'parametrage/regions',
-        component: RegionComponent,
-      },
-      {
-        path: 'parametrage/magasin',
-        component: MagasinComponent,
-      },
+      // {
+      //   path: 'parametrage/fouenisseur',
+      //   component: FounisseurComponent,
+      // },
+      // {
+      //   path: 'parametrage/regions',
+      //   component: RegionComponent,
+      // },
+      // {
+      //   path: 'parametrage/magasin',
+      //   component: MagasinComponent,
+      // },
       {
         path: 'parametrage/categoriearticle',
         component: CategoriearticleComponent,
       },
-      {
+       {
         path: 'region-magasin',
         component: RegionMagasinComponent,
+      },
+      {
+        path: 'fournisseur-client',
+        component: FournisseurClientComponent,
+      },
+      {
+        path: 'gestionusers',
+        component: GestionusersComponent,
       },
     ],
   },
