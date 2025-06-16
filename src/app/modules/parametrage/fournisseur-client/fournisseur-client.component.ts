@@ -1,17 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ClientComponent } from '../client/client.component';
 import { FounisseurComponent } from '../fournisseur/fournisseur.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-fournisseur-client',
-  templateUrl: 'fournisseur-client.component.html',
   standalone: true,
-  imports: [ClientComponent, FounisseurComponent],
+  imports: [CommonModule, ClientComponent, FounisseurComponent],
+  templateUrl: './fournisseur-client.component.html',
 })
-export class FournisseurClientComponent implements OnInit {
-  protected component: 'fournisseur' | 'client' = 'fournisseur';
+export class FournisseurClientComponent {
 
-  constructor() {}
+  
+  component: 'fournisseur' | 'client' = 'fournisseur';
 
-  ngOnInit(): void {}
+  setComponent(type: 'fournisseur' | 'client') {
+    this.component = type;
+  }
 }
+

@@ -25,9 +25,9 @@ export class MagasinComponent implements OnInit{
   protected createPopUp = false;
 
    formData = {
-    nommagasin: '',
-    regionId: null
-  };
+    nomMagasin: '',
+    idRegion:  '' ,
+    nomregion:''};
 
   constructor(
     private readonly magasinService: MagasinService,
@@ -63,13 +63,14 @@ export class MagasinComponent implements OnInit{
     this.selectdID = null;
   }
     onSubmit() {
-  if (this.formData.nommagasin.trim() && this.formData.regionId) {
+  if (this.formData.nomMagasin.trim() && this.formData.idRegion && this.formData.nomregion) {
     this.magasinService.create(this.formData).subscribe({
       next: (response: any) => {
         this.getAll();
         this.formData = {
-          nommagasin: '',
-          regionId: null
+          nomMagasin: '',
+          idRegion: '',
+          nomregion: ''
         };
         this.createPopUp = false;
       },

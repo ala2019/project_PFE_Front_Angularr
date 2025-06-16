@@ -1,0 +1,43 @@
+
+<app-modal [visible]="isModalOpen" title="Fournisseur" (onClose)="closeModal()">
+  <form >
+    <input placeholder="Nom" />
+    <input placeholder="Téléphone" />
+    <input placeholder="Email" />
+    <input  placeholder="Adresse" />
+    <input  placeholder="Pays" />
+    <input  placeholder="Raison Sociale" />
+    <input  placeholder="Matricule Fiscale" />
+   <div class="flex justify-end gap-2 mt-4">
+      <button type="button" (click)="save()">Ajouter</button>
+      <button type="button" (click)="closeModal()">Annuler</button>
+    </div>
+  </form>
+</app-modal>
+
+<div class="mt-4">
+<button class="btn btn-primary" (click)="openModal()">Nouveau Fournisseur</button>
+  <table class="w-full text-sm text-left">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="p-2">Nom</th>
+        <th class="p-2">Téléphone</th>
+        <th class="p-2">Email</th>
+        <th class="p-2">Matricule Fiscale</th>
+        <th class="p-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let fournisseur of fournisseurs" class="border-b">
+        <td class="p-2">{{ fournisseur.nompersonne }}</td>
+        <td class="p-2">{{ fournisseur.telephone }}</td>
+        <td class="p-2">{{ fournisseur.email }}</td>
+        <td class="p-2">{{ fournisseur.matricule_fiscale }}</td>
+        <td class="p-2 space-x-2">
+          <button class="btn btn-sm btn-outline" (click)="edit(fournisseur)">Modifier</button>
+          <button class="btn btn-sm btn-danger" (click)="delete(fournisseur.idPersonne)">Supprimer</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

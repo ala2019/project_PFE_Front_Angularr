@@ -1,12 +1,24 @@
-<div class="flex flex-col gap-3">
-  <div class="flex flex-row gap-2">
-    <button class="cursor-pointer bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold" (click)="component = 'fournisseur'">Fournisseur</button>
-    <button class="cursor-pointer bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold" (click)="component = 'client'">Client</button>
+<div class="flex flex-col gap-4 p-4">
+  <div class="flex gap-2">
+    <button
+      (click)="setComponent('fournisseur')"
+      [class.bg-blue-600]="component === 'fournisseur'"
+      class="bg-gray-200 text-sm font-medium px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition"
+    >
+      Fournisseurs
+    </button>
+    <button
+      (click)="setComponent('client')"
+      [class.bg-blue-600]="component === 'client'"
+      class="bg-gray-200 text-sm font-medium px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition"
+    >
+      Clients
+    </button>
   </div>
 
   @if (component === 'fournisseur') {
-  <app-fournisseur />
-  } @if (component === 'client') {
-  <app-client />
+    <app-fournisseur />
+  } @else {
+    <app-client />
   }
 </div>

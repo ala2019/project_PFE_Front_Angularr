@@ -15,14 +15,14 @@
   <div popup-content>
     <form #nameForm="ngForm" (ngSubmit)="onSubmit()" class="w-[400px] max-w-sm space-y-4" novalidate>
       <div>
-        <label for="nommagasin" class="mb-1 block text-sm font-medium text-gray-700">
+        <label for="nomMagasin" class="mb-1 block text-sm font-medium text-gray-700">
           Name <span class="text-red-500">*</span>
         </label>
         <input
           type="text"
-          id="nommagasin"
-          name="nommagasin"
-          [(ngModel)]="formData.nommagasin"
+          id="nomMagasin"
+          name="nomMagasin"
+          [(ngModel)]="formData.nomMagasin"
           required
           #nameInput="ngModel"
           placeholder="Enter name"
@@ -36,8 +36,8 @@
 
   <select
     id="region"
-    name="regionId"
-    [(ngModel)]="formData.regionId"
+    name="idRegion"
+    [(ngModel)]="formData.idRegion"
     required
     #regionInput="ngModel"
     class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
