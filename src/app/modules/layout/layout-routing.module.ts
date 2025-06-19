@@ -4,8 +4,7 @@ import { LayoutComponent } from './layout.component';
 import { ArticlesComponent } from '../articles/articles.component';
 import { CmdAchatComponent } from '../commande/commandeachat/cmdachat.component';
 import { CmdTransfertComponent } from '../commande/commandetransfert/cmdtransfert.component';
-import { CmdventetComponent } from '../commande/commandevente/cmdvente.component';
-import { StockComponent } from '../stock/stock.component';
+
 import { MouvementComponent } from '../mouvement/mouvement.component';
 import { DeviseComponent } from '../parametrage/devise/devise.component';
 import { FounisseurComponent } from '../parametrage/fournisseur/fournisseur.component';
@@ -13,10 +12,12 @@ import { RegionComponent } from '../parametrage/region/region.component';
 import { MagasinComponent } from '../parametrage/magasin/magasin.component';
 import { ClientComponent } from '../parametrage/client/client.component';
 import { CategoriearticleComponent } from '../parametrage/categoriearticle/categoriearticle.component';
-import { LotComponent } from '../Lot/Lot.component';
+import { ExtraComponent } from '../parametrage/extra/extracomponent';
 import { RegionMagasinComponent } from '../parametrage/region-magasin/region-magasin.component';
 import { FournisseurClientComponent } from '../parametrage/fournisseur-client/fournisseur-client.component';
 import { GestionusersComponent } from '../parametrage/GestionUsers/gestionusers.component';
+import { CmdventetComponent } from '../commande/commandevente/cmdvente.component';
+import { StockComponent } from '../stock/stock.component';
 
 const routes: Routes = [
   {
@@ -58,7 +59,10 @@ const routes: Routes = [
         path: 'mouvement',
         component: MouvementComponent,
       },
-      
+      {
+        path: 'parametrage/extra',
+        component: ExtraComponent,
+      },
       // {
       //   path: 'parametrage/client',
       //   component: ClientComponent,

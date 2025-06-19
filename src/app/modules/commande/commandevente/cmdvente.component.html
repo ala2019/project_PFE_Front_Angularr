@@ -1,65 +1,824 @@
-<div class="mb-4 flex justify-between">
-  <div class="inline-block">
-    <h3 class="text-foreground font-semibold">Team Members</h3>
-    <div class="text-muted-foreground space-x-1 text-xs font-medium">
-      <a href="" class="hover:text-primary">Tous Commande vente:</a>
-      <span class="text-foreground">{{ users().length }}</span>
+<!-- Filters Section -->
+<div class="bg-white p-6 rounded-lg shadow-sm border mb-6">
+  <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtres de recherche</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Libellé commande</label>
+      <input 
+        type="text"
+        [(ngModel)]="filters.libelle"
+        placeholder="Rechercher par libellé..."
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+    </div>
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Client</label>
+      <select 
+        [(ngModel)]="filters.client"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        <option value="">Tous les clients</option>
+        <option *ngFor="let client of clients" [value]="client.nom">{{ client.nom }}</option>
+      </select>
+    </div>
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Magasin</label>
+      <select 
+        [(ngModel)]="filters.magasin"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        <option value="">Tous les magasins</option>
+        <option *ngFor="let magasin of magasins" [value]="magasin.nom">{{ magasin.nom }}</option>
+      </select>
+    </div>
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
+      <input 
+        type="date" 
+        [(ngModel)]="filters.dateDebut"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+    </div>
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin</label>
+      <input 
+        type="date" 
+        [(ngModel)]="filters.dateFin"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
     </div>
   </div>
-  <div class="inline-block space-x-4">
-    <button class="bg-primary text-primary-foreground flex-none rounded-md px-4 py-2.5 text-xs font-semibold">
-      Ajouter Commande Vente
+  
+  <div class="flex gap-2 mt-4">
+    <button 
+      (click)="applyFilters()"
+      class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+      Appliquer les filtres
+    </button>
+    <button 
+      (click)="clearFilters()"
+      class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+      Effacer les filtres
     </button>
   </div>
 </div>
-<div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
-  <div class="flex flex-wrap items-center justify-between gap-2 py-3 px-5">
-    <h3 class="text-muted-foreground text-sm font-medium">Showing 08 of {{ users().length }} users</h3>
-    <div class="flex flex-wrap gap-2">
-      <div class="flex">
-        <label class="text-muted-foreground relative">
-          <div class="absolute left-2.5 top-2.5">
-            <svg-icon src="./assets/icons/heroicons/outline/magnifying-glass.svg" [svgClass]="'h-4 w-4'"> </svg-icon>
-          </div>
-          <input
-            name="search"
-            class="py-2 pl-8 pr-2"
-            placeholder="Search users"
-            type="text"
-            value=""
-            (input)="onSearchChange($event)" />
-        </label>
+
+<!-- Main Content -->
+<div class="bg-white rounded-lg shadow-sm border">
+  <div class="flex justify-between items-center p-6 border-b">
+    <div>
+      <h2 class="text-xl font-semibold text-gray-800">Commandes de vente</h2>
+      <p class="text-sm text-gray-600 mt-1">Total: {{ totalItems }} commande(s)</p>
+    </div>
+    <div class="flex gap-2">
+      @if (selectedCommandes.length > 0) {
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-600">
+          {{ selectedCommandes.length }} commande(s) sélectionnée(s)
+        </span>
+        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+          ✅ Prêt pour facturation
+        </span>
+        <button 
+          (click)="openFactureForm()"
+          class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700">
+          📄 Imprimer facture
+        </button>
       </div>
-      <div class="flex flex-wrap gap-2.5">
-        <select name="status" class="text-muted-foreground w-28! p-2" (change)="onStatusChange($event)">
-          <option value="">All</option>
-          <option value="1">Active</option>
-          <option value="2">Disabled</option>
-          <option value="3">Pending</option>
-        </select>
-        <select name="order" class="text-muted-foreground w-28! p-2" (change)="onOrderChange($event)">
-          <option value="1">Newest</option>
-          <option value="2">Oldest</option>
-        </select>
-      </div>
+      }
+      <button 
+        (click)="openModal()"
+        class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700">
+        + Nouvelle commande
+      </button>
     </div>
   </div>
-  <div
-    class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
-    <table
-      class="text-muted-foreground table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
-      <thead class="border-muted/20 text-muted-foreground border text-xs">
-        <tr app-table-header (onCheck)="toggleUsers($event)"></tr>
-      </thead>
-      <tbody>
-        @for (user of filteredUsers(); track $index) {
-        <tr class="hover:bg-card/50" app-table-row [user]="user"></tr>
-        } @empty {
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
         <tr>
-          <td class="py-4 text-center text-sm" colspan="7">No commande vente found</td>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <input 
+              type="checkbox"
+              [checked]="isAllCommandesSelected()"
+              (change)="toggleSelectAllCommandes()"
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libellé</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date commande</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date livraison</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Magasin</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taux TVA</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant TTC</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
-        }
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr 
+          *ngFor="let commande of getPaginatedCommandes(); let i = index" 
+          [class]="isCommandeSelected(commande) ? 'bg-blue-50 border-l-4 border-blue-400' : getLineStatusClass()"
+          class="hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
+          (click)="toggleCommandeSelection(commande)">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <input 
+                type="checkbox"
+                [checked]="isCommandeSelected(commande)"
+                (click)="$event.stopPropagation()"
+                (change)="toggleCommandeSelection(commande)"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              @if (isCommandeSelected(commande)) {
+              <span class="ml-2 text-xs text-blue-600 font-medium">Sélectionnée</span>
+              }
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.libelle }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.dateLivraison | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.client }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.magasin }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.tauxTva }}%</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+            <button 
+              (click)="$event.stopPropagation(); viewDetails(commande)"
+              class="text-blue-600 hover:text-blue-900">Détails</button>
+            <button 
+              (click)="$event.stopPropagation(); editCommande(commande)"
+              class="text-yellow-600 hover:text-yellow-900">Modifier</button>
+            <button 
+              (click)="$event.stopPropagation(); selectdID = commande.idCmd; deletedPopUp = true"
+              class="text-red-600 hover:text-red-900">Supprimer</button>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination -->
+  @if (getTotalPages() > 1) {
+  <div class="bg-white px-6 py-3 border-t border-gray-200">
+    <div class="flex items-center justify-between">
+      <div class="text-sm text-gray-700">
+        Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} commandes
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <button 
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+          class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Précédent
+        </button>
+        
+        @for (page of getPageNumbers(); track page) {
+        <button 
+          (click)="goToPage(page)"
+          [class]="page === currentPage ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
+          class="px-3 py-1 text-sm border border-gray-300 rounded-md">
+          {{ page }}
+        </button>
+        }
+        
+        <button 
+          (click)="nextPage()"
+          [disabled]="currentPage === getTotalPages()"
+          class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Suivant
+        </button>
+      </div>
+    </div>
+  </div>
+  }
 </div>
+
+<!-- Create/Edit Commande Popup -->
+@if (createPopUp) {
+<app-popup>
+  <div popup-content class="w-[800px] max-w-4xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold text-gray-800">
+        {{ isEditing ? 'Modifier' : 'Nouvelle' }} commande de vente
+      </h3>
+      <button 
+        (click)="closeModal()"
+        class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="commandeForm" (ngSubmit)="saveCommande()" class="space-y-6">
+      <!-- Header Information -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Libellé de la commande <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text"
+            formControlName="libelle"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+            placeholder="Libellé de la commande">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Date de commande <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="date"
+            formControlName="dateCommande"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Date de livraison <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="date"
+            formControlName="dateLivraison"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Client <span class="text-red-500">*</span>
+          </label>
+          <select 
+            formControlName="clientId"
+            (change)="onClientChange()"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+            <option value="">Sélectionner un client</option>
+            <option *ngFor="let client of clients" [value]="client.idClient">
+              {{ client.nom }} (TVA: {{ client.tauxTva }}%)
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Magasin <span class="text-red-500">*</span>
+          </label>
+          <select 
+            formControlName="magasinId"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+            <option value="">Sélectionner un magasin</option>
+            <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
+              {{ magasin.nom }}
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Taux TVA (%) <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="number"
+            formControlName="tauxTva"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+            placeholder="0"
+            min="0" 
+            max="100" 
+            step="0.01">
+        </div>
+      </div>
+
+      <!-- Line Items Section -->
+      <div class="border-t pt-6">
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="text-lg font-medium text-gray-800">Lignes de commande</h4>
+          <button 
+            type="button"
+            (click)="openArticleSelection()"
+            class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+            + Ajouter un article
+          </button>
+        </div>
+
+        <!-- Line Form -->
+        @if (showLineForm) {
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+          <h5 class="text-sm font-medium text-gray-700 mb-3">
+            {{ currentLineIndex !== null ? 'Modifier' : 'Ajouter' }} une ligne
+          </h5>
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <input 
+              type="text"
+              formControlName="code"
+              placeholder="Code"
+              class="rounded border border-gray-300 px-3 py-2 text-sm">
+            <input 
+              type="text"
+              formControlName="reference"
+              placeholder="Référence"
+              class="rounded border border-gray-300 px-3 py-2 text-sm">
+            <input 
+              type="text"
+              formControlName="description"
+              placeholder="Description"
+              class="rounded border border-gray-300 px-3 py-2 text-sm">
+            <input 
+              type="number"
+              formControlName="prixUnitaire"
+              placeholder="Prix vente"
+              class="rounded border border-gray-300 px-3 py-2 text-sm">
+            <input 
+              type="number"
+              formControlName="quantite"
+              placeholder="Quantité"
+              class="rounded border border-gray-300 px-3 py-2 text-sm">
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button 
+              type="button"
+              (click)="currentLineIndex !== null ? updateLine() : addLine()"
+              class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+              {{ currentLineIndex !== null ? 'Mettre à jour' : 'Ajouter' }}
+            </button>
+            <button 
+              type="button"
+              (click)="resetLineForm()"
+              class="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400">
+              Annuler
+            </button>
+          </div>
+        </div>
+        }
+
+        <!-- Lines Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Code</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Référence</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Description</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Prix vente</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Quantité</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Sous-total</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr 
+                *ngFor="let line of commandeForm.get('lignes')?.value; let i = index"
+                [class]="getLineStatusClass()"
+                class="transition-colors duration-200">
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.code }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.reference }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.description }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.quantite }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm space-x-2">
+                  <button 
+                    type="button"
+                    (click)="editLine(i)"
+                    class="text-blue-600 hover:text-blue-900">Modifier</button>
+                  <button 
+                    type="button"
+                    (click)="deleteLine(i)"
+                    class="text-red-600 hover:text-red-900">Supprimer</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="mt-4 flex justify-end">
+          <div class="w-64 space-y-2">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Montant HT:</span>
+              <span class="font-medium">{{ calculateMontantHt() | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">TVA ({{ commandeForm.get('tauxTva')?.value }}%):</span>
+              <span class="font-medium">{{ calculateMontantTva() | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between border-t pt-2">
+              <span class="text-sm font-semibold">Montant TTC:</span>
+              <span class="font-bold text-lg">{{ calculateMontantTtc() | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end gap-3 pt-6 border-t">
+        <button 
+          type="button"
+          (click)="closeModal()"
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+          Annuler
+        </button>
+        <button 
+          type="submit"
+          [disabled]="commandeForm.invalid"
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
+          {{ isEditing ? 'Mettre à jour' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-popup>
+}
+
+<!-- Details Popup -->
+@if (detailsPopUp) {
+<app-popup>
+  <div popup-content class="w-[600px] max-w-2xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold text-gray-800">Détails de la commande</h3>
+      <button 
+        (click)="closeModal()"
+        class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Libellé</label>
+          <p class="text-sm text-gray-900">{{ selectedCommande?.libelle }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Date de commande</label>
+          <p class="text-sm text-gray-900">{{ selectedCommande?.dateCommande | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Date de livraison</label>
+          <p class="text-sm text-gray-900">{{ selectedCommande?.dateLivraison | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Client</label>
+          <p class="text-sm text-gray-900">{{ selectedCommande?.client }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Magasin</label>
+          <p class="text-sm text-gray-900">{{ selectedCommande?.magasin }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Taux TVA</label>
+          <p class="text-sm text-gray-900">{{ selectedCommande?.tauxTva }}%</p>
+        </div>
+      </div>
+
+      <!-- Lines Details -->
+      @if (selectedCommande?.lignes?.length > 0) {
+      <div class="border-t pt-4">
+        <h4 class="text-lg font-medium text-gray-800 mb-3">Lignes de commande</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Code</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Référence</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Description</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Prix vente</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Quantité</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Sous-total</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr 
+                *ngFor="let line of selectedCommande.lignes"
+                [class]="getLineStatusClass()"
+                class="transition-colors duration-200">
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.code }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.reference }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.description }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.quantite }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:'EUR':'symbol':'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="mt-4 flex justify-end">
+          <div class="w-64 space-y-2">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Montant HT:</span>
+              <span class="font-medium">{{ selectedCommande?.montantHt | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">TVA ({{ selectedCommande?.tauxTva }}%):</span>
+              <span class="font-medium">{{ selectedCommande?.montantTva | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between border-t pt-2">
+              <span class="text-sm font-semibold">Montant TTC:</span>
+              <span class="font-bold text-lg">{{ selectedCommande?.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="flex justify-end mt-6">
+      <button 
+        (click)="closeModal()"
+        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+        Fermer
+      </button>
+    </div>
+  </div>
+</app-popup>
+}
+
+<!-- Delete Confirmation Popup -->
+@if (deletedPopUp) {
+<app-popup>
+  <div popup-content>
+    <h3 class="text-lg font-semibold">Êtes-vous sûr de vouloir supprimer cette commande ?</h3>
+    <div class="flex w-full justify-between p-3 py-5">
+      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
+      <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="selectdID && deleteCommande(selectdID); deletedPopUp = false">
+        Supprimer
+      </button>
+    </div>
+  </div>
+</app-popup>
+}
+
+<!-- Article Selection Popup -->
+@if (articleSelectionPopUp) {
+<app-popup>
+  <div popup-content class="w-[900px] max-w-5xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold text-gray-800">Sélectionner des articles</h3>
+      <button 
+        (click)="closeArticleSelection()"
+        class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Magasin Selection -->
+    @if (!selectedMagasin) {
+    <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+      <p class="text-sm text-yellow-800">
+        <strong>Attention :</strong> Veuillez d'abord sélectionner un magasin dans la commande pour voir les stocks disponibles.
+      </p>
+    </div>
+    } @else {
+    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <p class="text-sm text-blue-800">
+        <strong>Magasin sélectionné :</strong> {{ getSelectedMagasinName() }}
+      </p>
+    </div>
+    }
+
+    <!-- Search Filter -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Rechercher un article</label>
+      <div class="relative">
+        <input 
+          type="text"
+          [(ngModel)]="articleSearchFilter"
+          placeholder="Rechercher par code, référence ou description..."
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 pl-10 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+      @if (articleSearchFilter.trim()) {
+      <div class="mt-1 text-xs text-blue-600">
+        <strong>{{ getFilteredArticles().length }}</strong> article(s) trouvé(s) pour "{{ articleSearchFilter }}"
+      </div>
+      }
+    </div>
+
+    <!-- Articles Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <input 
+                type="checkbox"
+                [checked]="isAllSelected()"
+                (change)="toggleSelectAll()"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock disponible</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr 
+            *ngFor="let article of getFilteredArticles()" 
+            class="hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+            (click)="toggleArticleSelection(article)">
+            <td class="px-4 py-3 whitespace-nowrap">
+              <input 
+                type="checkbox"
+                [checked]="isArticleSelected(article)"
+                (click)="$event.stopPropagation()"
+                (change)="toggleArticleSelection(article)"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ article.code }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.reference }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.description }}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.prix | currency:'EUR':'symbol':'1.2-2' }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <span 
+                [class]="getStockStatusClass(getArticleStock(article))"
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                {{ getArticleStock(article) }} unités
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- No results message -->
+    @if (getFilteredArticles().length === 0) {
+    <div class="text-center py-8">
+      <p class="text-gray-500 text-sm">
+        @if (!selectedMagasin) {
+          Veuillez sélectionner un magasin pour voir les stocks disponibles
+        } @else if (articleSearchFilter) {
+          Aucun article trouvé pour cette recherche dans le magasin sélectionné
+        } @else {
+          Aucun article disponible en stock dans le magasin sélectionné
+        }
+      </p>
+    </div>
+    }
+
+    <!-- Selection summary -->
+    @if (selectedArticles.length > 0) {
+    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+      <p class="text-sm text-blue-800">
+        <strong>{{ selectedArticles.length }}</strong> article(s) sélectionné(s)
+      </p>
+    </div>
+    }
+
+    <div class="flex justify-between items-center mt-6">
+      <div class="text-sm text-gray-600">
+        {{ selectedArticles.length }} article(s) sélectionné(s)
+      </div>
+      <div class="flex gap-2">
+        <button 
+          (click)="closeArticleSelection()"
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+          Annuler
+        </button>
+        <button 
+          (click)="addSelectedArticles()"
+          [disabled]="selectedArticles.length === 0"
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          Ajouter {{ selectedArticles.length }} article(s)
+        </button>
+      </div>
+    </div>
+  </div>
+</app-popup>
+}
+
+<!-- Facture Form Popup -->
+@if (showFactureForm) {
+<app-popup>
+  <div popup-content class="w-[800px] max-w-4xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold text-gray-800">Générer une facture</h3>
+      <button 
+        (click)="closeFactureForm()"
+        class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="factureForm" (ngSubmit)="printFacture()" class="space-y-6">
+      <!-- Facture Information -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Numéro de facture <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text"
+            formControlName="numFacture"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50"
+            readonly
+            placeholder="Numéro généré automatiquement">
+          <p class="text-xs text-gray-500 mt-1">Numéro généré automatiquement</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Date de facture <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="date"
+            formControlName="dateFacture"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Client <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text"
+            [value]="getFactureClientName()"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50"
+            readonly>
+        </div>
+      </div>
+
+      <!-- Selected Commandes Summary -->
+      <div class="border-t pt-6">
+        <h4 class="text-lg font-medium text-gray-800 mb-4">Commandes sélectionnées ({{ selectedCommandes.length }})</h4>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">#</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Libellé</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Date</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Montant HT</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">TVA</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Montant TTC</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr 
+                *ngFor="let commande of selectedCommandes; let i = index"
+                class="transition-colors duration-200">
+                <td class="px-3 py-2 text-sm text-gray-900">{{ i + 1 }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.montantHt | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.montantTva | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="mt-4 flex justify-end">
+          <div class="w-64 space-y-2">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Total HT:</span>
+              <span class="font-medium">{{ calculateFactureTotalHt() | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Total TVA:</span>
+              <span class="font-medium">{{ calculateFactureTotalTva() | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="flex justify-between border-t pt-2">
+              <span class="text-sm font-semibold">Total TTC:</span>
+              <span class="font-bold text-lg">{{ calculateFactureTotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end gap-3 pt-6 border-t">
+        <button 
+          type="button"
+          (click)="closeFactureForm()"
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+          Annuler
+        </button>
+        <button 
+          type="submit"
+          [disabled]="factureForm.invalid"
+          class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-50">
+          🖨️ Imprimer la facture
+        </button>
+      </div>
+    </form>
+  </div>
+</app-popup>
+}

@@ -113,7 +113,7 @@
         <table class="table w-full table-auto border-collapse border-0 text-left align-middle leading-5">
           <thead class="text-primary">
             <tr>
-              <th>ID</th>
+              <!-- <th>ID</th> -->
               <th>Code</th>
               <th>Référence</th>
               <th>Description</th>
@@ -121,6 +121,7 @@
               <th>Prix Vente</th>
               <th>Stock Min</th>
               <th>Image</th>
+              <th>Categorie</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -128,7 +129,7 @@
           <tbody>
             @for (article of articles; track $index) {
             <tr>
-              <td>{{ article.idArticle }}</td>
+             <!-- <td>{{ article.idArticle }}</td> -->
               <td>{{ article.code }}</td>
               <td>{{ article.reference }}</td>
               <td>{{ article.description }}</td>
@@ -140,14 +141,8 @@
                 <img [src]="'data:image/jpeg;base64,' + article.image" width="60" height="60" />
                 }
               </td>
-              <td>
-                <!-- <span [ngClass]="{
-                  'text-green-600': article.status === 1,
-                  'text-red-600': article.status === 0
-                }"> -->
-                {{ article.status === 1 ? 'Actif' : 'Inactif' }}
-                <!-- </span> -->
-              </td>
+              <td>{{ article.categorie.nom }}</td>
+              
               <td class="space-x-1">
                 <button class="btn btn-info">Info</button>
                 <button class="btn btn-success" (click)="openModal(article)">Update</button>

@@ -1,7 +1,7 @@
 @if (deletedPopUp) {
 <app-popup>
   <div popup-content>
-    <h3 class="text-lg font-semibold">Êtes-vous sûr de vouloir supprimer cette catégorie ?</h3>
+    <h3 class="text-lg font-semibold">Êtes-vous sûr de vouloir supprimer cet extra ?</h3>
     <div class="flex w-full justify-between p-3 py-5">
       <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
       <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="selectdID && delete(selectdID); deletedPopUp = false">
@@ -13,22 +13,22 @@
 } @if (createPopUp) {
 <app-popup>
   <div popup-content>
-    <form #categorieForm="ngForm" (ngSubmit)="save()" class="w-[400px] max-w-sm space-y-4" novalidate>
+    <form #extraForm="ngForm" (ngSubmit)="save()" class="w-[400px] max-w-sm space-y-4" novalidate>
       <div>
-        <label for="nomCategorie" class="mb-1 block text-sm font-medium text-gray-700">
-          Nom de la catégorie <span class="text-red-500">*</span>
+        <label for="nomExtra" class="mb-1 block text-sm font-medium text-gray-700">
+          Nom de l'extra <span class="text-red-500">*</span>
         </label>
         <input 
           type="text"
-          id="nomCategorie"
-          name="nomCategorie"
-          [(ngModel)]="formData.nomCategorie"
+          id="nomExtra"
+          name="nomExtra"
+          [(ngModel)]="formData.nomExtra"
           required
-          #nomCategorieInput="ngModel"
-          placeholder="Saisir le nom de la catégorie"
+          #nomExtraInput="ngModel"
+          placeholder="Saisir le nom de l'extra"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="nomCategorieInput.invalid && nomCategorieInput.touched" class="mt-1 text-xs text-red-500">
-          Le nom de la catégorie est requis.
+        <div *ngIf="nomExtraInput.invalid && nomExtraInput.touched" class="mt-1 text-xs text-red-500">
+          Le nom de l'extra est requis.
         </div>
       </div>
 
@@ -36,7 +36,7 @@
         <button type="button" class="mt-3 cursor-pointer text-sm hover:underline" (click)="closeModal()">Annuler</button>
         <button
           type="submit"
-          [disabled]="categorieForm.invalid"
+          [disabled]="extraForm.invalid"
           class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
           {{ isEditing ? 'Modifier' : 'Enregistrer' }}
         </button>
@@ -53,11 +53,11 @@
       <button
         (click)="openModal()"
         class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-        Nouvelle Catégorie
+        Nouvel Extra
       </button>
       <button
         *ngIf="selectdID"
-        (click)="edit(selectedCategorie)"
+        (click)="edit(selectedExtra)"
         class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
         Modifier
       </button>
@@ -71,24 +71,24 @@
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
         <th class="px-6 py-3">#</th>
-        <th class="px-6 py-3">Nom de la catégorie</th>
+        <th class="px-6 py-3">Nom de l'extra</th>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
-        @for (item of categories; track $index) {
+        @for (item of extras; track $index) {
         <tr
           class="cursor-pointer hover:bg-gray-50"
-          [ngClass]="{ 'bg-gray-50': selectdID == item?.idCategorie }"
-          (click)="selectdID = item?.idCategorie; selectedCategorie = item">
+          [ngClass]="{ 'bg-gray-50': selectdID == item?.idExtra }"
+          (click)="selectdID = item?.idExtra; selectedExtra = item">
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.idCategorie }}
+            {{ item?.idExtra }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.nomCategorie }}
+            {{ item?.nomExtra }}
           </td>
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="2">Aucune catégorie trouvée</td>
+          <td class="py-4 text-center text-sm" colspan="2">Aucun extra trouvé</td>
         </tr>
         }
       </tbody>

@@ -3,25 +3,26 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FournisseurClientService } from 'src/app/core/services/fourisseur-client.service';
-import { ModalComponent } from "../../../shared/modal.component";
+import { PopupComponent } from '../../shared/popup/popup.component';
+
 
 @Component({
   selector: 'app-client',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalComponent],
-  templateUrl: './client.component.html'
+  templateUrl: './client.component.html',
+  styleUrl: './client.component.scss',
+  imports: [CommonModule, FormsModule, PopupComponent],
 })
 export class ClientComponent implements OnInit {
 
-    isModalOpen = false;  // par défaut modal fermé
+  // Popup management
+  createPopUp = false;
+  deletedPopUp = false;
+  
+  // Selection tracking
+  selectdID: number | null = null;
+  selectedClient: any = null;
 
-  openModal() {
-    this.isModalOpen = true;
-  }
-
-  closeModal() {
-    this.isModalOpen = false;
-  }
   clients: any[] = [];
   formData: any = this.resetForm();
   isEditing = false;
@@ -50,10 +51,15 @@ export class ClientComponent implements OnInit {
   edit(client: any): void {
     this.formData = { ...client };
     this.isEditing = true;
+    this.createPopUp = true;
   }
 
   delete(id: number): void {
-    this.service.delete(id.toString()).subscribe(() => this.getClients());
+    this.service.delete(id.toString()).subscribe(() => {
+      this.getClients();
+      this.selectdID = null;
+      this.selectedClient = null;
+    });
   }
 
   resetForm(): any {
@@ -72,8 +78,20 @@ export class ClientComponent implements OnInit {
     this.isEditing = false;
   }
 
+  // Modal management methods
+  openModal(): void {
+    this.createPopUp = true;
+    this.isEditing = false;
+    this.formData = this.resetForm();
+  }
+
+  closeModal(): void {
+    this.createPopUp = false;
+    this.cancel();
+  }
+
   private afterSave(): void {
     this.getClients();
-    this.cancel();
+    this.closeModal();
   }
 }

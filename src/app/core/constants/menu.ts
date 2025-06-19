@@ -59,11 +59,11 @@ export class Menu {
             { label: 'Commande Vente', route: '/commandes/vente' },
           ],
         },
-        // {
-        //   icon: 'assets/icons/heroicons/outline/cog.svg',
-        //   label: 'Liste des lots ',
-        //   route: '/lot',
-        // },
+        {
+          icon: 'assets/icons/heroicons/outline/cog.svg',
+          label: 'Extra ',
+          route: '/extra',
+        },
         {
           icon: 'assets/icons/heroicons/outline/cog.svg',
           label: 'Liste des mouvements',
@@ -76,6 +76,7 @@ export class Menu {
           route: '/parametrage',
           children: [
             { label: 'Categorie Article ', route: '/parametrage/categoriearticle' },
+            { label: 'Extra ', route: '/parametrage/extra' },
             { label: 'Devises ', route: '/parametrage/devise' },
             { label: 'Fournisseur / Client ', route: '/fournisseur-client' },
             { label: 'Region / Magasin ', route: '/region-magasin' },

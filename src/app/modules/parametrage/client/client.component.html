@@ -1,39 +1,170 @@
-
-<app-modal [visible]="isModalOpen" title="Client" (onClose)="closeModal()">
-  <form (ngSubmit)="save()" class="space-y-3">
-    <input class="input" [(ngModel)]="formData.nompersonne" name="nompersonne" placeholder="Nom" required />
-    <input class="input" [(ngModel)]="formData.telephone" name="telephone" placeholder="Téléphone" />
-    <input class="input" [(ngModel)]="formData.email" name="email" placeholder="Email" />
-    <input class="input" [(ngModel)]="formData.adresse" name="adresse" placeholder="Adresse" />
-    <input class="input" [(ngModel)]="formData.pays" name="pays" placeholder="Pays" />
-    <div class="flex justify-end gap-2">
-      <button (click)="closeModal()">Annuler</button>
-  <button (click)="save()">Ajouter</button>
+@if (deletedPopUp) {
+<app-popup>
+  <div popup-content>
+    <h3 class="text-lg font-semibold">Êtes-vous sûr de vouloir supprimer ce client ?</h3>
+    <div class="flex w-full justify-between p-3 py-5">
+      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
+      <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="selectdID && delete(selectdID); deletedPopUp = false">
+        Supprimer
+      </button>
     </div>
-  </form>
-</app-modal>
+  </div>
+</app-popup>
+} @if (createPopUp) {
+<app-popup>
+  <div popup-content>
+    <form #clientForm="ngForm" (ngSubmit)="save()" class="w-[500px] max-w-sm space-y-4" novalidate>
+      <div>
+        <label for="nompersonne" class="mb-1 block text-sm font-medium text-gray-700">
+          Nom <span class="text-red-500">*</span>
+        </label>
+        <input 
+          type="text"
+          id="nompersonne"
+          name="nompersonne"
+          [(ngModel)]="formData.nompersonne"
+          required
+          #nompersonneInput="ngModel"
+          placeholder="Saisir le nom du client"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="nompersonneInput.invalid && nompersonneInput.touched" class="mt-1 text-xs text-red-500">
+          Le nom est requis.
+        </div>
+      </div>
 
-<div class="mt-4">
-<button (click)="openModal()">Nouveau Client </button>
-  <table class="w-full text-sm text-left">
-    <thead class="bg-gray-100">
-      <tr>
-        <th class="p-2">Nom</th>
-        <th class="p-2">Téléphone</th>
-        <th class="p-2">Email</th>
-        <th class="p-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let client of clients" class="border-b">
-        <td class="p-2">{{ client.nompersonne }}</td>
-        <td class="p-2">{{ client.telephone }}</td>
-        <td class="p-2">{{ client.email }}</td>
-        <td class="p-2 space-x-2">
-          <button class="btn btn-sm btn-outline" (click)="edit(client)">Modifier</button>
-          <button class="btn btn-sm btn-danger" (click)="delete(client.idPersonne)">Supprimer</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <div>
+        <label for="telephone" class="mb-1 block text-sm font-medium text-gray-700">
+          Téléphone
+        </label>
+        <input
+          type="tel"
+          id="telephone"
+          name="telephone"
+          [(ngModel)]="formData.telephone"
+          #telephoneInput="ngModel"
+          placeholder="Numéro de téléphone"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+      </div>
+
+      <div>
+        <label for="email" class="mb-1 block text-sm font-medium text-gray-700">
+          Email
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="formData.email"
+          #emailInput="ngModel"
+          placeholder="Adresse email"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="emailInput.invalid && emailInput.touched" class="mt-1 text-xs text-red-500">
+          Veuillez saisir une adresse email valide.
+        </div>
+      </div>
+
+      <div>
+        <label for="adresse" class="mb-1 block text-sm font-medium text-gray-700">
+          Adresse
+        </label>
+        <textarea
+          id="adresse"
+          name="adresse"
+          [(ngModel)]="formData.adresse"
+          placeholder="Adresse complète"
+          rows="3"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"></textarea>
+      </div>
+
+      <div>
+        <label for="pays" class="mb-1 block text-sm font-medium text-gray-700">
+          Pays
+        </label>
+        <input
+          type="text"
+          id="pays"
+          name="pays"
+          [(ngModel)]="formData.pays"
+          placeholder="Pays"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+      </div>
+
+      <div class="flex justify-end gap-5">
+        <button type="button" class="mt-3 cursor-pointer text-sm hover:underline" (click)="closeModal()">Annuler</button>
+        <button
+          type="submit"
+          [disabled]="clientForm.invalid"
+          class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          {{ isEditing ? 'Modifier' : 'Enregistrer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-popup>
+}
+
+<div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
+  <div
+    class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
+    <div class="flex flex-row justify-end gap-2 py-6">
+      <button
+        (click)="openModal()"
+        class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+        Nouveau Client
+      </button>
+      <button
+        *ngIf="selectdID"
+        (click)="edit(selectedClient)"
+        class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+        Modifier
+      </button>
+      <button
+        *ngIf="selectdID"
+        class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
+        (click)="deletedPopUp = true">
+        Supprimer
+      </button>
+    </div>
+    <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+      <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
+        <th class="px-6 py-3">#</th>
+        <th class="px-6 py-3">Nom</th>
+        <th class="px-6 py-3">Téléphone</th>
+        <th class="px-6 py-3">Email</th>
+        <th class="px-6 py-3">Adresse</th>
+        <th class="px-6 py-3">Pays</th>
+      </thead>
+      <tbody class="divide-y divide-gray-100 bg-white">
+        @for (item of clients; track $index) {
+        <tr
+          class="cursor-pointer hover:bg-gray-50"
+          [ngClass]="{ 'bg-gray-50': selectdID == item?.idPersonne }"
+          (click)="selectdID = item?.idPersonne; selectedClient = item">
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.idPersonne }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.nompersonne }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.telephone || '-' }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.email || '-' }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.adresse || '-' }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.pays || '-' }}
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td class="py-4 text-center text-sm" colspan="6">Aucun client trouvé</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
 </div>
