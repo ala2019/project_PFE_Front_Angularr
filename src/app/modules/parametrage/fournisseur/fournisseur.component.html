@@ -15,19 +15,37 @@
   <div popup-content>
     <form #fournisseurForm="ngForm" (ngSubmit)="save()" class="w-[500px] max-w-sm space-y-4" novalidate>
       <div>
-        <label for="nompersonne" class="mb-1 block text-sm font-medium text-gray-700">
+        <label for="codePersonne" class="mb-1 block text-sm font-medium text-gray-700">
+          Code Fournisseur <span class="text-red-500">*</span>
+        </label>
+        <input 
+          type="text"
+          id="codePersonne"
+          name="codePersonne"
+          [(ngModel)]="formData.codePersonne"
+          required
+          #codePersonneInput="ngModel"
+          placeholder="Saisir le code fournisseur"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="codePersonneInput.invalid && codePersonneInput.touched" class="mt-1 text-xs text-red-500">
+          Le code fournisseur est requis.
+        </div>
+      </div>
+
+      <div>
+        <label for="nomPersonne" class="mb-1 block text-sm font-medium text-gray-700">
           Nom <span class="text-red-500">*</span>
         </label>
         <input 
           type="text"
-          id="nompersonne"
-          name="nompersonne"
-          [(ngModel)]="formData.nompersonne"
+          id="nomPersonne"
+          name="nomPersonne"
+          [(ngModel)]="formData.nomPersonne"
           required
-          #nompersonneInput="ngModel"
+          #nomPersonneInput="ngModel"
           placeholder="Saisir le nom du fournisseur"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="nompersonneInput.invalid && nompersonneInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="nomPersonneInput.invalid && nomPersonneInput.touched" class="mt-1 text-xs text-red-500">
           Le nom est requis.
         </div>
       </div>
@@ -76,42 +94,32 @@
       </div>
 
       <div>
-        <label for="pays" class="mb-1 block text-sm font-medium text-gray-700">
-          Pays
+        <label for="ribBancaire" class="mb-1 block text-sm font-medium text-gray-700">
+          RIB Bancaire
         </label>
         <input
           type="text"
-          id="pays"
-          name="pays"
-          [(ngModel)]="formData.pays"
-          placeholder="Pays"
+          id="ribBancaire"
+          name="ribBancaire"
+          [(ngModel)]="formData.ribBancaire"
+          placeholder="RIB bancaire"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
       </div>
 
       <div>
-        <label for="raison_sociale" class="mb-1 block text-sm font-medium text-gray-700">
-          Raison Sociale
+        <label for="devise" class="mb-1 block text-sm font-medium text-gray-700">
+          Devise
         </label>
-        <input
-          type="text"
-          id="raison_sociale"
-          name="raison_sociale"
-          [(ngModel)]="formData.raison_sociale"
-          placeholder="Raison sociale"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-      </div>
-
-      <div>
-        <label for="matricule_fiscale" class="mb-1 block text-sm font-medium text-gray-700">
-          Matricule Fiscale
-        </label>
-        <input
-          type="text"
-          id="matricule_fiscale"
-          name="matricule_fiscale"
-          [(ngModel)]="formData.matricule_fiscale"
-          placeholder="Matricule fiscale"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <select
+          id="devise"
+          name="devise"
+          [(ngModel)]="formData.devise"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+          <option value="">Sélectionner une devise</option>
+          @for (devise of devises; track $index) {
+          <option [value]="devise.idDevise">{{ devise.devise }}</option>
+          }
+        </select>
       </div>
 
       <div class="flex justify-end gap-5">
@@ -153,25 +161,28 @@
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
         <th class="px-6 py-3">#</th>
+        <th class="px-6 py-3">Code</th>
         <th class="px-6 py-3">Nom</th>
         <th class="px-6 py-3">Téléphone</th>
         <th class="px-6 py-3">Email</th>
         <th class="px-6 py-3">Adresse</th>
-        <th class="px-6 py-3">Pays</th>
-        <th class="px-6 py-3">Raison Sociale</th>
-        <th class="px-6 py-3">Matricule Fiscale</th>
+        <th class="px-6 py-3">RIB Bancaire</th>
+        <th class="px-6 py-3">Devise</th>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
         @for (item of fournisseurs; track $index) {
         <tr
-          class="cursor-pointer hover:bg-gray-50"
-          [ngClass]="{ 'bg-gray-50': selectdID == item?.idPersonne }"
+          class="cursor-pointer hover:bg-green-50"
+          [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idPersonne }"
           (click)="selectdID = item?.idPersonne; selectedFournisseur = item">
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.idPersonne }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.nompersonne }}
+            {{ getFournisseurCode(item) }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.nomPersonne }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.telephone || '-' }}
@@ -183,13 +194,10 @@
             {{ item?.adresse || '-' }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.pays || '-' }}
+            {{ item?.ribBancaire || '-' }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.raison_sociale || '-' }}
-          </td>
-          <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.matricule_fiscale || '-' }}
+            {{ item?.devise?.devise || '-' }}
           </td>
         </tr>
         } @empty {

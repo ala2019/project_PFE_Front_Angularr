@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ArticleService {
-  private apiUrl = 'http://localhost:8080/apis/articles'; // à adapter selon ton backend
+  private apiUrl = 'http://localhost:8081/api/article'; // à adapter selon ton backend
 
   constructor(private http: HttpClient) {}
 
@@ -15,14 +15,14 @@ export class ArticleService {
   }
 
   addArticle(article: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}`, article);
+    return this.http.post<any>(`${this.apiUrl}/add`, article);
   }
 
   updateArticle(id: number, article: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, article);
+    return this.http.put<any>(`${this.apiUrl}/update/${id}`, article);
   }
 
   deleteArticle(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 }

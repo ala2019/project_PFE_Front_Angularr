@@ -61,11 +61,6 @@ export class Menu {
         },
         {
           icon: 'assets/icons/heroicons/outline/cog.svg',
-          label: 'Extra ',
-          route: '/extra',
-        },
-        {
-          icon: 'assets/icons/heroicons/outline/cog.svg',
           label: 'Liste des mouvements',
           route: '/mouvement',
         },

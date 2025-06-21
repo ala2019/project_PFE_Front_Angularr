@@ -87,17 +87,18 @@
     <div class="flex flex-row justify-end gap-2 py-6">
       <button
         (click)="createPopUp = true"
-        class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+        class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
         Create
       </button>
       <button
         *ngIf="selectdID"
-        class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+        (click)="openUpdatePopupForSelected()"
+        class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
         Edit
       </button>
       <button
         *ngIf="selectdID"
-        class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
+        class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
         (click)="deletedPopUp = true">
         Delete
       </button>
@@ -110,19 +111,19 @@
       <tbody class="divide-y divide-gray-100 bg-white">
         @for (item of regionList; track $index) {
         <tr
-          class="cursor-pointer hover:bg-gray-50"
-          [ngClass]="{ 'bg-gray-50': selectdID == item?.idRegion }"
+          class="cursor-pointer hover:bg-green-50"
+          [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idRegion }"
           (click)="selectdID = item?.idRegion">
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.idRegion }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.nomregion }}
+            {{ getRegionName(item) }}
           </td>
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="7">No users found</td>
+          <td class="py-4 text-center text-sm" colspan="2">Aucune région trouvée</td>
         </tr>
         }
       </tbody>

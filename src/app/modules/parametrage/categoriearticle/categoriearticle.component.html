@@ -76,8 +76,8 @@
       <tbody class="divide-y divide-gray-100 bg-white">
         @for (item of categories; track $index) {
         <tr
-          class="cursor-pointer hover:bg-gray-50"
-          [ngClass]="{ 'bg-gray-50': selectdID == item?.idCategorie }"
+          class="cursor-pointer hover:bg-green-50"
+          [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idCategorie }"
           (click)="selectdID = item?.idCategorie; selectedCategorie = item">
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.idCategorie }}

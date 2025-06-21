@@ -35,7 +35,18 @@ export class RegionComponent implements OnInit {
   getAll() {
     this.regionService.getAll().subscribe({
       next: (response: any) => {
+        
+        if (Array.isArray(response) && response.length > 0) {
+          console.log('Première région:', response[0]);
+          console.log('Propriétés de la première région:', Object.keys(response[0]));
+        }
         this.regionList = response;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des régions:', error);
+        console.error('Status:', error.status);
+        console.error('Message:', error.message);
+        this.regionList = [];
       },
     });
   }
@@ -45,7 +56,8 @@ export class RegionComponent implements OnInit {
       next: (response: any) => {
         this.getAll();
       },
-      error: () => {
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
         this.getAll();
       },
     });
@@ -56,37 +68,55 @@ export class RegionComponent implements OnInit {
     if (this.formData.nomregion.trim()) {
       this.regionService.create(this.formData).subscribe({
         next: (response: any) => {
+          console.log('Région créée:', response);
           this.getAll();
           this.formData = {
-            idRegion: null, // Réinitialisation de l'ID pour la création
+            idRegion: null,
             nomregion: '',
           };
           this.createPopUp = false;
         },
+        error: (error) => {
+          console.error('Erreur lors de la création:', error);
+        },
       });
-    }}
-
-    openUpdatePopup(item: any) {
-  this.formData = {
-      idRegion: item.idRegion, // inclut idRegion pour la mise à jour
-    nomregion: item.nomregion,
-      }; // inclut idRegion et nomregion
-  this.updatePopUp = true;
-}
-   
-    onSubmitUpdate() {
-  if (this.formData.nomregion.trim()) {
-    this.regionService.update(this.formData.nomregion, this.formData).subscribe({
-      next: (response: any) => {
-        this.getAll();
-        this.formData = { nomregion: '', idRegion: null };
-        this.updatePopUp = false;
-      },
-      error: (err) => {
-        console.error('Update error', err);
-      }
-    });
+    }
   }
-}
+
+  openUpdatePopup(item: any) {
+    this.formData = {
+      idRegion: item.idRegion,
+      nomregion: item.nomregion,
+    };
+    this.updatePopUp = true;
+  }
+
+  openUpdatePopupForSelected() {
+    const selectedItem = this.regionList.find(item => item.idRegion === this.selectdID);
+    if (selectedItem) {
+      this.openUpdatePopup(selectedItem);
+    }
+  }
+
+  onSubmitUpdate() {
+    if (this.formData.nomregion.trim() && this.formData.idRegion !== null) {
+      this.regionService.update(this.formData.idRegion, this.formData).subscribe({
+        next: (response: any) => {
+          this.getAll();
+          this.formData = { nomregion: '', idRegion: null };
+          this.updatePopUp = false;
+        },
+        error: (err) => {
+          console.error('Update error', err);
+        }
+      });
+    }
+  }
+
+  getRegionName(item: any): string {
+    // Débogage: afficher toutes les propriétés disponibles
+    console.log('Structure de l\'objet région:', item);
+    return item?.nomregion || item?.nomRegion || item?.name || item?.nom || 'Nom non trouvé';
+  }
 
 }

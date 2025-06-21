@@ -4,23 +4,23 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class RegionService {
-  private api: string = 'http://localhost:8080/api/region';
+  private apiUrl: string = 'http://localhost:8081/api/region';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private  http: HttpClient) {}
 
   getAll(): Observable<any> {
-    return this.http.get(this.api);
+    return this.http.get<any[]>(`${this.apiUrl}/all`);
   }
 
-  create(body: any): Observable<any> {
-    return this.http.post(this.api, body);
+  create(region: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/add`, region);
   }
 
-  update(id: string, body: any): Observable<any> {
-    return this.http.put(this.api + '/' + id, body);
+  update(id: number, region: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/update/${id}`, region);
   }
 
-  delete(id: string): Observable<any> {
-    return this.http.delete(this.api + '/' + id);
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
   }
 }

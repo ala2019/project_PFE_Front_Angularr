@@ -2,7 +2,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FournisseurClientService } from 'src/app/core/services/fourisseur-client.service';
+import { PersonneService } from '../../../core/services/personne.service';
+import { DeviseService } from '../../../core/services/devise.service';
 import { PopupComponent } from '../../shared/popup/popup.component';
 
 
@@ -24,51 +25,127 @@ export class ClientComponent implements OnInit {
   selectedClient: any = null;
 
   clients: any[] = [];
+  devises: any[] = [];
   formData: any = this.resetForm();
   isEditing = false;
 
-  constructor(private service: FournisseurClientService) {}
+  constructor(
+    private service: PersonneService,
+    private deviseService: DeviseService
+  ) {}
 
   ngOnInit(): void {
     this.getClients();
+    this.getDevises();
   }
 
   getClients(): void {
-    this.service.getAll().subscribe(data => {
-      this.clients = data.filter((p: any) => p.type === 'CLIENT');
+    this.service.getAll().subscribe({
+      next: (data) => {
+        console.log('Données brutes reçues du backend:', data);
+        this.clients = data.filter((p: any) => p.type === 'CLIENT');
+        console.log('Clients filtrés:', this.clients);
+        if (this.clients.length > 0) {
+          console.log('Premier client:', this.clients[0]);
+          console.log('Propriétés du premier client:', Object.keys(this.clients[0]));
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des clients:', error);
+      }
+    });
+  }
+
+  getDevises(): void {
+    this.deviseService.getAll().subscribe(data => {
+      this.devises = data;
     });
   }
 
   save(): void {
     if (this.isEditing) {
-      this.service.update(this.formData.idPersonne, this.formData).subscribe(() => this.afterSave());
+      if (!this.formData.idPersonne) {
+        console.error('ID personne manquant pour la mise à jour');
+        alert('Erreur: ID personne manquant');
+        return;
+      }
+      
+      this.service.update(this.formData.idPersonne, this.formData).subscribe({
+        next: (response) => {
+          this.afterSave();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la mise à jour:', error);
+          alert('Erreur lors de la mise à jour: ' + (error.error?.message || error.message));
+        }
+      });
     } else {
-      this.formData.type = 'CLIENT';
-      this.service.create(this.formData).subscribe(() => this.afterSave());
+      const dataToSend = {
+        ...this.formData,
+        type: 'CLIENT'
+      };
+      
+      this.service.create(dataToSend).subscribe({
+        next: (response) => {
+          this.afterSave();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la création:', error);
+          alert('Erreur lors de la création: ' + (error.error?.message || error.message));
+        }
+      });
     }
   }
 
   edit(client: any): void {
-    this.formData = { ...client };
+    // Récupérer le code client de manière robuste
+    const codePersonne = client.codePersonne || client.code_personne || '';
+    console.log('Code client extrait:', codePersonne);
+    
+    this.formData = { 
+      ...client,
+      codePersonne: codePersonne, // S'assurer que codePersonne est défini
+      devise: client.devise?.idDevise || client.devise || ''
+    };
+    
+    console.log('FormData final pour édition:', this.formData);
+    console.log('formData.codePersonne après assignation:', this.formData.codePersonne);
+    
     this.isEditing = true;
     this.createPopUp = true;
   }
 
   delete(id: number): void {
-    this.service.delete(id.toString()).subscribe(() => {
-      this.getClients();
-      this.selectdID = null;
-      this.selectedClient = null;
+    this.service.delete(id).subscribe({
+      next: (response) => {
+        console.log('Client supprimé avec succès:', response);
+        this.getClients();
+        this.selectdID = null;
+        this.selectedClient = null;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
+        // Si le statut est 200, considérer comme succès malgré l'erreur
+        if (error.status === 200) {
+          console.log('Suppression réussie (statut 200)');
+          this.getClients();
+          this.selectdID = null;
+          this.selectedClient = null;
+        } else {
+          alert('Erreur lors de la suppression: ' + error.message);
+        }
+      }
     });
   }
 
   resetForm(): any {
     return {
-      nompersonne: '',
+      codePersonne: '',
+      nomPersonne: '',
       telephone: '',
       email: '',
       adresse: '',
-      pays: '',
+      devise: '',
       type: 'CLIENT'
     };
   }
@@ -80,9 +157,9 @@ export class ClientComponent implements OnInit {
 
   // Modal management methods
   openModal(): void {
-    this.createPopUp = true;
     this.isEditing = false;
     this.formData = this.resetForm();
+    this.createPopUp = true;
   }
 
   closeModal(): void {
@@ -93,5 +170,15 @@ export class ClientComponent implements OnInit {
   private afterSave(): void {
     this.getClients();
     this.closeModal();
+  }
+
+  // Méthode pour obtenir le code client de manière robuste
+  getClientCode(client: any): string {
+    if (!client) return 'N/A';
+    
+    if (client.codePersonne) return client.codePersonne;
+    if (client.code_personne) return client.code_personne;
+    
+    return `CLI-${client.idPersonne || 'N/A'}`;
   }
 }

@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
-  private baseUrl = 'http://localhost:8080/api/cmd';
+  private baseUrl = 'http://localhost:8081/api/cmd';
 
   constructor(private http: HttpClient) {}
 

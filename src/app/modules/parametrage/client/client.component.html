@@ -15,19 +15,39 @@
   <div popup-content>
     <form #clientForm="ngForm" (ngSubmit)="save()" class="w-[500px] max-w-sm space-y-4" novalidate>
       <div>
-        <label for="nompersonne" class="mb-1 block text-sm font-medium text-gray-700">
+        <label for="codePersonne" class="mb-1 block text-sm font-medium text-gray-700">
+          Code Client <span class="text-red-500">*</span>
+        </label>
+        <!-- Debug: formData.codePersonne = {{ formData.codePersonne }} -->
+        <!-- Debug: formData complet = {{ formData | json }} -->
+        <input 
+          type="text"
+          id="codePersonne"
+          name="codePersonne"
+          [(ngModel)]="formData.codePersonne"
+          required
+          #codePersonneInput="ngModel"
+          placeholder="Saisir le code client"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="codePersonneInput.invalid && codePersonneInput.touched" class="mt-1 text-xs text-red-500">
+          Le code client est requis.
+        </div>
+      </div>
+
+      <div>
+        <label for="nomPersonne" class="mb-1 block text-sm font-medium text-gray-700">
           Nom <span class="text-red-500">*</span>
         </label>
         <input 
           type="text"
-          id="nompersonne"
-          name="nompersonne"
-          [(ngModel)]="formData.nompersonne"
+          id="nomPersonne"
+          name="nomPersonne"
+          [(ngModel)]="formData.nomPersonne"
           required
-          #nompersonneInput="ngModel"
+          #nomPersonneInput="ngModel"
           placeholder="Saisir le nom du client"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="nompersonneInput.invalid && nompersonneInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="nomPersonneInput.invalid && nomPersonneInput.touched" class="mt-1 text-xs text-red-500">
           Le nom est requis.
         </div>
       </div>
@@ -77,23 +97,26 @@
       </div>
 
       <div>
-        <label for="pays" class="mb-1 block text-sm font-medium text-gray-700">
-          Pays
+        <label for="devise" class="mb-1 block text-sm font-medium text-gray-700">
+          Devise
         </label>
-        <input
-          type="text"
-          id="pays"
-          name="pays"
-          [(ngModel)]="formData.pays"
-          placeholder="Pays"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <select
+          id="devise"
+          name="devise"
+          [(ngModel)]="formData.devise"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+          <option value="">Sélectionner une devise</option>
+          @for (devise of devises; track $index) {
+          <option [value]="devise.idDevise">{{ devise.devise }}</option>
+          }
+        </select>
       </div>
 
       <div class="flex justify-end gap-5">
         <button type="button" class="mt-3 cursor-pointer text-sm hover:underline" (click)="closeModal()">Annuler</button>
         <button
           type="submit"
-          [disabled]="clientForm.invalid"
+          [disabled]="false"
           class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
           {{ isEditing ? 'Modifier' : 'Enregistrer' }}
         </button>
@@ -128,23 +151,27 @@
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
         <th class="px-6 py-3">#</th>
+        <th class="px-6 py-3">Code Client</th>
         <th class="px-6 py-3">Nom</th>
         <th class="px-6 py-3">Téléphone</th>
         <th class="px-6 py-3">Email</th>
         <th class="px-6 py-3">Adresse</th>
-        <th class="px-6 py-3">Pays</th>
+        <th class="px-6 py-3">Devise</th>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
         @for (item of clients; track $index) {
         <tr
-          class="cursor-pointer hover:bg-gray-50"
-          [ngClass]="{ 'bg-gray-50': selectdID == item?.idPersonne }"
+          class="cursor-pointer hover:bg-green-50"
+          [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idPersonne }"
           (click)="selectdID = item?.idPersonne; selectedClient = item">
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.idPersonne }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.nompersonne }}
+            {{ getClientCode(item) }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.nomPersonne }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.telephone || '-' }}
@@ -156,12 +183,12 @@
             {{ item?.adresse || '-' }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.pays || '-' }}
+            {{ item?.devise?.devise || '-' }}
           </td>
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="6">Aucun client trouvé</td>
+          <td class="py-4 text-center text-sm" colspan="7">Aucun client trouvé</td>
         </tr>
         }
       </tbody>
