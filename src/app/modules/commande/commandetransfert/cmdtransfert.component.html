@@ -66,11 +66,25 @@
 <div class="bg-white rounded-lg shadow-sm border">
   <div class="flex justify-between items-center p-6 border-b">
     <h2 class="text-xl font-semibold text-gray-800">Commandes de transfert</h2>
-    <button 
-      (click)="openModal()"
-      class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700">
-      + Nouvelle commande
-    </button>
+    <div class="flex flex-row justify-end gap-2">
+      <button 
+        (click)="openModal()"
+        class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+        + Nouvelle commande
+      </button>
+      <button
+        *ngIf="selectdID"
+        (click)="editCommande(selectedCommande)"
+        class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+        Modifier
+      </button>
+      <button
+        *ngIf="selectdID"
+        class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
+        (click)="deletedPopUp = true">
+        Supprimer
+      </button>
+    </div>
   </div>
 
   <!-- Table -->
@@ -83,30 +97,20 @@
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date commande</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Magasin source</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Magasin destination</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <tr 
           *ngFor="let commande of commandes; let i = index" 
           [class]="getLineStatusClass()"
-          class="hover:bg-gray-100 transition-colors duration-200">
+          class="cursor-pointer hover:bg-green-50 transition-colors duration-200"
+          [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == commande.idCmd }"
+          (click)="selectdID = commande.idCmd; selectedCommande = commande">
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ i + 1 }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.libelle }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.magasinSource }}</td>
           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.magasinDestination }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-            <button 
-              (click)="viewDetails(commande)"
-              class="text-blue-600 hover:text-blue-900">Détails</button>
-            <button 
-              (click)="editCommande(commande)"
-              class="text-yellow-600 hover:text-yellow-900">Modifier</button>
-            <button 
-              (click)="selectdID = commande.idCmd; deletedPopUp = true"
-              class="text-red-600 hover:text-red-900">Supprimer</button>
-          </td>
         </tr>
       </tbody>
     </table>

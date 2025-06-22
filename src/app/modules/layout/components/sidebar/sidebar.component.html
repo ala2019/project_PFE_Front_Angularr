@@ -5,13 +5,13 @@
     <!-- Logo -->
     <div
       [ngClass]="menuService.showSideBar ? 'justify-between' : 'justify-center'"
-      class="mx-4 mb-2 flex h-9 items-center">
+      class="mx-4 mb-2 flex h-12 items-center">
       <div class="flex items-center" *ngIf="menuService.showSideBar" (click)="toggleSidebar()">
         <img
-  src="assets/LOGO_Gesti.png"
-  alt="Logo Gesti"
-  class="h-12 w-auto rounded-md shadow-md"
-/>
+          src="assets/icons/logo12.png"
+          alt="Logo Gesti.Com"
+          class="h-auto w-32 rounded-md"
+        />
       </div>
       <button
         (click)="toggleSidebar()"

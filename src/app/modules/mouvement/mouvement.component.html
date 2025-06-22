@@ -1,0 +1,648 @@
+<div class="flex h-full flex-col">
+  <!-- Header -->
+  <div class="flex flex-col gap-4 p-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Liste des Mouvements</h1>
+        <p class="text-sm text-gray-600">Gestion des mouvements de stock</p>
+      </div>
+      <button
+        (click)="openCreatePopup()"
+        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Nouveau Mouvement
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="rounded-lg border border-gray-200 bg-white p-4">
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">Date Début</label>
+          <input
+            type="date"
+            formControlName="dateDebut"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">Date Fin</label>
+          <input
+            type="date"
+            formControlName="dateFin"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">Libellé commande</label>
+          <input
+            type="text"
+            formControlName="libelle"
+            placeholder="Rechercher par libellé commande..."
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">Type de Mouvement</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                [value]="'ENTREE'"
+                (change)="onTypeFilterChange($event, 'ENTREE')"
+                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              <span class="ml-2 text-sm text-gray-700">Entrées</span>
+            </label>
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                [value]="'SORTIE'"
+                (change)="onTypeFilterChange($event, 'SORTIE')"
+                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              <span class="ml-2 text-sm text-gray-700">Sorties</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">Magasin</label>
+          <select
+            formControlName="magasinSource"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <option value="">Tous les magasins</option>
+            <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">{{ magasin.nomMagasin }}</option>
+          </select>
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button
+            type="submit"
+            class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Filtrer
+          </button>
+          <button
+            type="button"
+            (click)="clearFilters()"
+            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Effacer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="flex-1 overflow-hidden">
+    <div class="h-full overflow-auto">
+      <div class="min-w-full">
+        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Libellé
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Libellé commande
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Type de commande
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Type
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Date
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Magasin
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <tr *ngFor="let mouvement of paginatedMouvements" class="hover:bg-gray-50">
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{{ mouvement.libelle }}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  {{ mouvement.commandeLibelle || '-' }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  {{ mouvement.typeCommande || '-' }}
+                </td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                        [ngClass]="{
+                          'bg-green-100 text-green-800': mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT',
+                          'bg-red-100 text-red-800': mouvement.typeMouvement === 'SORTIE'
+                        }">
+                    {{ (mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT') ? 'Entrée' : 'Sortie' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  {{ mouvement.dateMouvement | date:'dd/MM/yyyy' }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  {{ mouvement.magasinSource }}
+                </td>
+                <td class="px-6 py-4 text-sm font-medium">
+                  <div class="flex items-center gap-2">
+                    <button
+                      (click)="openDetailsPopup(mouvement)"
+                      class="text-blue-600 hover:text-blue-900">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                    </button>
+                    
+                    <button
+                      *ngIf="mouvement.typeCommande === 'ACHAT' && mouvement.statut !== 'TERMINE'"
+                      (click)="openEditPopup(mouvement)"
+                      class="text-green-600 hover:text-green-900">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+                    
+                    <button
+                      *ngIf="mouvement.typeCommande === 'ACHAT' && mouvement.statut !== 'TERMINE'"
+                      (click)="openDeletePopup(mouvement)"
+                      class="text-red-600 hover:text-red-900">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr *ngIf="paginatedMouvements.length === 0">
+                <td colspan="8" class="px-6 py-12 text-center">
+                  <div class="text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun mouvement trouvé</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                      Aucun mouvement ne correspond aux critères de recherche.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="border-t border-gray-200 bg-white px-6 py-3">
+    <div class="flex items-center justify-between">
+      <div class="text-sm text-gray-700">
+        Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} résultats
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+          class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Précédent
+        </button>
+        
+        <div class="flex items-center gap-1">
+          <button
+            *ngFor="let page of [].constructor(totalPages); let i = index"
+            (click)="changePage(i + 1)"
+            [class]="currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+            class="rounded-lg border border-gray-300 px-3 py-1 text-sm font-medium">
+            {{ i + 1 }}
+          </button>
+        </div>
+        
+        <button
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+          class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Suivant
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+@if (createPopUp) {
+<app-popup>
+  <div popup-content class="w-[900px] max-w-5xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold text-gray-800">
+        {{ isEditing ? 'Modifier le mouvement' : 'Nouveau mouvement' }}
+      </h3>
+      <button 
+        (click)="closeModal()"
+        class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="mouvementForm" (ngSubmit)="saveMouvement()" class="space-y-6">
+      <!-- Basic Information -->
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Libellé <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="libelle"
+            placeholder="Libellé du mouvement"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Libellé Commande <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="commandeLibelle"
+            placeholder="Libellé de la commande"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Type de Mouvement <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="typeMouvement"
+            (change)="onTypeChange()"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <option *ngFor="let type of typeOptions" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Date de Mouvement <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            formControlName="dateMouvement"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Magasin <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="magasinSourceId"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <option value="">Sélectionner un magasin</option>
+            <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">{{ magasin.nomMagasin }}</option>
+          </select>
+        </div>
+
+        <div *ngIf="selectedTypeMouvement === 'TRANSFERT'">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Magasin Destination <span class="text-red-500">*</span>
+          </label>
+          <select
+            formControlName="magasinDestinationId"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <option value="">Sélectionner un magasin</option>
+            <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">{{ magasin.nomMagasin }}</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Observations
+          </label>
+          <textarea
+            formControlName="observations"
+            rows="3"
+            placeholder="Observations sur le mouvement..."
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+        </div>
+      </div>
+
+      <!-- Lignes -->
+      <div class="border-t border-gray-200 pt-6">
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="text-lg font-medium text-gray-900">Lignes du mouvement</h4>
+          <button
+            type="button"
+            (click)="showLigneForm = true"
+            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Ajouter une ligne
+          </button>
+        </div>
+
+        <!-- Ligne Form -->
+        @if (showLigneForm) {
+        <div class="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <form [formGroup]="ligneForm" (ngSubmit)="currentLigneIndex !== null ? updateLigne() : addLigne()" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">
+                Article <span class="text-red-500">*</span>
+              </label>
+              <select
+                formControlName="articleId"
+                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                <option value="">Sélectionner un article</option>
+                <option *ngFor="let article of articles" [value]="article.idArticle">
+                  {{ article.code }} - {{ article.description }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">
+                Quantité <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                formControlName="quantite"
+                min="1"
+                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-700">
+                Prix Unitaire <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                formControlName="prixUnitaire"
+                min="0"
+                step="0.01"
+                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            </div>
+
+            <div class="flex items-end gap-2">
+              <button
+                type="submit"
+                class="flex-1 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700">
+                {{ currentLigneIndex !== null ? 'Modifier' : 'Ajouter' }}
+              </button>
+              <button
+                type="button"
+                (click)="showLigneForm = false; currentLigneIndex = null; ligneForm.reset({quantite: 1, prixUnitaire: 0})"
+                class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Annuler
+              </button>
+            </div>
+          </form>
+        </div>
+        }
+
+        <!-- Lignes Table -->
+        <div class="overflow-hidden rounded-lg border border-gray-200">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Article</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Quantité</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Prix Unitaire</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Montant</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <tr *ngFor="let ligne of mouvementForm.get('lignes')?.value; let i = index">
+                <td class="px-4 py-3">
+                  <div class="text-sm font-medium text-gray-900">{{ ligne.codeArticle }}</div>
+                  <div class="text-xs text-gray-500">{{ ligne.descriptionArticle }}</div>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ ligne.quantite }}</td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ ligne.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ ligne.montantLigne | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-4 py-3 text-sm font-medium">
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      (click)="editLigne(i)"
+                      class="text-blue-600 hover:text-blue-900">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="removeLigne(i)"
+                      class="text-red-600 hover:text-red-900">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr *ngIf="mouvementForm.get('lignes')?.value?.length === 0">
+                <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">
+                  Aucune ligne ajoutée
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Total -->
+        <div class="mt-4 flex justify-end">
+          <div class="text-lg font-semibold text-gray-900">
+            Total: {{ calculateTotal(mouvementForm.get('lignes')?.value || []) | currency:'EUR':'symbol':'1.2-2' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 border-t border-gray-200 pt-6">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          Annuler
+        </button>
+        <button
+          type="submit"
+          [disabled]="!mouvementForm.valid || mouvementForm.get('lignes')?.value?.length === 0"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ isEditing ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</app-popup>
+}
+
+<!-- Details Modal -->
+@if (detailsPopUp && selectedMouvement) {
+<app-popup>
+  <div popup-content class="w-[800px] max-w-4xl">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold text-gray-800">Détails du mouvement</h3>
+      <button 
+        (click)="closeModal()"
+        class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Basic Information -->
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Libellé</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.libelle }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Type de Mouvement</label>
+          <p class="mt-1">
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': selectedMouvement.typeMouvement === 'POINTAGE' || selectedMouvement.typeMouvement === 'TRANSFERT',
+                    'bg-red-100 text-red-800': selectedMouvement.typeMouvement === 'SORTIE'
+                  }">
+              {{ (selectedMouvement.typeMouvement === 'POINTAGE' || selectedMouvement.typeMouvement === 'TRANSFERT') ? 'Entrée' : 'Sortie' }}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Date de Mouvement</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.dateMouvement | date:'dd/MM/yyyy' }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Date de Création</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.dateCreation | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Magasin</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.magasinSource }}</p>
+        </div>
+
+        <div *ngIf="selectedMouvement.magasinDestination">
+          <label class="block text-sm font-medium text-gray-700">Magasin Destination</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.magasinDestination }}</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Statut</label>
+          <p class="mt-1">
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                  [ngClass]="getStatutClass(selectedMouvement.statut)">
+              {{ getStatutLabel(selectedMouvement.statut) }}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Utilisateur</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.utilisateur }}</p>
+        </div>
+
+        <div *ngIf="selectedMouvement.commandeLibelle" class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Commande Associée</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.commandeLibelle }}</p>
+        </div>
+
+        <div *ngIf="selectedMouvement.observations" class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Observations</label>
+          <p class="mt-1 text-sm text-gray-900">{{ selectedMouvement.observations }}</p>
+        </div>
+      </div>
+
+      <!-- Lignes -->
+      <div class="border-t border-gray-200 pt-6">
+        <h4 class="text-lg font-medium text-gray-900 mb-4">Lignes du mouvement</h4>
+        
+        <div class="overflow-hidden rounded-lg border border-gray-200">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Article</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Quantité</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Prix Unitaire</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Montant</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <tr *ngFor="let ligne of selectedMouvement.lignes">
+                <td class="px-4 py-3">
+                  <div class="text-sm font-medium text-gray-900">{{ ligne.codeArticle }}</div>
+                  <div class="text-xs text-gray-500">{{ ligne.descriptionArticle }}</div>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ ligne.quantite }}</td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ ligne.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ ligne.montantLigne | currency:'EUR':'symbol':'1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 border-t border-gray-200 pt-6">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</app-popup>
+}
+
+<!-- Delete Modal -->
+@if (deletePopUp && selectedMouvement) {
+<app-popup>
+  <div popup-content class="w-[400px] max-w-sm">
+    <div class="text-center">
+      <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Supprimer le mouvement</h3>
+      <p class="mt-2 text-sm text-gray-500">
+        Êtes-vous sûr de vouloir supprimer le mouvement "{{ selectedMouvement.libelle }}" ? Cette action est irréversible.
+      </p>
+    </div>
+    
+    <div class="mt-6 flex justify-end gap-3">
+      <button
+        type="button"
+        (click)="closeModal()"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+        Annuler
+      </button>
+      <button
+        type="button"
+        (click)="deleteMouvement()"
+        class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
+        Supprimer
+      </button>
+    </div>
+  </div>
+</app-popup>
+}

@@ -3,23 +3,6 @@
   <div class="flex justify-between items-center mb-4">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">État de Stock</h1>
-      <p class="text-sm text-gray-600 mt-1">Gestion et suivi des stocks par magasin</p>
-    </div>
-    <div class="flex gap-2">
-      @if (userRights.canExport) {
-      <button 
-        (click)="exportStock()"
-        class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700">
-        📊 Exporter
-      </button>
-      }
-      @if (userRights.canPrint) {
-      <button 
-        (click)="printStock()"
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
-        🖨️ Imprimer
-      </button>
-      }
     </div>
   </div>
 
@@ -150,7 +133,7 @@
       Détail des stocks
       @if (selectedMagasin) {
       <span class="text-sm font-normal text-gray-600">
-        - {{ getSelectedMagasinName() }}
+        - <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">{{ getSelectedMagasinName() }}</span>
       </span>
       }
     </h2>
@@ -180,7 +163,6 @@
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
@@ -193,9 +175,6 @@
         <tr 
           *ngFor="let article of getPaginatedArticles(); let i = index"
           class="hover:bg-gray-50 transition-colors duration-200">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-            {{ (currentPage - 1) * itemsPerPage + i + 1 }}
-          </td>
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
             {{ article.code }}
           </td>
@@ -260,22 +239,3 @@
   }
   }
 </div>
-
-<!-- User Rights Info -->
-@if (!userRights.canViewAllMagasins) {
-<div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-  <div class="flex">
-    <div class="flex-shrink-0">
-      <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-      </svg>
-    </div>
-    <div class="ml-3">
-      <h3 class="text-sm font-medium text-yellow-800">Accès limité</h3>
-      <div class="mt-2 text-sm text-yellow-700">
-        <p>Votre profil utilisateur vous limite à certains magasins. Seuls les magasins autorisés sont affichés.</p>
-      </div>
-    </div>
-  </div>
-</div>
-}

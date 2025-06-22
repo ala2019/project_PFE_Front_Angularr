@@ -40,17 +40,17 @@ export class Menu {
         //   children: [{ label: 'Table', route: '/components/table' }],
         // },
         {
-          icon: 'assets/icons/heroicons/outline/cog.svg',
+          icon: 'assets/icons/heroicons/outline/list.svg',
           label: 'Liste des articles',
           route: '/articles',
         },
         {
-          icon: 'assets/icons/heroicons/outline/cog.svg',
+          icon: 'assets/icons/heroicons/outline/stock.svg',
           label: 'Etat des stocks',
           route: '/etatstock',
         },
         {
-          icon: 'assets/icons/heroicons/outline/cog.svg',
+          icon: 'assets/icons/heroicons/outline/cmd.svg',
           label: 'Commandes',
           route: '/commandes',
           children: [
@@ -60,13 +60,13 @@ export class Menu {
           ],
         },
         {
-          icon: 'assets/icons/heroicons/outline/cog.svg',
+          icon: 'assets/icons/heroicons/outline/mvt.svg',
           label: 'Liste des mouvements',
           route: '/mouvement',
         },
 
         {
-          icon: 'assets/icons/heroicons/outline/test.svg',
+          icon: 'assets/icons/heroicons/outline/params.svg',
           label: 'Paramétrage globale',
           route: '/parametrage',
           children: [

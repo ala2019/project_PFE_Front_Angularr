@@ -61,7 +61,7 @@ export class StockComponent implements OnInit {
   loadData(): void {
     // Mock data - replace with actual service calls
     this.magasins = [
-      { idMagasin: 1, nom: 'Magasin Principal', code: 'MP' },
+      { idMagasin: 1, nom: 'Magasin Sousse', code: 'MP' },
       { idMagasin: 2, nom: 'Magasin Secondaire', code: 'MS' },
       { idMagasin: 3, nom: 'Entrepôt Central', code: 'EC' },
       { idMagasin: 4, nom: 'Point de Vente', code: 'PV' },
@@ -130,34 +130,6 @@ export class StockComponent implements OnInit {
           3: { quantite: 15, valeur: 1800.00 },
           4: { quantite: 25, valeur: 3000.00 },
           5: { quantite: 12, valeur: 1440.00 }
-        }
-      },
-      {
-        idArticle: 5,
-        code: 'ART005',
-        reference: 'REF005',
-        description: 'Imprimante laser HP',
-        prixAchat: 220.00,
-        stocks: {
-          1: { quantite: 8, valeur: 1760.00 },
-          2: { quantite: 12, valeur: 2640.00 },
-          3: { quantite: 6, valeur: 1320.00 },
-          4: { quantite: 10, valeur: 2200.00 },
-          5: { quantite: 15, valeur: 3300.00 }
-        }
-      },
-      {
-        idArticle: 6,
-        code: 'ART006',
-        reference: 'REF006',
-        description: 'Scanner document professionnel',
-        prixAchat: 180.00,
-        stocks: {
-          1: { quantite: 12, valeur: 2160.00 },
-          2: { quantite: 8, valeur: 1440.00 },
-          3: { quantite: 5, valeur: 900.00 },
-          4: { quantite: 15, valeur: 2700.00 },
-          5: { quantite: 9, valeur: 1620.00 }
         }
       }
     ];

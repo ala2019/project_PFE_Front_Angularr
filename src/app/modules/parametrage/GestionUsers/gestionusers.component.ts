@@ -21,6 +21,7 @@ export class GestionusersComponent implements OnInit {
 
   users: any[] = [];
   stores: any[] = [];
+  regions: any[] = [];
   formData: any = this.resetForm();
   isEditing = false;
   showPassword = false;
@@ -28,7 +29,7 @@ export class GestionusersComponent implements OnInit {
   // Role options
   roles = [
     { value: 'ADMIN', label: 'Administrateur' },
-    { value: 'SALES', label: 'Vendeur' }
+    { value: 'SALES', label: 'Commercial' }
   ];
 
   constructor() {}
@@ -36,6 +37,7 @@ export class GestionusersComponent implements OnInit {
   ngOnInit(): void {
     this.getUsers();
     this.getStores();
+    this.getRegions();
   }
 
   getUsers(): void {
@@ -47,26 +49,29 @@ export class GestionusersComponent implements OnInit {
         login: 'admin', 
         password: '********', 
         store: 'Magasin Central',
+        region: 'Tunis',
         role: 'ADMIN',
         roleLabel: 'Administrateur'
       },
       { 
         idUser: 2, 
-        email: 'vendeur1@example.com', 
-        login: 'vendeur1', 
+        email: 'commercial1@example.com', 
+        login: 'commercial1', 
         password: '********', 
         store: 'Magasin Nord',
+        region: 'Sousse',
         role: 'SALES',
-        roleLabel: 'Vendeur'
+        roleLabel: 'Commercial'
       },
       { 
         idUser: 3, 
-        email: 'vendeur2@example.com', 
-        login: 'vendeur2', 
+        email: 'commercial2@example.com', 
+        login: 'commercial2', 
         password: '********', 
         store: 'Magasin Sud',
+        region: 'Monastir',
         role: 'SALES',
-        roleLabel: 'Vendeur'
+        roleLabel: 'Commercial'
       }
     ];
   }
@@ -82,10 +87,33 @@ export class GestionusersComponent implements OnInit {
     ];
   }
 
+  getRegions(): void {
+    // Mock data - replace with actual service call
+    this.regions = [
+      { idRegion: 1, nomRegion: 'Sousse' },
+      { idRegion: 2, nomRegion: 'Monastir' },
+      { idRegion: 3, nomRegion: 'Tunis' },
+      { idRegion: 4, nomRegion: 'Nabeul' }
+    ];
+  }
+
   save(): void {
-    // Comprehensive validation for all required fields
-    if (!this.formData.email || !this.formData.login || !this.formData.store || !this.formData.role) {
+    // Validation de base pour les champs communs
+    if (!this.formData.email || !this.formData.login || !this.formData.role) {
       return; // Don't save if any required field is missing
+    }
+
+    // Validation conditionnelle selon le rôle
+    if (this.formData.role === 'ADMIN') {
+      // Pour ADMIN : région obligatoire, magasin non obligatoire
+      if (!this.formData.region) {
+        return; // Don't save if region is missing for ADMIN
+      }
+    } else if (this.formData.role === 'SALES') {
+      // Pour SALES : magasin obligatoire, région non obligatoire
+      if (!this.formData.store) {
+        return; // Don't save if store is missing for SALES
+      }
     }
 
     // Check if passwords match for new users
@@ -103,10 +131,12 @@ export class GestionusersComponent implements OnInit {
       const index = this.users.findIndex(u => u.idUser === this.formData.idUser);
       if (index !== -1) {
         const selectedStore = this.stores.find(s => s.idStore === this.formData.store);
+        const selectedRegion = this.regions.find(r => r.idRegion === this.formData.region);
         const selectedRole = this.roles.find(r => r.value === this.formData.role);
         this.users[index] = { 
           ...this.formData,
-          store: selectedStore?.nomStore,
+          store: selectedStore?.nomStore || '',
+          region: selectedRegion?.nomRegion || '',
           roleLabel: selectedRole?.label
         };
       }
@@ -114,11 +144,13 @@ export class GestionusersComponent implements OnInit {
     } else {
       // Add new user
       const selectedStore = this.stores.find(s => s.idStore === this.formData.store);
+      const selectedRegion = this.regions.find(r => r.idRegion === this.formData.region);
       const selectedRole = this.roles.find(r => r.value === this.formData.role);
       const newUser = {
         ...this.formData,
         idUser: Math.max(...this.users.map(u => u.idUser), 0) + 1,
-        store: selectedStore?.nomStore,
+        store: selectedStore?.nomStore || '',
+        region: selectedRegion?.nomRegion || '',
         roleLabel: selectedRole?.label
       };
       // Remove confirmPassword from the user object before saving
@@ -132,6 +164,7 @@ export class GestionusersComponent implements OnInit {
     this.formData = { 
       ...user,
       store: this.stores.find(s => s.nomStore === user.store)?.idStore,
+      region: this.regions.find(r => r.nomRegion === user.region)?.idRegion,
       confirmPassword: '' // Clear confirm password when editing
     };
     this.isEditing = true;
@@ -151,6 +184,7 @@ export class GestionusersComponent implements OnInit {
       password: '',
       confirmPassword: '',
       store: '',
+      region: '',
       role: 'SALES'
     };
   }

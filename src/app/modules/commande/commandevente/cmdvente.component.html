@@ -63,137 +63,146 @@
 </div>
 
 <!-- Main Content -->
-<div class="bg-white rounded-lg shadow-sm border">
-  <div class="flex justify-between items-center p-6 border-b">
-    <div>
-      <h2 class="text-xl font-semibold text-gray-800">Commandes de vente</h2>
-      <p class="text-sm text-gray-600 mt-1">Total: {{ totalItems }} commande(s)</p>
-    </div>
-    <div class="flex gap-2">
-      @if (selectedCommandes.length > 0) {
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-600">
-          {{ selectedCommandes.length }} commande(s) sélectionnée(s)
-        </span>
-        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
-          ✅ Prêt pour facturation
-        </span>
+<div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
+  <div
+    class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
+    
+    <!-- Header Title and Stats -->
+    <div class="flex justify-between items-start mb-4 pt-6">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800">Commandes de vente</h2>
+        <p class="text-sm text-gray-600 mt-1">Total: {{ totalItems }} commande(s)</p>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="flex gap-2">
         <button 
-          (click)="openFactureForm()"
-          class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700">
-          📄 Imprimer facture
+          (click)="openModal()"
+          class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          + Nouvelle commande
+        </button>
+        <button
+          *ngIf="selectdID"
+          (click)="editCommande(selectedCommande)"
+          class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          Modifier
+        </button>
+        <button
+          *ngIf="selectdID"
+          class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
+          (click)="deletedPopUp = true">
+          Supprimer
         </button>
       </div>
-      }
+    </div>
+
+    <!-- Selection Status and Invoice Button -->
+    @if (selectedCommandes.length > 0) {
+    <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4">
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-blue-700 font-medium">
+          {{ selectedCommandes.length }} commande(s) sélectionnée(s)
+        </span>
+        <span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full font-medium">
+          ✅ Prêt pour facturation
+        </span>
+      </div>
       <button 
-        (click)="openModal()"
-        class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700">
-        + Nouvelle commande
+        (click)="openFactureForm()"
+        class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-semibold">
+        📄 Imprimer facture
       </button>
     </div>
-  </div>
+    }
 
-  <!-- Table -->
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
+    <!-- Table -->
+    <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
+      <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
         <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th class="px-6 py-3">
             <input 
               type="checkbox"
               [checked]="isAllCommandesSelected()"
               (change)="toggleSelectAllCommandes()"
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              class="rounded border-gray-300 text-green-500 focus:ring-green-500">
           </th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Libellé</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date commande</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date livraison</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Magasin</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taux TVA</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant TTC</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          <th class="px-6 py-3">#</th>
+          <th class="px-6 py-3">Libellé</th>
+          <th class="px-6 py-3">Date commande</th>
+          <th class="px-6 py-3">Date livraison</th>
+          <th class="px-6 py-3">Client</th>
+          <th class="px-6 py-3">Magasin</th>
+          <th class="px-6 py-3">Taux TVA</th>
+          <th class="px-6 py-3">Montant TTC</th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
+      <tbody class="divide-y divide-gray-100 bg-white">
+        @for (commande of getPaginatedCommandes(); track $index) {
         <tr 
-          *ngFor="let commande of getPaginatedCommandes(); let i = index" 
-          [class]="isCommandeSelected(commande) ? 'bg-blue-50 border-l-4 border-blue-400' : getLineStatusClass()"
-          class="hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
-          (click)="toggleCommandeSelection(commande)">
-          <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-              <input 
-                type="checkbox"
-                [checked]="isCommandeSelected(commande)"
-                (click)="$event.stopPropagation()"
-                (change)="toggleCommandeSelection(commande)"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-              @if (isCommandeSelected(commande)) {
-              <span class="ml-2 text-xs text-blue-600 font-medium">Sélectionnée</span>
-              }
-            </div>
+          class="cursor-pointer hover:bg-green-50"
+          [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == commande.idCmd }"
+          (click)="selectdID = commande.idCmd; selectedCommande = commande; toggleCommandeSelection(commande)">
+          <td class="px-6 py-4">
+            <input 
+              type="checkbox"
+              [checked]="isCommandeSelected(commande)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleCommandeSelection(commande)"
+              class="rounded border-gray-300 text-green-500 focus:ring-green-500">
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.libelle }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.dateLivraison | date:'dd/MM/yyyy' }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.client }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.magasin }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commande.tauxTva }}%</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-            <button 
-              (click)="$event.stopPropagation(); viewDetails(commande)"
-              class="text-blue-600 hover:text-blue-900">Détails</button>
-            <button 
-              (click)="$event.stopPropagation(); editCommande(commande)"
-              class="text-yellow-600 hover:text-yellow-900">Modifier</button>
-            <button 
-              (click)="$event.stopPropagation(); selectdID = commande.idCmd; deletedPopUp = true"
-              class="text-red-600 hover:text-red-900">Supprimer</button>
-          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ (currentPage - 1) * itemsPerPage + $index + 1 }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.libelle }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.dateLivraison | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.client }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.magasin }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.tauxTva }}%</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
         </tr>
+        } @empty {
+        <tr>
+          <td class="py-4 text-center text-sm" colspan="9">Aucune commande trouvée</td>
+        </tr>
+        }
       </tbody>
     </table>
-  </div>
 
-  <!-- Pagination -->
-  @if (getTotalPages() > 1) {
-  <div class="bg-white px-6 py-3 border-t border-gray-200">
-    <div class="flex items-center justify-between">
-      <div class="text-sm text-gray-700">
-        Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} commandes
-      </div>
-      
-      <div class="flex items-center space-x-2">
-        <button 
-          (click)="previousPage()"
-          [disabled]="currentPage === 1"
-          class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-          Précédent
-        </button>
+    <!-- Pagination -->
+    @if (getTotalPages() > 1) {
+    <div class="bg-white px-6 py-3 border-t border-gray-200">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} commandes
+        </div>
         
-        @for (page of getPageNumbers(); track page) {
-        <button 
-          (click)="goToPage(page)"
-          [class]="page === currentPage ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
-          class="px-3 py-1 text-sm border border-gray-300 rounded-md">
-          {{ page }}
-        </button>
-        }
-        
-        <button 
-          (click)="nextPage()"
-          [disabled]="currentPage === getTotalPages()"
-          class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-          Suivant
-        </button>
+        <div class="flex items-center space-x-2">
+          <button 
+            (click)="previousPage()"
+            [disabled]="currentPage === 1"
+            class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Précédent
+          </button>
+          
+          @for (page of getPageNumbers(); track page) {
+          <button 
+            (click)="goToPage(page)"
+            [class]="page === currentPage ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
+            class="px-3 py-1 text-sm border border-gray-300 rounded-md">
+            {{ page }}
+          </button>
+          }
+          
+          <button 
+            (click)="nextPage()"
+            [disabled]="currentPage === getTotalPages()"
+            class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+          </button>
+        </div>
       </div>
     </div>
+    }
   </div>
-  }
 </div>
 
 <!-- Create/Edit Commande Popup -->
@@ -616,7 +625,7 @@
                 type="checkbox"
                 [checked]="isAllSelected()"
                 (change)="toggleSelectAll()"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                class="rounded border-gray-300 text-green-500 focus:ring-green-500">
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
@@ -636,7 +645,7 @@
                 [checked]="isArticleSelected(article)"
                 (click)="$event.stopPropagation()"
                 (change)="toggleArticleSelection(article)"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                class="rounded border-gray-300 text-green-500 focus:ring-green-500">
             </td>
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ article.code }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.reference }}</td>
