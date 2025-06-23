@@ -1,64 +1,99 @@
 <!-- Filters Section -->
-<div class="bg-white p-6 rounded-lg shadow-sm border mb-6">
-  <h3 class="text-lg font-semibold text-gray-800 mb-4">Filtres de recherche</h3>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Libellé commande</label>
+<div class="filters-container p-6 mb-6">
+  <div class="filters-header">
+    <div class="filter-icon">
+      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+      </svg>
+    </div>
+    <h3>Filtres de recherche</h3>
+  </div>
+  
+  <div class="filters-grid">
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        Libellé commande
+      </label>
       <input 
         type="text"
         [(ngModel)]="filters.libelle"
-        placeholder="Rechercher par libellé..."
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        placeholder="Rechercher par libellé...">
     </div>
     
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Client</label>
-      <select 
-        [(ngModel)]="filters.client"
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        Client
+      </label>
+      <select [(ngModel)]="filters.client">
         <option value="">Tous les clients</option>
         <option *ngFor="let client of clients" [value]="client.nom">{{ client.nom }}</option>
       </select>
     </div>
     
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Magasin</label>
-      <select 
-        [(ngModel)]="filters.magasin"
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        </svg>
+        Magasin
+      </label>
+      <select [(ngModel)]="filters.magasin">
         <option value="">Tous les magasins</option>
         <option *ngFor="let magasin of magasins" [value]="magasin.nom">{{ magasin.nom }}</option>
       </select>
     </div>
     
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        Date de début
+      </label>
       <input 
         type="date" 
-        [(ngModel)]="filters.dateDebut"
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        [(ngModel)]="filters.dateDebut">
     </div>
     
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin</label>
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        Date de fin
+      </label>
       <input 
         type="date" 
-        [(ngModel)]="filters.dateFin"
-        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        [(ngModel)]="filters.dateFin">
     </div>
-  </div>
-  
-  <div class="flex gap-2 mt-4">
-    <button 
-      (click)="applyFilters()"
-      class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
-      Appliquer les filtres
-    </button>
-    <button 
-      (click)="clearFilters()"
-      class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
-      Effacer les filtres
-    </button>
+
+    <!-- Boutons intégrés dans la grille -->
+    <div class="filter-item button-item">
+      <div class="compact-buttons">
+        <button 
+          (click)="applyFilters()"
+          class="action-button apply-button">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+          </svg>
+          Appliquer
+        </button>
+        <button 
+          (click)="clearFilters()"
+          class="action-button clear-button">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Effacer
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -69,9 +104,16 @@
     
     <!-- Header Title and Stats -->
     <div class="flex justify-between items-start mb-4 pt-6">
-      <div>
-        <h2 class="text-xl font-semibold text-gray-800">Commandes de vente</h2>
-        <p class="text-sm text-gray-600 mt-1">Total: {{ totalItems }} commande(s)</p>
+      <div class="flex items-center gap-4">
+        <div class="p-2 bg-blue-100 rounded-lg">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Commandes de vente</h1>
+          <p class="text-sm text-gray-600 mt-1">Total: {{ totalItems }} commande(s)</p>
+        </div>
       </div>
       
       <!-- Action Buttons -->
@@ -129,10 +171,8 @@
           <th class="px-6 py-3">#</th>
           <th class="px-6 py-3">Libellé</th>
           <th class="px-6 py-3">Date commande</th>
-          <th class="px-6 py-3">Date livraison</th>
           <th class="px-6 py-3">Client</th>
           <th class="px-6 py-3">Magasin</th>
-          <th class="px-6 py-3">Taux TVA</th>
           <th class="px-6 py-3">Montant TTC</th>
         </tr>
       </thead>
@@ -153,55 +193,51 @@
           <td class="px-6 py-4 font-medium text-gray-800">{{ (currentPage - 1) * itemsPerPage + $index + 1 }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.libelle }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.dateLivraison | date:'dd/MM/yyyy' }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.client }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.magasin }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.tauxTva }}%</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="9">Aucune commande trouvée</td>
+          <td class="py-4 text-center text-sm" colspan="7">Aucune commande trouvée</td>
         </tr>
         }
       </tbody>
     </table>
 
     <!-- Pagination -->
-    @if (getTotalPages() > 1) {
-    <div class="bg-white px-6 py-3 border-t border-gray-200">
+    <div class="border-t border-gray-200 bg-white px-6 py-3">
       <div class="flex items-center justify-between">
         <div class="text-sm text-gray-700">
-          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} commandes
+          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} résultats
         </div>
-        
-        <div class="flex items-center space-x-2">
-          <button 
-            (click)="previousPage()"
+        <div class="flex items-center gap-2">
+          <button
+            (click)="changePage(currentPage - 1)"
             [disabled]="currentPage === 1"
-            class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
             Précédent
           </button>
           
-          @for (page of getPageNumbers(); track page) {
-          <button 
-            (click)="goToPage(page)"
-            [class]="page === currentPage ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
-            class="px-3 py-1 text-sm border border-gray-300 rounded-md">
-            {{ page }}
-          </button>
-          }
+          <div class="flex items-center gap-1">
+            <button
+              *ngFor="let page of [].constructor(totalPages); let i = index"
+              (click)="changePage(i + 1)"
+              [class]="currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+              class="rounded-lg border border-gray-300 px-3 py-1 text-sm font-medium">
+              {{ i + 1 }}
+            </button>
+          </div>
           
-          <button 
-            (click)="nextPage()"
-            [disabled]="currentPage === getTotalPages()"
-            class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button
+            (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
             Suivant
           </button>
         </div>
       </div>
     </div>
-    }
   </div>
 </div>
 
@@ -724,6 +760,15 @@
       </button>
     </div>
 
+    <!-- Client Info -->
+    @if (selectedCommandes.length > 0) {
+    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <p class="text-sm text-blue-800">
+        <strong>Client:</strong> {{ selectedCommandes[0]?.client }}
+      </p>
+    </div>
+    }
+
     <form [formGroup]="factureForm" (ngSubmit)="printFacture()" class="space-y-6">
       <!-- Facture Information -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -749,17 +794,6 @@
             formControlName="dateFacture"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
         </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Client <span class="text-red-500">*</span>
-          </label>
-          <input 
-            type="text"
-            [value]="getFactureClientName()"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50"
-            readonly>
-        </div>
       </div>
 
       <!-- Selected Commandes Summary -->
@@ -770,25 +804,48 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">#</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Libellé</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Date</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Montant HT</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">TVA</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Montant TTC</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr 
-                *ngFor="let commande of selectedCommandes; let i = index"
-                class="transition-colors duration-200">
-                <td class="px-3 py-2 text-sm text-gray-900">{{ i + 1 }}</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle }}</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.montantHt | currency:'EUR':'symbol':'1.2-2' }}</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ commande.montantTva | currency:'EUR':'symbol':'1.2-2' }}</td>
-                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
-              </tr>
+              <ng-container *ngFor="let commande of selectedCommandes; let i = index">
+                <tr 
+                  class="transition-colors duration-200 cursor-pointer hover:bg-gray-50"
+                  (click)="toggleCommandeDetails(commande.idCmd)">
+                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle }}</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.montantHt | currency:'EUR':'symbol':'1.2-2' }}</td>
+                  <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
+                </tr>
+                <tr *ngIf="expandedCommandes.has(commande.idCmd)">
+                  <td colspan="4" class="p-0">
+                    <div class="p-4 bg-gray-100">
+                      <h5 class="font-semibold mb-2">Détails de la commande : {{commande.libelle}}</h5>
+                      <table class="min-w-full bg-white rounded">
+                        <thead class="bg-gray-200">
+                          <tr>
+                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Article</th>
+                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Quantité</th>
+                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Prix Unitaire</th>
+                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Sous-total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let ligne of commande.lignes">
+                            <td class="px-2 py-1 text-sm">{{ligne.description}}</td>
+                            <td class="px-2 py-1 text-sm">{{ligne.quantite}}</td>
+                            <td class="px-2 py-1 text-sm">{{ligne.prixUnitaire | currency:'EUR':'symbol'}}</td>
+                            <td class="px-2 py-1 text-sm">{{ligne.sousTotal | currency:'EUR':'symbol'}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </div>

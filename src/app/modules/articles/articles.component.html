@@ -1,3 +1,91 @@
+<!-- Filters Section -->
+<div class="filters-container p-6 mb-6">
+  <div class="filters-header">
+    <div class="filter-icon">
+      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+      </svg>
+    </div>
+    <h3>Filtres de recherche</h3>
+  </div>
+  
+  <div class="filters-grid">
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        Code
+      </label>
+      <input 
+        type="text"
+        [(ngModel)]="filters.code"
+        placeholder="Rechercher par code...">
+    </div>
+    
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        Référence
+      </label>
+      <input 
+        type="text"
+        [(ngModel)]="filters.reference"
+        placeholder="Rechercher par référence...">
+    </div>
+    
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        Description
+      </label>
+      <input 
+        type="text"
+        [(ngModel)]="filters.description"
+        placeholder="Rechercher par description...">
+    </div>
+    
+    <div class="filter-item">
+      <label>
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        Catégorie
+      </label>
+      <select [(ngModel)]="filters.categorie">
+        <option value="">Toutes les catégories</option>
+        <option *ngFor="let categorie of categories" [value]="categorie.nomCategorie">{{ categorie.nomCategorie }}</option>
+      </select>
+    </div>
+
+    <!-- Boutons intégrés dans la grille -->
+    <div class="filter-item button-item">
+      <div class="compact-buttons">
+        <button 
+          (click)="applyFilters()"
+          class="action-button apply-button">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+          </svg>
+          Appliquer
+        </button>
+        <button 
+          (click)="clearFilters()"
+          class="action-button clear-button">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Effacer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="mb-4 flex justify-between">
   
   <div class="inline-block space-x-4">
@@ -168,33 +256,39 @@
     
     <!-- Affichage du nombre total d'articles -->
     <div class="flex flex-wrap items-center justify-between gap-2 py-3">
-      <h3 class="text-muted-foreground text-sm font-medium">
-        Affichage de {{ paginatedArticles.length }} sur {{ totalItems }} articles
-      </h3>
+      <div class="flex items-center gap-4">
+        <div class="p-2 bg-blue-100 rounded-lg">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-800">Liste des articles</h1>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="flex gap-2">
+        <button
+          (click)="openCreatePopup()"
+          class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          + Nouvel article
+        </button>
+        <button
+          *ngIf="selectdID"
+          class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
+          (click)="editArticle()">
+          Modifier
+        </button>
+        <button
+          *ngIf="selectdID"
+          class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
+          (click)="deletedPopUp = true">
+          Supprimer
+        </button>
+      </div>
     </div>
 
-    <div class="flex flex-row justify-end gap-2 py-6">
-      <button
-        (click)="openCreatePopup()"
-        class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-        Create
-      </button>
-      <button
-        *ngIf="selectdID"
-        class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
-        (click)="editArticle()">
-        Edit
-      </button>
-      <button
-        *ngIf="selectdID"
-        class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
-        (click)="deletedPopUp = true">
-        Delete
-      </button>
-    </div>
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
-        <th class="px-6 py-3">#</th>
         <th class="px-6 py-3">Code</th>
         <th class="px-6 py-3">Référence</th>
         <th class="px-6 py-3">Description</th>
@@ -204,14 +298,11 @@
         <th class="px-6 py-3">Catégorie</th>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
-        @for (article of paginatedArticles; track $index) {
+        @for (article of getPaginatedArticles(); track $index) {
         <tr
           class="cursor-pointer hover:bg-green-50"
           [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == article?.idArticle }"
           (click)="selectdID = article?.idArticle">
-          <td class="px-6 py-4 font-medium text-gray-800">
-            {{ article?.idArticle }}
-          </td>
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ article?.code }}
           </td>
@@ -237,73 +328,52 @@
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="9">No articles found</td>
+          <td colspan="7" class="px-6 py-12 text-center">
+            <div class="text-gray-500">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun article trouvé</h3>
+              <p class="mt-1 text-sm text-gray-500">
+                Aucun article ne correspond aux critères de recherche.
+              </p>
+            </div>
+          </td>
         </tr>
         }
       </tbody>
     </table>
 
     <!-- Pagination -->
-    @if (totalPages > 1) {
-    <div class="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
-      <div class="flex justify-between flex-1 sm:hidden">
-        <button
-          (click)="onPageChange(currentPage - 1)"
-          [disabled]="currentPage === 1"
-          class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-          Précédent
-        </button>
-        <button
-          (click)="onPageChange(currentPage + 1)"
-          [disabled]="currentPage === totalPages"
-          class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-          Suivant
-        </button>
-      </div>
-      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-gray-700">
-            Affichage de <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> à 
-            <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, totalItems) }}</span> sur 
-            <span class="font-medium">{{ totalItems }}</span> résultats
-          </p>
+    <div class="border-t border-gray-200 bg-white px-6 py-3">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} résultats
         </div>
-        <div>
-          <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-            <!-- Bouton Précédent -->
+        <div class="flex items-center gap-2">
+          <button
+            (click)="changePage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Précédent
+          </button>
+          <div class="flex items-center gap-1">
             <button
-              (click)="onPageChange(currentPage - 1)"
-              [disabled]="currentPage === 1"
-              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed">
-              <span class="sr-only">Précédent</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-              </svg>
+              *ngFor="let page of [].constructor(totalPages); let i = index"
+              (click)="changePage(i + 1)"
+              [class]="currentPage === i + 1 ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+              class="rounded-lg border border-gray-300 px-3 py-1 text-sm font-medium">
+              {{ i + 1 }}
             </button>
-            
-            <!-- Numéros de pages -->
-            @for (page of pages; track page) {
-            <button
-              (click)="onPageChange(page)"
-              [class]="page === currentPage ? 'relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600' : 'relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'">
-              {{ page }}
-            </button>
-            }
-            
-            <!-- Bouton Suivant -->
-            <button
-              (click)="onPageChange(currentPage + 1)"
-              [disabled]="currentPage === totalPages"
-              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed">
-              <span class="sr-only">Suivant</span>
-              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-              </svg>
-            </button>
-          </nav>
+          </div>
+          <button
+            (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            Suivant
+          </button>
         </div>
       </div>
     </div>
-    }
   </div>
 </div>

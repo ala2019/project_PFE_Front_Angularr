@@ -256,8 +256,18 @@ export class StockComponent implements OnInit {
     return Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
   goToPage(page: number): void {
     if (page >= 1 && page <= this.getTotalPages()) {
+      this.currentPage = page;
+    }
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
     }
   }

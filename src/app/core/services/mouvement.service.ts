@@ -5,7 +5,7 @@ import { Mouvement, MouvementFilter } from '../models/mouvement.model';
 
 @Injectable({ providedIn: 'root' })
 export class MouvementService {
-  private baseUrl = 'http://localhost:8081/api/mouvement';
+  private baseUrl = 'http://localhost:8081/api/mouvements';
 
   constructor(private http: HttpClient) {}
 

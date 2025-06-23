@@ -121,7 +121,8 @@ export class MouvementComponent implements OnInit {
       dateFin: [''],
       libelle: [''],
       typeMouvement: [[]],
-      magasinSource: ['']
+      magasinSource: [''],
+      typeCommande: ['']
     });
   }
 
@@ -165,12 +166,12 @@ export class MouvementComponent implements OnInit {
     this.mouvements = [
       {
         idMouvement: 1,
-        libelle: 'Pointage initial stock magasin 1',
-        commandeLibelle: 'Commande Achat Fournisseur X',
+        libelle: 'Mvt-2025-00001',
+        commandeLibelle: 'Cmd-achat-2025/00001',
         typeMouvement: 'POINTAGE',
         dateCreation: '2024-01-15T10:30:00',
-        dateMouvement: '2024-01-15',
-        magasinSource: 'Magasin 1',
+        dateMouvement: '2025-05-01',
+        magasinSource: 'Magasin hammemat',
         magasinSourceId: 1,
         statut: 'EN_COURS',
         typeCommande: 'ACHAT',
@@ -191,12 +192,12 @@ export class MouvementComponent implements OnInit {
       },
       {
         idMouvement: 2,
-        libelle: 'Transfert vers magasin 2',
-        commandeLibelle: 'Demande de transfert interne #123',
+        libelle: 'Mvt-2025-00002',
+        commandeLibelle: 'Cmd-TRS-2025/00002',
         typeMouvement: 'TRANSFERT',
         dateCreation: '2024-01-16T14:20:00',
-        dateMouvement: '2024-01-16',
-        magasinSource: 'Magasin 1',
+        dateMouvement: '2025-06-22',
+        magasinSource: 'Magasin Moknine',
         magasinDestination: 'Magasin 2',
         magasinSourceId: 1,
         magasinDestinationId: 2,
@@ -219,16 +220,16 @@ export class MouvementComponent implements OnInit {
       },
       {
         idMouvement: 3,
-        libelle: 'Sortie vente commande 001',
+        libelle: 'Mvt-2025-00003',
         commandeId: 1,
-        commandeLibelle: 'Commande Vente Matériel Informatique',
+        commandeLibelle: 'Cmd-TRS-2025/00002',
         typeMouvement: 'SORTIE',
         dateCreation: '2024-01-17T09:15:00',
-        dateMouvement: '2024-01-17',
-        magasinSource: 'Magasin 1',
+        dateMouvement: '2025-06-22',
+        magasinSource: 'Magasin ksar héllal',
         magasinSourceId: 1,
         statut: 'TERMINE',
-        typeCommande: 'VENTE',
+        typeCommande: 'TRANSFERT',
         lignes: [
           {
             idLigne: 3,
@@ -243,10 +244,75 @@ export class MouvementComponent implements OnInit {
         ],
         montantTotal: 2400,
         utilisateur: 'admin'
-      }
+      },
+      {
+        idMouvement: 4,
+        libelle: 'Mvt-2025-00004',
+        commandeId: 2,
+        commandeLibelle: 'Cmd-Achat-2025/00002',
+        typeMouvement: 'POINTAGE',
+        dateCreation: '2024-01-18T11:00:00',
+        dateMouvement: '2025-06-18',
+        magasinSource: 'Magasin Sfax',
+        magasinSourceId: 3,
+        statut: 'EN_COURS',
+        typeCommande: 'ACHAT',
+        lignes: [
+          {
+            idLigne: 4,
+            articleId: 2,
+            codeArticle: 'ART002',
+            referenceArticle: 'REF002',
+            descriptionArticle: 'Souris Gamer',
+            quantite: 50,
+            prixUnitaire: 75,
+            montantLigne: 3750
+          },
+          {
+            idLigne: 5,
+            articleId: 3,
+            codeArticle: 'ART003',
+            referenceArticle: 'REF003',
+            descriptionArticle: 'Clavier Mécanique',
+            quantite: 30,
+            prixUnitaire: 150,
+            montantLigne: 4500
+          }
+        ],
+        montantTotal: 8250,
+        utilisateur: 'user1'
+      },
+      {
+        idMouvement: 5,
+        libelle: 'Mvt-2025-00005',
+        commandeId: 3,
+        commandeLibelle: 'Cmd-Vente-2025/00001',
+        typeMouvement: 'SORTIE',
+        dateCreation: '2024-01-19T16:45:00',
+        dateMouvement: '2025-06-19',
+        magasinSource: 'Magasin Moknine',
+        magasinSourceId: 1,
+        statut: 'TERMINE',
+        typeCommande: 'VENTE',
+        lignes: [
+          {
+            idLigne: 6,
+            articleId: 1,
+            codeArticle: 'ART001',
+            referenceArticle: 'REF001',
+            descriptionArticle: 'Ordinateur portable',
+            quantite: 1,
+            prixUnitaire: 1350,
+            montantLigne: 1350
+          }
+        ],
+        montantTotal: 1350,
+        utilisateur: 'user2'
+      },
+      
     ];
     this.filteredMouvements = [...this.mouvements];
-    this.totalItems = this.mouvements.length;
+    this.totalItems = this.filteredMouvements.length;
   }
 
   // Filter methods
@@ -258,6 +324,7 @@ export class MouvementComponent implements OnInit {
       dateDebut: filterValues.dateDebut || undefined,
       dateFin: filterValues.dateFin || undefined,
       magasinSource: filterValues.magasinSource || undefined,
+      typeCommande: filterValues.typeCommande || undefined
     };
 
     this.filteredMouvements = this.mouvements.filter(mouvement => {
@@ -281,6 +348,9 @@ export class MouvementComponent implements OnInit {
         match = false;
       }
       if (this.filters.magasinSource && mouvement.magasinSourceId !== this.filters.magasinSource) {
+        match = false;
+      }
+      if (this.filters.typeCommande && mouvement.typeCommande !== this.filters.typeCommande) {
         match = false;
       }
       return match;

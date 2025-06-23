@@ -51,6 +51,15 @@ export class CmdTransfertComponent implements OnInit {
   articleSearchFilter = '';
   selectedArticles: any[] = [];
 
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalItems = 0;
+  filteredCommandes: any[] = [];
+
+  // Math object for template
+  Math = Math;
+
   constructor(
     private fb: FormBuilder, 
     private service: CommandeService
@@ -84,47 +93,44 @@ export class CmdTransfertComponent implements OnInit {
     this.commandes = [
       {
         idCmd: 1,
-        libelle: 'Transfert Matériel Informatique',
+        libelle: 'Cmd-TRS-2025/00001',
         dateCommande: '2024-01-15',
-        magasinSource: 'Magasin Central',
-        magasinDestination: 'Magasin Nord',
+        magasinSource: 'Magasin moknine',
+        magasinDestination: 'Magasin ksar hellal',
         lignes: [
           {
             code: 'ART001',
             reference: 'REF001',
             description: 'Ordinateur portable',
-            quantite: 5
-          },
-          {
-            code: 'ART002',
-            reference: 'REF002',
-            description: 'Écran 24"',
-            quantite: 8
+            quantite: 5,
+            prixUnitaire: 1200,
+            montantLigne: 6000
           }
-        ]
+        ],
+        montantTotal: 6000
       },
       {
         idCmd: 2,
-        libelle: 'Transfert Mobilier Bureau',
-        dateCommande: '2024-01-10',
-        magasinSource: 'Magasin Sud',
-        magasinDestination: 'Magasin Est',
+        libelle: 'Cmd-TRS-2025/00002',
+        dateCommande: '2024-01-16',
+        magasinSource: 'Magasin ksar hellal ',
+        magasinDestination: 'Magasin moknine',
         lignes: [
           {
-            code: 'ART003',
-            reference: 'REF003',
-            description: 'Bureau ergonomique',
-            quantite: 10
-          },
-          {
-            code: 'ART004',
-            reference: 'REF004',
-            description: 'Chaise de bureau',
-            quantite: 12
+            code: 'ART002',
+            reference: 'REF002',
+            description: 'Souris sans fil',
+            quantite: 20,
+            prixUnitaire: 25,
+            montantLigne: 500
           }
-        ]
+        ],
+        montantTotal: 500
       }
     ];
+    
+    this.filteredCommandes = [...this.commandes];
+    this.totalItems = this.commandes.length;
 
     this.magasins = [
       { idMagasin: 1, nom: 'Magasin Central' },
@@ -478,5 +484,40 @@ export class CmdTransfertComponent implements OnInit {
 
   getLineStatusClass(): string {
     return 'bg-gray-50 border-l-4 border-gray-300';
+  }
+
+  // Pagination methods
+  getPaginatedCommandes(): any[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.filteredCommandes.slice(startIndex, endIndex);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  openDetailsPopup(commande: any): void {
+    this.selectedCommande = commande;
+    this.detailsPopUp = true;
+  }
+
+  openEditPopup(commande: any): void {
+    this.selectedCommande = commande;
+    this.selectdID = commande.idCmd;
+    this.isEditing = true;
+    this.createPopUp = true;
+  }
+
+  openDeletePopup(commande: any): void {
+    this.selectedCommande = commande;
+    this.selectdID = commande.idCmd;
+    this.deletedPopUp = true;
   }
 }

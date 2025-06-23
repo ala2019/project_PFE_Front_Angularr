@@ -60,6 +60,7 @@ export class CmdventetComponent implements OnInit {
   showFactureForm = false;
   nextFactureNumber = 'FACT-2024-001';
   factureCounter = 1;
+  expandedCommandes = new Set<number>();
 
   // Pagination
   currentPage = 1;
@@ -112,11 +113,12 @@ export class CmdventetComponent implements OnInit {
     this.commandes = [
       {
         idCmd: 1,
-        libelle: 'Commande Vente Matériel Informatique',
-        dateCommande: '2024-01-15',
+        libelle: 'Cmd-vente-2025/00001',
+        dateCommande: '2025-06-19',
         dateLivraison: '2024-01-25',
-        client: 'Entreprise ABC',
-        magasin: 'Magasin 1',
+        client: 'Société XYZ',
+        clientId: 2,
+        magasin: 'Magasin Sahloul',
         tauxTva: 19,
         montantHt: 12000.00,
         montantTva: 2280.00,
@@ -142,11 +144,12 @@ export class CmdventetComponent implements OnInit {
       },
       {
         idCmd: 2,
-        libelle: 'Commande Vente Mobilier Bureau',
-        dateCommande: '2024-01-10',
+        libelle: 'Cmd-vente-2025/00002',
+        dateCommande: '2025-06-22',
         dateLivraison: '2024-01-20',
         client: 'Société XYZ',
-        magasin: 'Magasin 2',
+        clientId: 2,
+        magasin: 'Magasin Sahloul',
         tauxTva: 7,
         montantHt: 8500.00,
         montantTva: 595.00,
@@ -170,50 +173,8 @@ export class CmdventetComponent implements OnInit {
           }
         ]
       },
-      {
-        idCmd: 3,
-        libelle: 'Commande Vente Accessoires',
-        dateCommande: '2024-01-12',
-        dateLivraison: '2024-01-22',
-        client: 'Entreprise ABC',
-        magasin: 'Magasin 1',
-        tauxTva: 19,
-        montantHt: 3500.00,
-        montantTva: 665.00,
-        montantTtc: 4165.00,
-        lignes: [
-          {
-            code: 'ART005',
-            reference: 'REF005',
-            description: 'Imprimante laser',
-            prixUnitaire: 350.00,
-            quantite: 10,
-            sousTotal: 3500.00
-          }
-        ]
-      },
-      {
-        idCmd: 4,
-        libelle: 'Commande Vente Équipements',
-        dateCommande: '2024-01-18',
-        dateLivraison: '2024-01-28',
-        client: 'Entreprise ABC',
-        magasin: 'Magasin 3',
-        tauxTva: 19,
-        montantHt: 2800.00,
-        montantTva: 532.00,
-        montantTtc: 3332.00,
-        lignes: [
-          {
-            code: 'ART006',
-            reference: 'REF006',
-            description: 'Scanner document',
-            prixUnitaire: 280.00,
-            quantite: 10,
-            sousTotal: 2800.00
-          }
-        ]
-      }
+     
+      
     ];
 
     // Initialiser le total des commandes
@@ -758,34 +719,39 @@ export class CmdventetComponent implements OnInit {
   }
 
   isAllCommandesSelected(): boolean {
-    const currentPageCommandes = this.getPaginatedCommandes();
-    return currentPageCommandes.length > 0 && 
-           currentPageCommandes.every(c => this.isCommandeSelected(c));
+    return this.filteredCommandes.length > 0 && this.selectedCommandes.length === this.filteredCommandes.length;
+  }
+
+  toggleCommandeDetails(commandeId: number): void {
+    if (this.expandedCommandes.has(commandeId)) {
+      this.expandedCommandes.delete(commandeId);
+    } else {
+      this.expandedCommandes.add(commandeId);
+    }
   }
 
   openFactureForm(): void {
     if (this.selectedCommandes.length === 0) {
-      alert('Veuillez sélectionner au moins une commande pour créer une facture.');
+      // Afficher une alerte ou un toast pour notifier l'utilisateur
+      alert("Veuillez sélectionner au moins une commande pour générer une facture.");
       return;
     }
-
-    // Vérifier que toutes les commandes ont le même client
-    const clients = [...new Set(this.selectedCommandes.map(c => c.client))];
-    if (clients.length > 1) {
-      alert('Impossible de créer une facture avec des commandes de clients différents. Toutes les commandes doivent être du même client.');
-      return;
-    }
-
-    const client = this.clients.find(c => c.nom === clients[0]);
     
-    // Générer automatiquement le numéro de facture
+    // Vérifier que toutes les commandes sélectionnées appartiennent au même client
+    const firstClientId = this.selectedCommandes[0]?.clientId;
+    const allSameClient = this.selectedCommandes.every(cmd => cmd.clientId === firstClientId);
+    
+    if (!allSameClient) {
+      alert("Toutes les commandes sélectionnées doivent appartenir au même client.");
+      return;
+    }
+
     this.updateFactureNumber();
-    
     this.factureForm.patchValue({
-      clientId: client?.idClient,
-      commandes: this.selectedCommandes,
       numFacture: this.nextFactureNumber,
-      dateFacture: new Date().toISOString().substring(0, 10)
+      dateFacture: new Date().toISOString().substring(0, 10),
+      clientId: firstClientId, // Set the client ID here
+      commandes: this.selectedCommandes.map(cmd => cmd.idCmd)
     });
 
     this.showFactureForm = true;
@@ -934,18 +900,24 @@ export class CmdventetComponent implements OnInit {
     return this.filteredCommandes.slice(startIndex, endIndex);
   }
 
-  getTotalPages(): number {
+  get totalPages(): number {
     return Math.ceil(this.totalItems / this.itemsPerPage);
   }
 
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.getTotalPages()) {
+    if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
     }
   }
 
   nextPage(): void {
-    if (this.currentPage < this.getTotalPages()) {
+    if (this.currentPage < this.totalPages) {
       this.currentPage++;
     }
   }
@@ -957,21 +929,16 @@ export class CmdventetComponent implements OnInit {
   }
 
   getPageNumbers(): number[] {
-    const totalPages = this.getTotalPages();
+    const totalPages = this.totalPages;
+    const currentPage = this.currentPage;
     const pages: number[] = [];
-    const maxVisiblePages = 5;
     
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      const start = Math.max(1, this.currentPage - 2);
-      const end = Math.min(totalPages, start + maxVisiblePages - 1);
-      
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
+    // Afficher maximum 5 pages autour de la page courante
+    const start = Math.max(1, currentPage - 2);
+    const end = Math.min(totalPages, currentPage + 2);
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
     }
     
     return pages;

@@ -31,10 +31,10 @@ export interface MouvementLigne {
 
 export interface MouvementFilter {
   libelle?: string;
-  typeMouvement?: string;
+  typeMouvement?: string[];
   dateDebut?: string;
   dateFin?: string;
   magasinSource?: number;
-  magasinDestination?: number;
+  typeCommande?: 'ACHAT' | 'VENTE' | 'TRANSFERT';
   statut?: string;
 } 

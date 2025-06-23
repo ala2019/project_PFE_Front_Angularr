@@ -34,6 +34,17 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   totalItems = 0;
   paginatedArticles: any[] = [];
 
+  // Variables pour les filtres
+  filters = {
+    code: '',
+    reference: '',
+    description: '',
+    categorie: ''
+  };
+
+  // Articles filtrés
+  filteredArticles: any[] = [];
+
   formData = {
     reference: '',
     description: '',
@@ -210,7 +221,7 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
         
         // Mapper les catégories si nécessaire
         this.mapCategoriesToArticles();
-        // Mettre à jour la pagination
+        this.updateFilteredArticles();
         this.updatePagination();
       });
   }
@@ -233,15 +244,29 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   }
 
   updatePagination() {
-    this.totalItems = this.articles.length;
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     this.paginatedArticles = this.articles.slice(startIndex, endIndex);
   }
 
+  getPaginatedArticles(): any[] {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.filteredArticles.slice(startIndex, endIndex);
+  }
+
   onPageChange(page: number) {
-    this.currentPage = page;
-    this.updatePagination();
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
   }
 
   get totalPages(): number {
@@ -350,5 +375,44 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
         placement: { from, align },
       },
     );
+  }
+
+  // Méthodes pour les filtres
+  applyFilters() {
+    this.currentPage = 1;
+    this.updateFilteredArticles();
+    this.updatePagination();
+  }
+
+  clearFilters() {
+    this.filters = {
+      code: '',
+      reference: '',
+      description: '',
+      categorie: ''
+    };
+    this.currentPage = 1;
+    this.updateFilteredArticles();
+    this.updatePagination();
+  }
+
+  updateFilteredArticles() {
+    this.filteredArticles = this.articles.filter(article => {
+      const codeMatch = !this.filters.code || 
+        article.code?.toLowerCase().includes(this.filters.code.toLowerCase());
+      
+      const referenceMatch = !this.filters.reference || 
+        article.reference?.toLowerCase().includes(this.filters.reference.toLowerCase());
+      
+      const descriptionMatch = !this.filters.description || 
+        article.description?.toLowerCase().includes(this.filters.description.toLowerCase());
+      
+      const categorieMatch = !this.filters.categorie || 
+        this.getCategorieName(article)?.toLowerCase().includes(this.filters.categorie.toLowerCase());
+      
+      return codeMatch && referenceMatch && descriptionMatch && categorieMatch;
+    });
+    
+    this.totalItems = this.filteredArticles.length;
   }
 }
