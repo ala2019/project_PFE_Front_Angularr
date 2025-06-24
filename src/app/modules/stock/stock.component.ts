@@ -61,7 +61,7 @@ export class StockComponent implements OnInit {
   loadData(): void {
     // Mock data - replace with actual service calls
     this.magasins = [
-      { idMagasin: 1, nom: 'Magasin Sousse', code: 'MP' },
+      { idMagasin: 1, nom: 'Magasin Moknine', code: 'MP' },
       { idMagasin: 2, nom: 'Magasin Secondaire', code: 'MS' },
       { idMagasin: 3, nom: 'Entrepôt Central', code: 'EC' },
       { idMagasin: 4, nom: 'Point de Vente', code: 'PV' },
@@ -82,8 +82,9 @@ export class StockComponent implements OnInit {
         reference: 'REF001',
         description: 'Ordinateur portable Dell Latitude',
         prixAchat: 850.00,
+        stockMin: 10,
         stocks: {
-          1: { quantite: 25, valeur: 21250.00 },
+          1: { quantite: 0, valeur: 0.00 },
           2: { quantite: 15, valeur: 12750.00 },
           3: { quantite: 8, valeur: 6800.00 },
           4: { quantite: 12, valeur: 10200.00 },
@@ -96,6 +97,7 @@ export class StockComponent implements OnInit {
         reference: 'REF002',
         description: 'Écran 24" Samsung',
         prixAchat: 180.00,
+        stockMin: 15,
         stocks: {
           1: { quantite: 40, valeur: 7200.00 },
           2: { quantite: 25, valeur: 4500.00 },
@@ -110,6 +112,7 @@ export class StockComponent implements OnInit {
         reference: 'REF003',
         description: 'Bureau ergonomique en bois',
         prixAchat: 280.00,
+        stockMin: 8,
         stocks: {
           1: { quantite: 15, valeur: 4200.00 },
           2: { quantite: 8, valeur: 2240.00 },
@@ -124,6 +127,7 @@ export class StockComponent implements OnInit {
         reference: 'REF004',
         description: 'Chaise de bureau pivotante',
         prixAchat: 120.00,
+        stockMin: 20,
         stocks: {
           1: { quantite: 30, valeur: 3600.00 },
           2: { quantite: 20, valeur: 2400.00 },
@@ -218,8 +222,79 @@ export class StockComponent implements OnInit {
   getStockStatusClass(quantity: number): string {
     if (quantity === 0) return 'bg-red-100 text-red-800';
     if (quantity <= 5) return 'bg-orange-100 text-orange-800';
-    if (quantity <= 15) return 'bg-yellow-100 text-yellow-800';
+    if (quantity <= 10) return 'bg-yellow-100 text-yellow-800';
     return 'bg-green-100 text-green-800';
+  }
+
+  // Nouvelle méthode pour vérifier si l'article est en rupture de stock
+  isStockAlert(article: any): boolean {
+    if (!this.selectedMagasin) return false;
+    const currentStock = this.getStockQuantity(article);
+    const stockMin = article.stockMin || 0;
+    return currentStock <= stockMin;
+  }
+
+  // Nouvelle méthode pour obtenir le statut d'alerte de stock
+  getStockAlertStatus(article: any): string {
+    if (!this.selectedMagasin) return 'normal';
+    const currentStock = this.getStockQuantity(article);
+    const stockMin = article.stockMin || 0;
+    
+    if (currentStock === 0) return 'rupture';
+    if (currentStock <= stockMin) return 'alerte';
+    return 'normal';
+  }
+
+  // Nouvelle méthode pour obtenir la classe CSS de l'alerte
+  getStockAlertClass(article: any): string {
+    const status = this.getStockAlertStatus(article);
+    switch (status) {
+      case 'rupture':
+        return 'bg-red-50 border-l-4 border-red-500';
+      case 'alerte':
+        return 'bg-orange-50 border-l-4 border-orange-500';
+      default:
+        return '';
+    }
+  }
+
+  // Nouvelle méthode pour obtenir l'icône d'alerte
+  getStockAlertIcon(article: any): string {
+    const status = this.getStockAlertStatus(article);
+    switch (status) {
+      case 'rupture':
+        return 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z';
+      case 'alerte':
+        return 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z';
+      default:
+        return '';
+    }
+  }
+
+  // Nouvelle méthode pour obtenir le message d'alerte
+  getStockAlertMessage(article: any): string {
+    const status = this.getStockAlertStatus(article);
+    const currentStock = this.getStockQuantity(article);
+    const stockMin = article.stockMin || 0;
+    
+    switch (status) {
+      case 'rupture':
+        return `Rupture de stock ! Stock minimum requis: ${stockMin}`;
+      case 'alerte':
+        return `Stock faible ! Actuel: ${currentStock}, Minimum: ${stockMin}`;
+      default:
+        return '';
+    }
+  }
+
+  // Nouvelle méthode pour compter les articles en alerte
+  getAlertCount(): number {
+    return this.filteredArticles.filter(article => this.isStockAlert(article)).length;
+  }
+
+  // Nouvelle méthode pour obtenir les articles en alerte
+  getAlertArticles(): any[] {
+    return this.filteredArticles.filter(article => this.isStockAlert(article));
   }
 
   // Magasin methods

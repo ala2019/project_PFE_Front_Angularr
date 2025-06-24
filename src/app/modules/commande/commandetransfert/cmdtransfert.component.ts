@@ -93,8 +93,8 @@ export class CmdTransfertComponent implements OnInit {
     this.commandes = [
       {
         idCmd: 1,
-        libelle: 'Cmd-TRS-2025/00001',
-        dateCommande: '2024-01-15',
+        libelle: 'Cmd-TRS-2025/0001',
+        dateCommande: '2025-06-28',
         magasinSource: 'Magasin moknine',
         magasinDestination: 'Magasin ksar hellal',
         lignes: [
@@ -111,8 +111,8 @@ export class CmdTransfertComponent implements OnInit {
       },
       {
         idCmd: 2,
-        libelle: 'Cmd-TRS-2025/00002',
-        dateCommande: '2024-01-16',
+        libelle: 'Cmd-TRS-2025/0002',
+        dateCommande: '2025-06-24',
         magasinSource: 'Magasin ksar hellal ',
         magasinDestination: 'Magasin moknine',
         lignes: [

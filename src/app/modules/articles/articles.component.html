@@ -160,7 +160,7 @@
         </div>
 
         <label for="prixAchat" class="mb-1 block text-sm font-medium text-gray-700">
-          Prix Achat <span class="text-red-500">*</span>
+          Prix  <span class="text-red-500">*</span>
         </label>
         <input type="number"
           id="prixAchat"
@@ -171,11 +171,11 @@
           placeholder="Saisie prix achat"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
         <div *ngIf="prixAchatInput.invalid && prixAchatInput.touched" class="mt-1 text-xs text-red-500">
-          Prix achat is required.
+          Prix  is required.
         </div>
 
         <label for="prixVente" class="mb-1 block text-sm font-medium text-gray-700">
-          Prix Vente <span class="text-red-500">*</span>
+          TVA <span class="text-red-500">*</span>
         </label>
         <input type="number"
           id="prixVente"
@@ -186,7 +186,7 @@
           placeholder="Saisie prix vente"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
         <div *ngIf="prixVenteInput.invalid && prixVenteInput.touched" class="mt-1 text-xs text-red-500">
-          Prix vente is required.
+          TVA is required.
         </div>
 
         <label for="stockMin" class="mb-1 block text-sm font-medium text-gray-700">
@@ -292,8 +292,8 @@
         <th class="px-6 py-3">Code</th>
         <th class="px-6 py-3">Référence</th>
         <th class="px-6 py-3">Description</th>
-        <th class="px-6 py-3">Prix Achat</th>
-        <th class="px-6 py-3">Prix Vente</th>
+        <th class="px-6 py-3">Prix </th>
+        <th class="px-6 py-3">TVA</th>
         <th class="px-6 py-3">Stock Min</th>
         <th class="px-6 py-3">Catégorie</th>
       </thead>
