@@ -1,6 +1,6 @@
 // import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ArticleService } from '../../core/services/article.service';
 import { CategorieArticleService } from '../../core/services/categorie.service'; // Fixed import path
 import { DomSanitizer } from '@angular/platform-browser';
@@ -15,7 +15,7 @@ declare var $: any;
   selector: 'app-articles',
   templateUrl: './articles.component.html',
   styleUrls: ['./articles.component.scss'],
-  imports: [CommonModule, PopupComponent, FormsModule],
+  imports: [CommonModule, PopupComponent, FormsModule, ReactiveFormsModule],
   standalone: true
 })
 export class ArticlesComponent implements OnInit, AfterViewInit {
@@ -30,7 +30,7 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
 
   // Variables pour la pagination
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 5;
   totalItems = 0;
   paginatedArticles: any[] = [];
 
@@ -48,8 +48,8 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   formData = {
     reference: '',
     description: '',
-    prixAchat: '',
-    prixVente: '',
+    prix: '',
+    tva: '',
     stockMin: '',
     code: '',
     categorie: ''
@@ -64,8 +64,8 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
     this.articleForm = this.fb.group({
       reference: ['', Validators.required],
       description: ['', Validators.required],
-      prixAchat: ['', Validators.required],
-      prixVente: ['', Validators.required],
+      prix: ['', Validators.required],
+      tva: ['', Validators.required],
       stockMin: ['', Validators.required],
       code: ['', Validators.required],
       categorie: ['', Validators.required],
@@ -115,30 +115,187 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   }
 
   onSubmit() {
+    console.log('Soumission du formulaire...');
+    
+    // Marquer tous les champs comme touchés pour déclencher la validation
+    Object.keys(this.articleForm.controls).forEach(key => {
+      const control = this.articleForm.get(key);
+      control?.markAsTouched();
+    });
+    
+    console.log('FormGroup valide:', this.articleForm.valid);
+    console.log('FormGroup valeurs:', this.articleForm.value);
+    console.log('FormGroup erreurs:', this.articleForm.errors);
+    
+    // Vérifier si le formulaire est valide
+    if (this.articleForm.invalid) {
+      console.error('Formulaire invalide, soumission annulée');
+      console.error('Erreurs du formulaire:', this.articleForm.errors);
+      
+      // Afficher les erreurs de chaque champ
+      Object.keys(this.articleForm.controls).forEach(key => {
+        const control = this.articleForm.get(key);
+        if (control?.invalid) {
+          console.error(`Erreur dans ${key}:`, control.errors);
+        }
+      });
+      
+      alert('Veuillez corriger les erreurs dans le formulaire avant de soumettre.');
+      return;
+    }
+    
+    // Vérification supplémentaire des champs requis
+    const requiredFields = ['code', 'reference', 'description', 'prix', 'tva', 'stockMin', 'categorie'];
+    console.log('=== VÉRIFICATION DES CHAMPS REQUIS ===');
+    console.log('FormGroup complet:', this.articleForm.value);
+    
+    const missingFields = requiredFields.filter(field => {
+      const control = this.articleForm.get(field);
+      const value = control?.value;
+      const isValid = !value || value === '' || value === null || value === undefined;
+      console.log(`Champ ${field}:`, value, 'Type:', typeof value, 'Manquant:', isValid);
+      return isValid;
+    });
+    
+    if (missingFields.length > 0) {
+      console.error('Champs manquants:', missingFields);
+      console.error('Valeurs du FormGroup:', this.articleForm.value);
+      alert(`Veuillez remplir tous les champs requis: ${missingFields.join(', ')}`);
+      return;
+    }
+    
+    console.log('Tous les champs requis sont remplis ✓');
+    
+    // Synchroniser formData avec les valeurs du FormGroup
+    this.formData = this.articleForm.value;
+    console.log('FormData après synchronisation:', this.formData);
+    
+    // Préparer les données pour l'API - structure simplifiée
+    const articleData: any = {
+      code: this.articleForm.get('code')?.value,
+      reference: this.articleForm.get('reference')?.value,
+      description: this.articleForm.get('description')?.value,
+      prix: parseFloat(this.articleForm.get('prix')?.value) || null,
+      tva: parseFloat(this.articleForm.get('tva')?.value) || null,
+      stockMin: parseInt(this.articleForm.get('stockMin')?.value) || null
+    };
+    
+    // Gestion spéciale pour la catégorie
+    const categorieValue = this.articleForm.get('categorie')?.value;
+    if (categorieValue) {
+      console.log('Gestion de la catégorie - ID original:', categorieValue, 'Type:', typeof categorieValue);
+      
+      // Essayer de trouver l'objet catégorie complet
+      const selectedCategorie = this.categories.find(cat => cat.idCategorie == categorieValue);
+      if (selectedCategorie) {
+        console.log('Objet catégorie trouvé:', selectedCategorie);
+        articleData.categorie = selectedCategorie;
+      } else {
+        // Si l'objet n'est pas trouvé, essayer avec juste l'ID
+        const categorieId = parseInt(categorieValue);
+        if (!isNaN(categorieId)) {
+          console.log('Conversion en ID numérique:', categorieId);
+          articleData.categorie = categorieId;
+        } else {
+          console.log('Utilisation de l\'ID tel quel:', categorieValue);
+          articleData.categorie = categorieValue;
+        }
+      }
+    }
+    
+    // Nettoyer les valeurs null
+    Object.keys(articleData).forEach(key => {
+      if (articleData[key] === null || articleData[key] === undefined || articleData[key] === '') {
+        delete articleData[key];
+      }
+    });
+    
+    console.log('=== DONNÉES FINALES À ENVOYER ===');
+    console.log('ArticleData:', articleData);
+    console.log('Type de categorie:', typeof articleData.categorie);
+    console.log('JSON stringifié:', JSON.stringify(articleData, null, 2));
+    console.log('Headers Content-Type:', 'application/json');
+    
     if (this.selectdID) {
       // Mode édition
-      const articleData = { ...this.formData, idArticle: this.selectdID };
+      console.log('=== MODE ÉDITION ===');
+      console.log('ID sélectionné:', this.selectdID);
+      articleData.idArticle = this.selectdID;
+      
       this.articleService.updateArticle(this.selectdID, articleData).subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('Article mis à jour avec succès:', response);
           this.fetchData();
           this.createPopUp = false;
           this.selectdID = null;
           this.resetForm();
+          this.showNotification('bottom', 'right');
         },
         error: (error) => {
-          console.error('Error updating article', error);
+          console.error('Erreur lors de la mise à jour de l\'article:', error);
+          console.error('Status:', error.status);
+          console.error('StatusText:', error.statusText);
+          console.error('Message:', error.message);
+          console.error('Error body:', error.error);
+          console.error('Error text:', error.error?.text || 'Pas de texte d\'erreur');
+          console.error('Error details:', error.error?.details || 'Pas de détails');
+          console.error('URL:', error.url);
+          
+          let errorMessage = 'Erreur lors de la mise à jour de l\'article';
+          
+          if (error.status === 500) {
+            errorMessage = 'Erreur serveur (500) - Impossible de mettre à jour l\'article.';
+            if (error.error && error.error.message) {
+              errorMessage += '\nDétails: ' + error.error.message;
+            }
+          } else if (error.error && error.error.message) {
+            errorMessage += ': ' + error.error.message;
+          } else if (error.message) {
+            errorMessage += ': ' + error.message;
+          }
+          
+          alert(errorMessage);
         },
       });
     } else {
       // Mode création
-      this.articleService.addArticle(this.formData).subscribe({
-        next: () => {
+      console.log('=== MODE CRÉATION ===');
+      console.log('Aucun ID sélectionné, création d\'un nouvel article');
+      
+      this.articleService.addArticle(articleData).subscribe({
+        next: (response) => {
+          console.log('Article créé avec succès:', response);
           this.fetchData();
           this.createPopUp = false;
           this.resetForm();
+          this.showNotification('bottom', 'right');
         },
         error: (error) => {
-          console.error('Error adding article', error);
+          console.error('Erreur lors de la création de l\'article:', error);
+          console.error('Status:', error.status);
+          console.error('StatusText:', error.statusText);
+          console.error('Message:', error.message);
+          console.error('Error body:', error.error);
+          console.error('Error text:', error.error?.text || 'Pas de texte d\'erreur');
+          console.error('Error details:', error.error?.details || 'Pas de détails');
+          console.error('URL:', error.url);
+          
+          let errorMessage = 'Erreur lors de la création de l\'article';
+          
+          if (error.status === 500) {
+            errorMessage = 'Erreur serveur (500) - Impossible de créer l\'article.';
+            if (error.error && error.error.message) {
+              errorMessage += '\nDétails: ' + error.error.message;
+            }
+          } else if (error.error && error.error.message) {
+            errorMessage += ': ' + error.error.message;
+          } else if (error.error && typeof error.error === 'string') {
+            errorMessage += ': ' + error.error;
+          } else if (error.message) {
+            errorMessage += ': ' + error.message;
+          }
+          
+          alert(errorMessage);
         },
       });
     }
@@ -148,12 +305,15 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
     this.formData = {
       reference: '',
       description: '',
-      prixAchat: '',
-      prixVente: '',
+      prix: '',
+      tva: '',
       stockMin: '',
       code: '',
       categorie: ''
     };
+    
+    // Réinitialiser aussi le FormGroup
+    this.articleForm.reset();
   }
 
   editArticle() {
@@ -166,14 +326,18 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
         this.formData = {
           reference: selectedArticle.reference || '',
           description: selectedArticle.description || '',
-          prixAchat: selectedArticle.prixAchat || '',
-          prixVente: selectedArticle.prixVente || '',
+          prix: selectedArticle.prix || '',
+          tva: selectedArticle.tva || '',
           stockMin: selectedArticle.stockMin || '',
           code: selectedArticle.code || '',
           categorie: selectedArticle.categorie?.idCategorie || selectedArticle.idCategorie || ''
         };
         
+        // Synchroniser le FormGroup avec formData
+        this.articleForm.patchValue(this.formData);
+        
         console.log('FormData pour édition:', this.formData);
+        console.log('FormGroup après patchValue:', this.articleForm.value);
         
         // S'assurer que les catégories sont chargées
         if (this.categories.length === 0) {
@@ -286,9 +450,18 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
 
   // Méthode pour ouvrir la popup de création
   openCreatePopup() {
-    console.log('Ouverture popup de création');
-    console.log('Catégories disponibles avant ouverture:', this.categories);
-    console.log('Longueur du tableau catégories:', this.categories.length);
+    console.log('=== OUVERTURE POPUP DE CRÉATION ===');
+    console.log('selectdID avant réinitialisation:', this.selectdID);
+    
+    // Réinitialiser l'ID sélectionné pour s'assurer qu'on est en mode création
+    this.selectdID = null;
+    
+    // Réinitialiser le formulaire
+    this.resetForm();
+    
+    console.log('FormData après reset:', this.formData);
+    console.log('FormGroup après reset:', this.articleForm.value);
+    console.log('FormGroup valide:', this.articleForm.valid);
     
     // Toujours recharger les catégories pour s'assurer qu'elles sont à jour
     console.log('Rechargement forcé des catégories...');
@@ -298,15 +471,21 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       console.log('Catégories après rechargement:', this.categories);
       console.log('Longueur après rechargement:', this.categories.length);
+      
+      // Ouvrir la popup
       this.createPopUp = true;
       
       // Vérifier à nouveau après ouverture de la popup
       setTimeout(() => {
-        console.log('Catégories dans la popup:', this.categories);
+        console.log('=== ÉTAT FINAL AVANT SOUMISSION ===');
+        console.log('selectdID:', this.selectdID);
+        console.log('createPopUp:', this.createPopUp);
+        console.log('FormData:', this.formData);
+        console.log('FormGroup:', this.articleForm.value);
+        console.log('FormGroup valide:', this.articleForm.valid);
+        console.log('Catégories disponibles:', this.categories.length);
       }, 100);
     }, 1000);
-    
-    console.log('FormData actuel:', this.formData);
   }
 
   // Méthode pour obtenir le nom de catégorie de manière robuste
@@ -350,24 +529,74 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
       error: (error) => {
         console.error('Erreur lors du chargement des catégories:', error);
         console.error('Status de l\'erreur:', error.status);
+        console.error('StatusText:', error.statusText);
         console.error('Message d\'erreur:', error.message);
       }
     });
   }
 
   deleteArticles(id: any) {
-    if (!confirm('Delete Article ?')) return;
-    this.articleService.deleteArticle(id).subscribe(() => {
-      this.fetchData();
-      this.showNotification('bottom', 'right');
+    console.log('Suppression de l\'article avec ID:', id);
+    
+    // Vérifier que l'ID est valide
+    if (!id || id === null || id === undefined) {
+      console.error('ID d\'article invalide:', id);
+      alert('ID d\'article invalide. Impossible de supprimer.');
+      return;
+    }
+    
+    // Vérifier que l'article existe dans la liste
+    const articleToDelete = this.articles.find(article => article.idArticle === id);
+    if (!articleToDelete) {
+      console.error('Article non trouvé avec l\'ID:', id);
+      alert('Article non trouvé. Impossible de supprimer.');
+      return;
+    }
+    
+    console.log('Article à supprimer:', articleToDelete);
+    
+    this.articleService.deleteArticle(id).subscribe({
+      next: (response) => {
+        console.log('Article supprimé avec succès:', response);
+        this.fetchData();
+        this.selectdID = null; // Réinitialiser la sélection
+        this.showNotification('bottom', 'right', 'Article supprimé avec succès.');
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression de l\'article:', error);
+        console.error('Status:', error.status);
+        console.error('StatusText:', error.statusText);
+        console.error('Message:', error.message);
+        console.error('Error body:', error.error);
+        console.error('Error text:', error.error?.text || 'Pas de texte d\'erreur');
+        console.error('Error details:', error.error?.details || 'Pas de détails');
+        console.error('URL:', error.url);
+        
+        let errorMessage = 'Erreur lors de la suppression de l\'article';
+        
+        if (error.status === 500) {
+          errorMessage = 'Erreur serveur (500) - Impossible de supprimer l\'article.';
+          if (error.error && error.error.message) {
+            errorMessage += '\nDétails: ' + error.error.message;
+          }
+        } else if (error.error && error.error.message) {
+          errorMessage += ': ' + error.error.message;
+        } else if (error.error && typeof error.error === 'string') {
+          errorMessage += ': ' + error.error;
+        } else if (error.message) {
+          errorMessage += ': ' + error.message;
+        }
+        
+        alert(errorMessage);
+      }
     });
   }
 
-  showNotification(from: string, align: string) {
+  showNotification(from: string, align: string, message: string = 'Opération terminée avec succès.') {
     $.notify(
       {
         icon: 'notifications',
-        message: 'Opération terminée avec succès.',
+        message: message,
       },
       {
         type: 'success',

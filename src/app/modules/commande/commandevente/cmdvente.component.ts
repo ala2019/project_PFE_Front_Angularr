@@ -30,6 +30,7 @@ export class CmdventetComponent implements OnInit {
   magasins: any[] = [];
   articles: any[] = [];
   articlesWithStock: any[] = [];
+  modesPaiement: any[] = [];
   
   // Forms
   commandeForm!: FormGroup;
@@ -85,9 +86,8 @@ export class CmdventetComponent implements OnInit {
     this.commandeForm = this.fb.group({
       libelle: ['', Validators.required],
       dateCommande: [new Date().toISOString().substring(0, 10), Validators.required],
-      dateLivraison: ['', Validators.required],
       clientId: ['', Validators.required],
-      tauxTva: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      modePaiement: ['', Validators.required],
       lignes: [[]],
       magasinId: [null, Validators.required]
     });
@@ -97,7 +97,8 @@ export class CmdventetComponent implements OnInit {
       reference: ['', Validators.required],
       description: ['', Validators.required],
       prixUnitaire: [0, [Validators.required, Validators.min(0)]],
-      quantite: [1, [Validators.required, Validators.min(1)]]
+      quantite: [1, [Validators.required, Validators.min(1)]],
+      tauxTva: [19, [Validators.required, Validators.min(0), Validators.max(100)]]
     });
 
     this.factureForm = this.fb.group({
@@ -295,6 +296,13 @@ export class CmdventetComponent implements OnInit {
         }
       }
     ];
+
+    this.modesPaiement = [
+      { idModePaiement: 1, nom: 'Espèces' },
+      { idModePaiement: 2, nom: 'Chèque' },
+      { idModePaiement: 3, nom: 'Virement' },
+      { idModePaiement: 4, nom: 'Carte bancaire' }
+    ];
   }
 
   // Filter methods
@@ -371,6 +379,69 @@ export class CmdventetComponent implements OnInit {
     return article.stocks[this.selectedMagasin] || 0;
   }
 
+  // Get stock for article by code
+  getArticleStockByCode(code: string): number {
+    if (!this.selectedMagasin) return 0;
+    const article = this.articlesWithStock.find(a => a.code === code);
+    return article ? (article.stocks[this.selectedMagasin] || 0) : 0;
+  }
+
+  // Get current stock for the line being edited
+  getCurrentStock(): number | null {
+    if (!this.showLineForm) return null;
+    const code = this.lineForm.get('code')?.value;
+    if (!code) return null;
+    return this.getArticleStockByCode(code);
+  }
+
+  // Get max quantity for current line
+  getMaxQuantity(): number {
+    const stock = this.getCurrentStock();
+    return stock || 999;
+  }
+
+  // Check if quantity exceeds stock
+  isQuantityExceedingStock(): boolean {
+    const quantity = this.lineForm.get('quantite')?.value || 0;
+    const stock = this.getCurrentStock();
+    return stock !== null && quantity > stock;
+  }
+
+  // Handle quantity change in line form
+  onQuantityChange(): void {
+    const quantity = this.lineForm.get('quantite')?.value || 0;
+    const prixUnitaire = this.lineForm.get('prixUnitaire')?.value || 0;
+    const sousTotal = quantity * prixUnitaire;
+    
+    // Update sous-total in the form for display
+    this.lineForm.patchValue({ sousTotal });
+  }
+
+  // Update line quantity in table
+  updateLineQuantity(index: number, event: any): void {
+    const newQuantity = parseInt(event.target.value) || 1;
+    const lignes = this.commandeForm.get('lignes')?.value || [];
+    
+    if (index >= 0 && index < lignes.length) {
+      const line = lignes[index];
+      const stock = this.getArticleStockByCode(line.code);
+      
+      // Vérifier que la quantité ne dépasse pas le stock
+      if (newQuantity > stock) {
+        alert(`La quantité ne peut pas dépasser le stock disponible (${stock} unités)`);
+        event.target.value = Math.min(newQuantity, stock);
+        return;
+      }
+      
+      // Mettre à jour la quantité et recalculer le sous-total
+      line.quantite = newQuantity;
+      line.sousTotal = line.prixUnitaire * newQuantity;
+      
+      this.commandeForm.patchValue({ lignes });
+      this.updateTotals();
+    }
+  }
+
   // Get stock status class
   getStockStatusClass(stock: number): string {
     if (stock > 10) return 'bg-green-100 text-green-800';
@@ -410,12 +481,17 @@ export class CmdventetComponent implements OnInit {
 
   // Open article selection popup
   openArticleSelection(): void {
+    // Vérifier si un magasin est sélectionné
+    const magasinId = this.commandeForm.get('magasinId')?.value;
+    if (!magasinId) {
+      alert('Veuillez d\'abord sélectionner un magasin avant d\'ajouter des articles.');
+      return;
+    }
+    
     this.articleSelectionPopUp = true;
     this.articleSearchFilter = '';
     this.selectedArticles = [];
-    // Set selected magasin from form if available
-    const magasinId = this.commandeForm.get('magasinId')?.value;
-    this.selectedMagasin = magasinId || null;
+    this.selectedMagasin = magasinId;
   }
 
   // Toggle article selection
@@ -458,6 +534,7 @@ export class CmdventetComponent implements OnInit {
         description: article.description,
         prixUnitaire: article.prix,
         quantite: 1,
+        tauxTva: 19, // Taux TVA par défaut, peut être modifié par ligne
         sousTotal: article.prix
       };
       
@@ -483,7 +560,8 @@ export class CmdventetComponent implements OnInit {
     if (clientId) {
       const client = this.clients.find(c => c.idClient === clientId);
       if (client) {
-        this.commandeForm.patchValue({ tauxTva: client.tauxTva });
+        // Mettre à jour le taux TVA par défaut pour les nouvelles lignes
+        this.lineForm.patchValue({ tauxTva: client.tauxTva });
       }
     }
   }
@@ -494,7 +572,7 @@ export class CmdventetComponent implements OnInit {
       const formData = this.commandeForm.value;
       
       if (this.isEditing) {
-        // Update existing commande
+        // Update existing commande locally only
         const index = this.commandes.findIndex(c => c.idCmd === this.selectdID);
         if (index !== -1) {
           const client = this.clients.find(c => c.idClient === formData.clientId);
@@ -502,6 +580,7 @@ export class CmdventetComponent implements OnInit {
           this.commandes[index] = {
             ...this.commandes[index],
             ...formData,
+            type: 'vente', // Set type to 'vente' for update
             client: client?.nom,
             montantHt: this.calculateMontantHt(),
             montantTva: this.calculateMontantTva(),
@@ -509,19 +588,31 @@ export class CmdventetComponent implements OnInit {
           };
         }
       } else {
-        // Add new commande
+        // Add new commande via API
         const client = this.clients.find(c => c.idClient === formData.clientId);
         
         const newCommande = {
           ...formData,
-          idCmd: Math.max(...this.commandes.map(c => c.idCmd), 0) + 1,
+          type: 'vente', // Set type to 'vente' for new
           client: client?.nom,
           montantHt: this.calculateMontantHt(),
           montantTva: this.calculateMontantTva(),
           montantTtc: this.calculateMontantTtc()
         };
         
-        this.commandes.push(newCommande);
+        this.service.create(newCommande).subscribe({
+          next: (createdCommande) => {
+            // Optionally, you can push createdCommande or newCommande
+            this.commandes.push(createdCommande);
+            this.filteredCommandes = [...this.commandes];
+            this.totalItems = this.filteredCommandes.length;
+            this.closeModal();
+          },
+          error: (err) => {
+            alert('Erreur lors de la création de la commande');
+          }
+        });
+        return; // Prevent closing modal immediately
       }
       
       this.closeModal();
@@ -536,9 +627,8 @@ export class CmdventetComponent implements OnInit {
     this.commandeForm.patchValue({
       libelle: commande.libelle,
       dateCommande: commande.dateCommande,
-      dateLivraison: commande.dateLivraison,
       clientId: this.clients.find(c => c.nom === commande.client)?.idClient,
-      tauxTva: commande.tauxTva,
+      modePaiement: commande.modePaiement || '',
       lignes: commande.lignes || [],
       magasinId: this.magasins.find(m => m.nom === commande.magasin)?.idMagasin
     });
@@ -613,8 +703,10 @@ export class CmdventetComponent implements OnInit {
   updateTotals(): void {
     const lignes = this.commandeForm.get('lignes')?.value || [];
     const montantHt = lignes.reduce((sum: number, line: any) => sum + line.sousTotal, 0);
-    const tauxTva = this.commandeForm.get('tauxTva')?.value || 0;
-    const montantTva = montantHt * (tauxTva / 100);
+    const montantTva = lignes.reduce((sum: number, line: any) => {
+      const tauxTva = line.tauxTva || 19; // Taux par défaut si non défini
+      return sum + (line.sousTotal * (tauxTva / 100));
+    }, 0);
     const montantTtc = montantHt + montantTva;
     
     // Update form values for display
@@ -631,9 +723,11 @@ export class CmdventetComponent implements OnInit {
   }
 
   calculateMontantTva(): number {
-    const montantHt = this.calculateMontantHt();
-    const tauxTva = this.commandeForm.get('tauxTva')?.value || 0;
-    return montantHt * (tauxTva / 100);
+    const lignes = this.commandeForm.get('lignes')?.value || [];
+    return lignes.reduce((sum: number, line: any) => {
+      const tauxTva = line.tauxTva || 19; // Taux par défaut si non défini
+      return sum + (line.sousTotal * (tauxTva / 100));
+    }, 0);
   }
 
   calculateMontantTtc(): number {
@@ -646,7 +740,8 @@ export class CmdventetComponent implements OnInit {
       reference: '',
       description: '',
       prixUnitaire: 0,
-      quantite: 1
+      quantite: 1,
+      tauxTva: 19
     });
     this.currentLineIndex = null;
     this.showLineForm = false;
@@ -660,7 +755,6 @@ export class CmdventetComponent implements OnInit {
     this.selectedCommande = null;
     this.commandeForm.reset({
       dateCommande: new Date().toISOString().substring(0, 10),
-      tauxTva: 19,
       lignes: [],
       magasinId: null
     });

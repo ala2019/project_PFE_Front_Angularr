@@ -100,11 +100,11 @@
 @if (deletedPopUp) {
 <app-popup>
   <div popup-content>
-    <h3 class="text-lg font-semibold">Did you want to delete it</h3>
+    <h3 class="text-lg font-semibold">Voulez-vous vraiment supprimer cet article ?</h3>
     <div class="flex w-full justify-between p-3 py-5">
-      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Close</button>
+      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
       <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="deleteArticles(selectdID); deletedPopUp = false">
-        Delete
+        Supprimer
       </button>
     </div>
   </div>
@@ -112,115 +112,97 @@
 } @if (createPopUp) {
 <app-popup>
   <div popup-content>
-    <form #nameForm="ngForm" (ngSubmit)="onSubmit()" class="w-[400px] max-w-sm space-y-4" novalidate>
+    <form [formGroup]="articleForm" (ngSubmit)="onSubmit()" class="w-[400px] max-w-sm space-y-4" novalidate>
       <div>
         <label for="code" class="mb-1 block text-sm font-medium text-gray-700">
-          Code <span class="text-red-500">*</span>
+          Code <span class="text-red-500" *ngIf="!selectdID">*</span>
         </label>
         <input type="text"
           id="code"
-          name="code"
-          [(ngModel)]="formData.code"
-          required
-          #codeInput="ngModel"
+          formControlName="code"
           placeholder="Saisie code"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="codeInput.invalid && codeInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="articleForm.get('code')?.invalid && articleForm.get('code')?.touched" class="mt-1 text-xs text-red-500">
           Code is required.
         </div>
 
         <label for="reference" class="mb-1 block text-sm font-medium text-gray-700">
-          Référence <span class="text-red-500">*</span>
+          Référence <span class="text-red-500" *ngIf="!selectdID">*</span>
         </label>
         <input type="text"
           id="reference"
-          name="reference"
-          [(ngModel)]="formData.reference"
-          required
-          #referenceInput="ngModel"
+          formControlName="reference"
           placeholder="Saisie référence"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="referenceInput.invalid && referenceInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="articleForm.get('reference')?.invalid && articleForm.get('reference')?.touched" class="mt-1 text-xs text-red-500">
           Référence is required.
         </div>
 
         <label for="description" class="mb-1 block text-sm font-medium text-gray-700">
-          Description <span class="text-red-500">*</span>
+          Description <span class="text-red-500" *ngIf="!selectdID">*</span>
         </label>
         <input type="text"
           id="description"
-          name="description"
-          [(ngModel)]="formData.description"
-          required
-          #descriptionInput="ngModel"
+          formControlName="description"
           placeholder="Saisie description"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="descriptionInput.invalid && descriptionInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="articleForm.get('description')?.invalid && articleForm.get('description')?.touched" class="mt-1 text-xs text-red-500">
           Description is required.
         </div>
 
-        <label for="prixAchat" class="mb-1 block text-sm font-medium text-gray-700">
-          Prix  <span class="text-red-500">*</span>
+        <label for="prix" class="mb-1 block text-sm font-medium text-gray-700">
+          Prix <span class="text-red-500" *ngIf="!selectdID">*</span>
         </label>
         <input type="number"
-          id="prixAchat"
-          name="prixAchat"
-          [(ngModel)]="formData.prixAchat"
-          required
-          #prixAchatInput="ngModel"
-          placeholder="Saisie prix achat"
+          id="prix"
+          formControlName="prix"
+          placeholder="Saisie prix"
+          step="0.01"
+          min="0"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="prixAchatInput.invalid && prixAchatInput.touched" class="mt-1 text-xs text-red-500">
-          Prix  is required.
+        <div *ngIf="articleForm.get('prix')?.invalid && articleForm.get('prix')?.touched" class="mt-1 text-xs text-red-500">
+          Prix is required.
         </div>
 
-        <label for="prixVente" class="mb-1 block text-sm font-medium text-gray-700">
-          TVA <span class="text-red-500">*</span>
+        <label for="tva" class="mb-1 block text-sm font-medium text-gray-700">
+          TVA <span class="text-red-500" *ngIf="!selectdID">*</span>
         </label>
         <input type="number"
-          id="prixVente"
-          name="prixVente"
-          [(ngModel)]="formData.prixVente"
-          required
-          #prixVenteInput="ngModel"
-          placeholder="Saisie prix vente"
+          id="tva"
+          formControlName="tva"
+          placeholder="Saisie TVA"
+          step="0.01"
+          min="0"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="prixVenteInput.invalid && prixVenteInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="articleForm.get('tva')?.invalid && articleForm.get('tva')?.touched" class="mt-1 text-xs text-red-500">
           TVA is required.
         </div>
 
         <label for="stockMin" class="mb-1 block text-sm font-medium text-gray-700">
-          Stock Minimum <span class="text-red-500">*</span>
+          Stock Minimum <span class="text-red-500" *ngIf="!selectdID">*</span>
         </label>
         <input type="number"
           id="stockMin"
-          name="stockMin"
-          [(ngModel)]="formData.stockMin"
-          required
-          #stockMinInput="ngModel"
+          formControlName="stockMin"
           placeholder="Saisie stock minimum"
+          step="1"
+          min="0"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="stockMinInput.invalid && stockMinInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="articleForm.get('stockMin')?.invalid && articleForm.get('stockMin')?.touched" class="mt-1 text-xs text-red-500">
           Stock minimum is required.
         </div>
 
         <label for="categorie" class="mb-1 block text-sm font-medium text-gray-700">
-          Catégorie <span class="text-red-500">*</span>
+          Catégorie <span class="text-red-500" *ngIf="!selectdID">*</span>
           @if (categories.length === 0) {
           <span class="text-red-500 text-xs">(Chargement des catégories...)</span>
           } @else {
           <span class="text-green-500 text-xs">({{ categories.length }} catégories disponibles)</span>
           }
         </label>
-        <!-- Debug: {{ categories.length }} catégories disponibles -->
-        <!-- Debug première catégorie: {{ categories[0] | json }} -->
-        <!-- Debug formData.categorie: {{ formData.categorie }} -->
         <select
           id="categorie"
-          name="categorie"
-          [(ngModel)]="formData.categorie"
-          required
-          #categorieInput="ngModel"
+          formControlName="categorie"
           [disabled]="categories.length === 0"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 disabled:bg-gray-100 disabled:cursor-not-allowed">
           <option value="">Sélectionner une catégorie ({{ categories.length }} disponibles)</option>
@@ -230,19 +212,18 @@
           </option>
           }
         </select>
-        <div *ngIf="categorieInput.invalid && categorieInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="articleForm.get('categorie')?.invalid && articleForm.get('categorie')?.touched" class="mt-1 text-xs text-red-500">
           Catégorie is required.
         </div>
-
-       
 
         <div class="flex justify-end gap-5">
           <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="createPopUp = false">Close</button>
           <button
             type="submit"
-            [disabled]="nameForm.invalid"
-            class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-            Save
+            [disabled]="articleForm.invalid"
+            [class]="articleForm.invalid ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary/90'"
+            class="text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+            {{ articleForm.invalid ? 'Formulaire invalide' : 'Save' }}
           </button>
         </div>
       </div>
@@ -313,10 +294,10 @@
             {{ article?.description }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ article?.prixAchat }}
+            {{ article?.prix | currency:'EUR':'symbol':'1.2-2' }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ article?.prixVente }}
+            {{ article?.tva | currency:'EUR':'symbol':'1.2-2' }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ article?.stockMin }}
