@@ -17,79 +17,78 @@ import { Mouvement, MouvementLigne, MouvementFilter } from '../../core/models/mo
   styleUrl: 'mouvement.component.scss',
   imports: [
     CommonModule,
-    AngularSvgIconModule, 
-    TableRowComponent, 
-    TableFooterComponent, 
+    AngularSvgIconModule,
+    TableRowComponent,
+    TableFooterComponent,
     TableHeaderComponent,
     PopupComponent,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
   ],
-  standalone: true
+  standalone: true,
 })
 export class MouvementComponent implements OnInit {
-  
   // Popup management
   createPopUp = false;
   detailsPopUp = false;
   deletePopUp = false;
   articleSelectionPopUp = false;
-  
+
   // Selection tracking
   selectedId: number | null = null;
   selectedMouvement: Mouvement | null = null;
-  
+
   // Data arrays
-  mouvements: Mouvement[] = [];
+  mouvements: any[] = [];
   filteredMouvements: Mouvement[] = [];
   magasins: any[] = [];
   articles: any[] = [];
   articlesWithStock: any[] = [];
-  
+
   // Forms
   mouvementForm!: FormGroup;
   ligneForm!: FormGroup;
   filterForm!: FormGroup;
-  
+
   // State management
   isEditing = false;
   showLigneForm = false;
   currentLigneIndex: number | null = null;
   selectedTypeMouvement: 'POINTAGE' | 'TRANSFERT' | 'SORTIE' = 'POINTAGE';
-  
+
   // Filters
   filters: MouvementFilter = {};
-  
+
   // Article search filter
   articleSearchFilter = '';
   selectedArticles: any[] = [];
   selectedMagasin: number | null = null;
-  
+
   // Pagination
   currentPage = 1;
   itemsPerPage = 10;
   totalItems = 0;
-  
+
   // Math object for template
   Math = Math;
-  
+
   // Type options
   typeOptions = [
     { value: 'ENTREE', label: 'Entrées' },
-    { value: 'SORTIE', label: 'Sorties' }
+    { value: 'SORTIE', label: 'Sorties' },
   ];
-  
+
   statutOptions = [
     { value: 'EN_COURS', label: 'En cours' },
     { value: 'TERMINE', label: 'Terminé' },
-    { value: 'ANNULE', label: 'Annulé' }
+    { value: 'ANNULE', label: 'Annulé' },
   ];
 
   constructor(
     private fb: FormBuilder,
     private mouvementService: MouvementService,
     private magasinService: MagasinService,
-    private articleService: ArticleService
+    private articleService: ArticleService,
   ) {
     this.initForms();
   }
@@ -107,13 +106,13 @@ export class MouvementComponent implements OnInit {
       magasinSourceId: [null, Validators.required],
       magasinDestinationId: [null],
       observations: [''],
-      lignes: [[]]
+      lignes: [[]],
     });
 
     this.ligneForm = this.fb.group({
       articleId: ['', Validators.required],
       quantite: [1, [Validators.required, Validators.min(1)]],
-      prixUnitaire: [0, [Validators.required, Validators.min(0)]]
+      prixUnitaire: [0, [Validators.required, Validators.min(0)]],
     });
 
     this.filterForm = this.fb.group({
@@ -122,7 +121,7 @@ export class MouvementComponent implements OnInit {
       libelle: [''],
       typeMouvement: [[]],
       magasinSource: [''],
-      typeCommande: ['']
+      typeCommande: [''],
     });
   }
 
@@ -138,7 +137,7 @@ export class MouvementComponent implements OnInit {
         console.error('Erreur lors du chargement des mouvements:', error);
         // Données de test
         this.loadMockData();
-      }
+      },
     });
 
     // Charger les magasins
@@ -148,7 +147,7 @@ export class MouvementComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur lors du chargement des magasins:', error);
-      }
+      },
     });
 
     // Charger les articles
@@ -158,12 +157,12 @@ export class MouvementComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Erreur lors du chargement des articles:', error);
-      }
+      },
     });
   }
 
   loadMockData(): void {
-    this.mouvements = [
+    /* this.mouvements = [
       {
         idMouvement: 1,
         libelle: 'Mvt-2025-00001',
@@ -310,9 +309,18 @@ export class MouvementComponent implements OnInit {
         utilisateur: 'user2'
       },
       
-    ];
-    this.filteredMouvements = [...this.mouvements];
-    this.totalItems = this.filteredMouvements.length;
+    ];*/
+    this.mouvementService.getAll().subscribe({
+      next: (value: any) => {
+        console.log(value)
+        this.mouvements = value;
+        this.filteredMouvements = [...this.mouvements];
+        this.totalItems = this.filteredMouvements.length;
+      },
+      error: (err) => {
+        // Optionally handle error here
+      },
+    });
   }
 
   // Filter methods
@@ -320,22 +328,28 @@ export class MouvementComponent implements OnInit {
     const filterValues = this.filterForm.value;
     this.filters = {
       libelle: filterValues.libelle || undefined,
-      typeMouvement: filterValues.typeMouvement && filterValues.typeMouvement.length ? filterValues.typeMouvement : undefined,
+      typeMouvement:
+        filterValues.typeMouvement && filterValues.typeMouvement.length ? filterValues.typeMouvement : undefined,
       dateDebut: filterValues.dateDebut || undefined,
       dateFin: filterValues.dateFin || undefined,
       magasinSource: filterValues.magasinSource || undefined,
-      typeCommande: filterValues.typeCommande || undefined
+      typeCommande: filterValues.typeCommande || undefined,
     };
 
-    this.filteredMouvements = this.mouvements.filter(mouvement => {
+    this.filteredMouvements = this.mouvements.filter((mouvement) => {
       let match = true;
 
       if (this.filters.libelle && !mouvement.libelle.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
         match = false;
       }
 
-      if (this.filters.typeMouvement && Array.isArray(this.filters.typeMouvement) && this.filters.typeMouvement.length > 0) {
-        const type = (mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT') ? 'ENTREE' : 'SORTIE';
+      if (
+        this.filters.typeMouvement &&
+        Array.isArray(this.filters.typeMouvement) &&
+        this.filters.typeMouvement.length > 0
+      ) {
+        const type =
+          mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT' ? 'ENTREE' : 'SORTIE';
         if (!this.filters.typeMouvement.includes(type)) {
           match = false;
         }
@@ -392,7 +406,7 @@ export class MouvementComponent implements OnInit {
     this.mouvementForm.reset({
       typeMouvement: 'POINTAGE',
       dateMouvement: new Date().toISOString().substring(0, 10),
-      lignes: []
+      lignes: [],
     });
     this.createPopUp = true;
   }
@@ -401,7 +415,7 @@ export class MouvementComponent implements OnInit {
     this.isEditing = true;
     this.selectedMouvement = mouvement;
     this.selectedId = mouvement.idMouvement;
-    
+
     this.mouvementForm.patchValue({
       libelle: mouvement.libelle,
       commandeLibelle: mouvement.commandeLibelle,
@@ -410,9 +424,9 @@ export class MouvementComponent implements OnInit {
       magasinSourceId: mouvement.magasinSourceId,
       magasinDestinationId: mouvement.magasinDestinationId,
       observations: mouvement.observations,
-      lignes: mouvement.lignes || []
+      lignes: mouvement.lignes || [],
     });
-    
+
     this.createPopUp = true;
   }
 
@@ -442,21 +456,23 @@ export class MouvementComponent implements OnInit {
   saveMouvement(): void {
     if (this.mouvementForm.valid) {
       const formData = this.mouvementForm.value;
-      
+
       const mouvementData: Mouvement = {
         ...formData,
-        idMouvement: this.isEditing ? this.selectedId! : Math.max(...this.mouvements.map(m => m.idMouvement), 0) + 1,
+        idMouvement: this.isEditing ? this.selectedId! : Math.max(...this.mouvements.map((m) => m.idMouvement), 0) + 1,
         dateCreation: new Date().toISOString(),
         statut: 'EN_COURS',
         montantTotal: this.calculateTotal(formData.lignes || []),
         utilisateur: 'admin',
         magasinSource: this.getMagasinName(formData.magasinSourceId),
-        magasinDestination: formData.magasinDestinationId ? this.getMagasinName(formData.magasinDestinationId) : undefined
+        magasinDestination: formData.magasinDestinationId
+          ? this.getMagasinName(formData.magasinDestinationId)
+          : undefined,
       };
 
       if (this.isEditing) {
         // Update existing mouvement
-        const index = this.mouvements.findIndex(m => m.idMouvement === this.selectedId);
+        const index = this.mouvements.findIndex((m) => m.idMouvement === this.selectedId);
         if (index !== -1) {
           this.mouvements[index] = { ...this.mouvements[index], ...mouvementData };
         }
@@ -464,7 +480,7 @@ export class MouvementComponent implements OnInit {
         // Add new mouvement
         this.mouvements.unshift(mouvementData);
       }
-      
+
       this.filteredMouvements = [...this.mouvements];
       this.totalItems = this.mouvements.length;
       this.closeModal();
@@ -473,7 +489,7 @@ export class MouvementComponent implements OnInit {
 
   deleteMouvement(): void {
     if (this.selectedId) {
-      this.mouvements = this.mouvements.filter(m => m.idMouvement !== this.selectedId);
+      this.mouvements = this.mouvements.filter((m) => m.idMouvement !== this.selectedId);
       this.filteredMouvements = [...this.mouvements];
       this.totalItems = this.mouvements.length;
       this.closeModal();
@@ -484,8 +500,8 @@ export class MouvementComponent implements OnInit {
   addLigne(): void {
     if (this.ligneForm.valid) {
       const ligneData = this.ligneForm.value;
-      const article = this.articles.find(a => a.idArticle === ligneData.articleId);
-      
+      const article = this.articles.find((a) => a.idArticle === ligneData.articleId);
+
       if (article) {
         const newLigne: MouvementLigne = {
           idLigne: Math.max(...(this.mouvementForm.get('lignes')?.value || []).map((l: any) => l.idLigne), 0) + 1,
@@ -495,16 +511,16 @@ export class MouvementComponent implements OnInit {
           descriptionArticle: article.description,
           quantite: ligneData.quantite,
           prixUnitaire: ligneData.prixUnitaire,
-          montantLigne: ligneData.quantite * ligneData.prixUnitaire
+          montantLigne: ligneData.quantite * ligneData.prixUnitaire,
         };
 
         const lignes = this.mouvementForm.get('lignes')?.value || [];
         lignes.push(newLigne);
         this.mouvementForm.patchValue({ lignes });
-        
+
         this.ligneForm.reset({
           quantite: 1,
-          prixUnitaire: 0
+          prixUnitaire: 0,
         });
       }
     }
@@ -519,13 +535,13 @@ export class MouvementComponent implements OnInit {
   editLigne(index: number): void {
     const lignes = this.mouvementForm.get('lignes')?.value || [];
     const ligne = lignes[index];
-    
+
     this.ligneForm.patchValue({
       articleId: ligne.articleId,
       quantite: ligne.quantite,
-      prixUnitaire: ligne.prixUnitaire
+      prixUnitaire: ligne.prixUnitaire,
     });
-    
+
     this.currentLigneIndex = index;
     this.showLigneForm = true;
   }
@@ -533,8 +549,8 @@ export class MouvementComponent implements OnInit {
   updateLigne(): void {
     if (this.ligneForm.valid && this.currentLigneIndex !== null) {
       const ligneData = this.ligneForm.value;
-      const article = this.articles.find(a => a.idArticle === ligneData.articleId);
-      
+      const article = this.articles.find((a) => a.idArticle === ligneData.articleId);
+
       if (article) {
         const lignes = this.mouvementForm.get('lignes')?.value || [];
         lignes[this.currentLigneIndex] = {
@@ -545,15 +561,15 @@ export class MouvementComponent implements OnInit {
           descriptionArticle: article.description,
           quantite: ligneData.quantite,
           prixUnitaire: ligneData.prixUnitaire,
-          montantLigne: ligneData.quantite * ligneData.prixUnitaire
+          montantLigne: ligneData.quantite * ligneData.prixUnitaire,
         };
-        
+
         this.mouvementForm.patchValue({ lignes });
         this.showLigneForm = false;
         this.currentLigneIndex = null;
         this.ligneForm.reset({
           quantite: 1,
-          prixUnitaire: 0
+          prixUnitaire: 0,
         });
       }
     }
@@ -565,26 +581,30 @@ export class MouvementComponent implements OnInit {
   }
 
   getMagasinName(magasinId: number): string {
-    const magasin = this.magasins.find(m => m.idMagasin === magasinId);
+    const magasin = this.magasins.find((m) => m.idMagasin === magasinId);
     return magasin ? magasin.nomMagasin : '';
   }
 
   getTypeLabel(type: string): string {
-    const option = this.typeOptions.find(opt => opt.value === type);
+    const option = this.typeOptions.find((opt) => opt.value === type);
     return option ? option.label : type;
   }
 
   getStatutLabel(statut: string): string {
-    const option = this.statutOptions.find(opt => opt.value === statut);
+    const option = this.statutOptions.find((opt) => opt.value === statut);
     return option ? option.label : statut;
   }
 
   getStatutClass(statut: string): string {
     switch (statut) {
-      case 'EN_COURS': return 'bg-yellow-100 text-yellow-800';
-      case 'TERMINE': return 'bg-green-100 text-green-800';
-      case 'ANNULE': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'EN_COURS':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'TERMINE':
+        return 'bg-green-100 text-green-800';
+      case 'ANNULE':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   }
 
@@ -600,7 +620,7 @@ export class MouvementComponent implements OnInit {
   onTypeChange(): void {
     const type = this.mouvementForm.get('typeMouvement')?.value;
     this.selectedTypeMouvement = type;
-    
+
     // Reset destination magasin for non-transfert types
     if (type !== 'TRANSFERT') {
       this.mouvementForm.patchValue({ magasinDestinationId: null });
@@ -610,7 +630,7 @@ export class MouvementComponent implements OnInit {
   // Type filter change handler
   onTypeFilterChange(event: any, type: string): void {
     const currentTypes = this.filterForm.get('typeMouvement')?.value || [];
-    
+
     if (event.target.checked) {
       if (!currentTypes.includes(type)) {
         currentTypes.push(type);
@@ -621,7 +641,7 @@ export class MouvementComponent implements OnInit {
         currentTypes.splice(index, 1);
       }
     }
-    
+
     this.filterForm.patchValue({ typeMouvement: currentTypes });
   }
 }

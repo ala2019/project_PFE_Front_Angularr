@@ -7,6 +7,7 @@ import { MagasinService } from 'src/app/core/services/magasin.service';
 import { MouvementService } from 'src/app/core/services/mouvement.service';
 import { Mouvement } from 'src/app/core/models/mouvement.model';
 import { PersonneService } from 'src/app/core/services/personne.service';
+import { ArticleService } from 'src/app/core/services/article.service';
 
 @Component({
   selector: 'app-cmdachat',
@@ -79,6 +80,7 @@ export class CmdAchatComponent implements OnInit {
     private magasinService: MagasinService,
     private mouvementService: MouvementService,
     private personneService: PersonneService,
+    private articleService: ArticleService,
   ) {
     this.initForms();
   }
@@ -144,11 +146,12 @@ export class CmdAchatComponent implements OnInit {
   }
 
   loadArticles(): void {
-    this.articles = [
-      { idArticle: 1, code: 'ART001', reference: 'REF001', description: 'Ordinateur portable', prix: 1200.0 },
-      { idArticle: 2, code: 'ART002', reference: 'REF002', description: 'Écran 24"', prix: 300.0 },
-      { idArticle: 3, code: 'ART003', reference: 'REF003', description: 'Bureau ergonomique', prix: 450.0 },
-    ];
+    this.articleService.getArticles().subscribe({
+      next: (response: any) => {
+        this.articles = response;
+      },
+      error: (err) => {},
+    });
   }
 
   loadMagasins(): void {
@@ -275,7 +278,7 @@ export class CmdAchatComponent implements OnInit {
             statut: formData.statut,
             detailCmds: formData.lignes.map((item: any) => ({
               idDetailCmd: item.idDetailCmd,
-              article: { idArticle: 1 },
+              article: { idArticle: item.article?.idArticle },
               quantite: item.quantite,
               prix: item.prixUnitaire,
               sousTotal: item.sousTotal,
@@ -295,7 +298,6 @@ export class CmdAchatComponent implements OnInit {
         }
       } else {
         // Add new commande
-
         const newCommande = {
           dateCmd: formData.dateCommande,
           dateLivraison: formData.datePrevue,
@@ -303,7 +305,7 @@ export class CmdAchatComponent implements OnInit {
           type: 'ACHAT',
           statut: formData.statut,
           detailCmds: formData.lignes.map((item: any) => ({
-            article: { idArticle: 1 },
+            article: { idArticle: item.id_article },
             quantite: item.quantite,
             prix: item.prixUnitaire,
             sousTotal: item.sousTotal,
@@ -350,6 +352,7 @@ export class CmdAchatComponent implements OnInit {
             quantite: item.quantite,
             prixUnitaire: item.prix,
             sousTotal: item.sousTotal,
+            article: item.article,
           }),
         );
       });
@@ -473,21 +476,23 @@ export class CmdAchatComponent implements OnInit {
     if (!this.selectedCommande) return;
 
     this.mouvementForm.reset({
-      libelle: `Pointage pour commande ${this.selectedCommande.libelle}`,
+      libelle: `Pointage pour commande ${this.selectedCommande.libCmd}`,
       dateMouvement: new Date().toISOString().substring(0, 10),
       magasinId: '',
     });
 
     const lignesFormArray = this.mouvementForm.get('lignes') as FormArray;
     lignesFormArray.clear();
+    console.log(this.selectedCommande);
 
-    this.selectedCommande.lignes.forEach((ligne: any) => {
+    this.selectedCommande?.detailCmds.forEach((ligne: any) => {
       lignesFormArray.push(
         this.fb.group({
-          articleId: [ligne.idArticle], // Assurez-vous que l'ID de l'article est disponible dans la ligne de commande
-          codeArticle: [ligne.code],
-          referenceArticle: [ligne.reference],
-          descriptionArticle: [ligne.description],
+          detailCmd: [{ idDetailCmd: ligne.idDetailCmd }],
+          articleId: [ligne.article?.idArticle], // Assurez-vous que l'ID de l'article est disponible dans la ligne de commande
+          codeArticle: [ligne.article?.code],
+          referenceArticle: [ligne.article?.reference],
+          descriptionArticle: [ligne.article?.description],
           quantite: [ligne.quantite, [Validators.required, Validators.min(0)]],
           prixUnitaire: [ligne.prixUnitaire],
         }),
@@ -503,16 +508,12 @@ export class CmdAchatComponent implements OnInit {
     }
 
     const formValue = this.mouvementForm.value;
-    const newMouvement: Mouvement = {
-      idMouvement: 0, // Le backend devrait générer l'ID
-      libelle: formValue.libelle,
-      typeMouvement: 'POINTAGE',
-      dateCreation: new Date().toISOString(),
-      dateMouvement: new Date(formValue.dateMouvement).toISOString(),
+    const newMouvement: any = {
+      signe: '+',
+      dateMvt: new Date(formValue.dateMouvement).toISOString(),
       magasinDestinationId: formValue.magasinId,
       commandeId: this.selectedCommande.idCmd,
-      commandeLibelle: this.selectedCommande.libelle,
-      statut: 'EN_COURS',
+      magasin: { idMagasin: formValue.magasinId },
       lignes: formValue.lignes.map((ligne: any) => ({
         ...ligne,
         montantLigne: ligne.quantite * ligne.prixUnitaire,
@@ -523,6 +524,15 @@ export class CmdAchatComponent implements OnInit {
       ),
       utilisateur: 'current_user', // À remplacer par l'utilisateur connecté
     };
+
+    newMouvement.lignes.map((item: any) => {
+      this.commandeService.pointerReception(item?.detailCmd?.idDetailCmd, formValue.magasinId, item).subscribe({
+        next(value) {
+          console.log(value);
+        },
+        error(err) {},
+      });
+    });
 
     console.log('Saving mouvement:', newMouvement);
 
@@ -575,6 +585,12 @@ export class CmdAchatComponent implements OnInit {
     return this.selectedArticle ? this.selectedArticle.idArticle === article.idArticle : false;
   }
 
+  get getDevise() {
+    const forniseur = this.fournisseurs.find((f) => f.idPersonne == this.commandeForm.get('fournisseurId')?.value);
+    if (forniseur) return forniseur?.devise?.devise ?? 'N/A';
+    return 'N/A';
+  }
+
   addSelectedArticle(): void {
     if (this.selectedArticle) {
       const article = this.selectedArticle;
@@ -582,9 +598,10 @@ export class CmdAchatComponent implements OnInit {
         code: article.code,
         reference: article.reference,
         description: article.description,
-        prixUnitaire: article.prix,
+        prixUnitaire: 0,
         quantite: 1,
-        sousTotal: article.prix,
+        sousTotal: 0,
+        id_article: article.idArticle,
       };
       this.commandeLignes.push(this.fb.group(newLine));
       this.updateTotal();
