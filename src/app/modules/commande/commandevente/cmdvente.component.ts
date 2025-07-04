@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommandeService } from 'src/app/core/services/commande.service';
 import { PopupComponent } from '../../shared/popup/popup.component';
+import { FournisseurClientService } from 'src/app/core/services/fourisseur-client.service';
+import { MagasinService } from 'src/app/core/services/magasin.service';
 
 @Component({
   selector: 'app-cmdvente',
@@ -26,6 +28,7 @@ export class CmdventetComponent implements OnInit {
   // Data arrays
   commandes: any[] = [];
   filteredCommandes: any[] = [];
+  allCommandes: any[] = [];
   clients: any[] = [];
   magasins: any[] = [];
   articles: any[] = [];
@@ -73,13 +76,15 @@ export class CmdventetComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder, 
-    private service: CommandeService
+    private service: CommandeService,
+    private fournisseurClientService: FournisseurClientService,
+    private magasinService: MagasinService
   ) {
     this.initForms();
   }
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadCommandes();
   }
 
   initForms(): void {
@@ -109,96 +114,27 @@ export class CmdventetComponent implements OnInit {
     });
   }
 
-  loadData(): void {
-    // Mock data - replace with actual service calls
-    this.commandes = [
-      {
-        idCmd: 1,
-        libelle: 'Cmd-vente-2025/00001',
-        dateCommande: '2025-06-19',
-        dateLivraison: '2024-01-25',
-        client: 'Société XYZ',
-        clientId: 2,
-        magasin: 'Magasin Sahloul',
-        tauxTva: 19,
-        montantHt: 12000.00,
-        montantTva: 2280.00,
-        montantTtc: 14280.00,
-        lignes: [
-          {
-            code: 'ART001',
-            reference: 'REF001',
-            description: 'Ordinateur portable',
-            prixUnitaire: 1200.00,
-            quantite: 8,
-            sousTotal: 9600.00
-          },
-          {
-            code: 'ART002',
-            reference: 'REF002',
-            description: 'Écran 24"',
-            prixUnitaire: 300.00,
-            quantite: 8,
-            sousTotal: 2400.00
-          }
-        ]
+  loadCommandes(): void {
+    this.service.getAll().subscribe({
+      next: (data) => {
+        data = (data || []).filter((commande: any) => commande.type === 'VENTE');
+        this.allCommandes = data;
+        this.commandes = data;
+        this.filteredCommandes = [...data];
+        this.totalItems = data.length;
       },
-      {
-        idCmd: 2,
-        libelle: 'Cmd-vente-2025/00002',
-        dateCommande: '2025-06-22',
-        dateLivraison: '2024-01-20',
-        client: 'Société XYZ',
-        clientId: 2,
-        magasin: 'Magasin Sahloul',
-        tauxTva: 7,
-        montantHt: 8500.00,
-        montantTva: 595.00,
-        montantTtc: 9095.00,
-        lignes: [
-          {
-            code: 'ART003',
-            reference: 'REF003',
-            description: 'Bureau ergonomique',
-            prixUnitaire: 450.00,
-            quantite: 15,
-            sousTotal: 6750.00
-          },
-          {
-            code: 'ART004',
-            reference: 'REF004',
-            description: 'Chaise de bureau',
-            prixUnitaire: 175.00,
-            quantite: 10,
-            sousTotal: 1750.00
-          }
-        ]
+      error: (error) => {
+        console.error('Erreur lors du chargement des commandes de vente:', error);
       },
-     
-      
-    ];
-
-    // Initialiser le total des commandes
-    this.totalItems = this.commandes.length;
-    
-    // Initialiser les commandes filtrées
-    this.filteredCommandes = [...this.commandes];
-
-    this.clients = [
-      { idClient: 1, nom: 'Entreprise ABC', tauxTva: 19 },
-      { idClient: 2, nom: 'Société XYZ', tauxTva: 7 },
-      { idClient: 3, nom: 'Startup Innov', tauxTva: 19 },
-      { idClient: 4, nom: 'PME Tech', tauxTva: 7 },
-      { idClient: 5, nom: 'Corporation Plus', tauxTva: 19 }
-    ];
-
-    this.magasins = [
-      { idMagasin: 1, nom: 'Magasin 1' },
-      { idMagasin: 2, nom: 'Magasin 2' },
-      { idMagasin: 3, nom: 'Magasin 3' },
-      { idMagasin: 4, nom: 'Magasin 4' },
-      { idMagasin: 5, nom: 'Magasin 5' }
-    ];
+    });
+    // Charger dynamiquement les clients
+    this.fournisseurClientService.getAll().subscribe((data: any[]) => {
+      this.clients = (data || []).filter((p: any) => p.type === 'CLIENT');
+    });
+    // Charger dynamiquement les magasins
+    this.magasinService.getAll().subscribe((data: any[]) => {
+      this.magasins = data || [];
+    });
 
     this.articles = [
       { idArticle: 1, code: 'ART001', reference: 'REF001', description: 'Ordinateur portable', prix: 1200.00 }, // prix de vente
@@ -1036,5 +972,51 @@ export class CmdventetComponent implements OnInit {
     }
     
     return pages;
+  }
+
+  // Ajout des méthodes utilitaires pour affichage dynamique
+  getClientName(clientId: any): string {
+    if (!clientId) return '';
+    // Si c'est déjà un nom (string sans chiffre), retourne directement
+    if (typeof clientId === 'string' && isNaN(Number(clientId))) return clientId;
+    // Recherche par idPersonne ou idClient
+    const client = this.clients.find(c => c.idPersonne === clientId || c.idClient === clientId);
+    return client ? (client.nomPersonne || client.nom) : clientId;
+  }
+
+  getMagasinName(magasinId: any): string {
+    if (!magasinId) return '';
+    // Si c'est déjà un nom (string sans chiffre), retourne directement
+    if (typeof magasinId === 'string' && isNaN(Number(magasinId))) return magasinId;
+    // Recherche par idMagasin
+    const magasin = this.magasins.find(m => m.idMagasin === magasinId || m.nomMagasin === magasinId);
+    return magasin ? (magasin.nomMagasin || magasin.nom) : magasinId;
+  }
+
+  getClientDevise(clientId: any): string {
+    if (!clientId) return '';
+    // Recherche par idPersonne ou idClient
+    const client = this.clients.find(c => c.idPersonne === clientId || c.idClient === clientId);
+    if (!client) return '-';
+    if (client.devise) {
+      if (typeof client.devise === 'object' && client.devise !== null) {
+        return client.devise.code || client.devise.nom || client.devise.libelle || '-';
+      }
+      return client.devise;
+    }
+    return '-';
+  }
+
+  // Affichage de la devise du client sélectionné dans le formulaire (popup)
+  get getDevise(): string {
+    const clientId = this.commandeForm.get('clientId')?.value;
+    const client = this.clients.find(c => c.idPersonne == clientId || c.idClient == clientId);
+    if (client && client.devise) {
+      if (typeof client.devise === 'object' && client.devise !== null) {
+        return client.devise.code || client.devise.nom || client.devise.libelle || 'N/A';
+      }
+      return client.devise;
+    }
+    return 'N/A';
   }
 }

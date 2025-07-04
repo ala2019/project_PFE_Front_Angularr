@@ -32,7 +32,9 @@
       </label>
       <select [(ngModel)]="filters.client">
         <option value="">Tous les clients</option>
-        <option *ngFor="let client of clients" [value]="client.nom">{{ client.nom }}</option>
+        <option *ngFor="let client of clients" [value]="client.idPersonne">
+          {{ client.nomPersonne }}
+        </option>
       </select>
     </div>
     
@@ -45,7 +47,9 @@
       </label>
       <select [(ngModel)]="filters.magasin">
         <option value="">Tous les magasins</option>
-        <option *ngFor="let magasin of magasins" [value]="magasin.nom">{{ magasin.nom }}</option>
+        <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
+          {{ magasin.nom || magasin.nomMagasin }}
+        </option>
       </select>
     </div>
     
@@ -171,7 +175,9 @@
           <th class="px-6 py-3">Libellé</th>
           <th class="px-6 py-3">Date commande</th>
           <th class="px-6 py-3">Client</th>
+          <th class="px-6 py-3">Devise</th>
           <th class="px-6 py-3">Magasin</th>
+          <th class="px-6 py-3">Mode de paiement</th>
           <th class="px-6 py-3">Montant TTC</th>
         </tr>
       </thead>
@@ -189,11 +195,13 @@
               (change)="toggleCommandeSelection(commande)"
               class="rounded border-gray-300 text-green-500 focus:ring-green-500">
           </td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.libelle }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.client }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.magasin }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.libelle || commande.libCmd }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.dateCommande || commande.dateCmd | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{commande.personne?.nomPersonne }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{commande?.personne?.devise?.devise }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande?.magasin?.nomMagasin }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.modePaiement || '-' }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.montantTtc || commande.montantTotal }}</td>
         </tr>
         } @empty {
         <tr>
@@ -290,7 +298,7 @@
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
             <option value="">Sélectionner un client</option>
             <option *ngFor="let client of clients" [value]="client.idClient">
-              {{ client.nom }} (TVA: {{ client.tauxTva }}%)
+              {{ client.nomPersonne }} 
             </option>
           </select>
         </div>
@@ -303,8 +311,8 @@
             formControlName="magasinId"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
             <option value="">Sélectionner un magasin</option>
-            <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
-              {{ magasin.nom }}
+            <option *ngFor="let magasin of magasins" [value]="magasin.nomMagasin">
+              {{ magasin.nomMagasin }}
             </option>
           </select>
         </div>
@@ -530,6 +538,10 @@
         <div>
           <label class="block text-sm font-medium text-gray-700">Client</label>
           <p class="text-sm text-gray-900">{{ selectedCommande?.client }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Devise</label>
+          <p class="text-sm text-gray-900">{{ getClientDevise(selectedCommande?.clientId || selectedCommande?.client || selectedCommande?.idClient) }}</p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Magasin</label>

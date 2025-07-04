@@ -5,14 +5,14 @@ import { Mouvement, MouvementFilter } from '../models/mouvement.model';
 
 @Injectable({ providedIn: 'root' })
 export class MouvementService {
-  private baseUrl = 'http://localhost:8081/api/mouvements';
+  private apiUrl = 'http://localhost:8081/api/mvt'; 
 
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Mouvement[]> {
-    return this.http.get<Mouvement[]>(this.baseUrl);
+    return this.http.get<any[]>(`${this.apiUrl}/all`);
   }
-
+/*
   getById(id: number): Observable<Mouvement> {
     return this.http.get<Mouvement>(`${this.baseUrl}/${id}`);
   }
@@ -41,10 +41,10 @@ export class MouvementService {
   createTransfert(mouvement: Mouvement): Observable<Mouvement> {
     return this.http.post<Mouvement>(`${this.baseUrl}/transfert`, mouvement);
   }
-
+*/
   // Générer les mouvements automatiquement depuis les commandes
   generateFromCommande(commandeId: number, typeCommande: 'VENTE' | 'TRANSFERT'): Observable<Mouvement[]> {
-    return this.http.post<Mouvement[]>(`${this.baseUrl}/generate-from-commande`, {
+    return this.http.post<Mouvement[]>(`${this.apiUrl}/generate-from-commande`, {
       commandeId,
       typeCommande
     });
