@@ -1,59 +1,94 @@
 <!-- Header -->
-<div class="bg-white p-6 rounded-lg shadow-sm border mb-6">
-  <div class="flex justify-between items-center mb-4">
+<div class="mb-6 rounded-lg border bg-white p-6 shadow-sm">
+  <div class="mb-4 flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">État de Stock</h1>
     </div>
   </div>
 
   <!-- Filters Section -->
-  <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="space-y-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- Magasin Filter (Obligatoire selon droits utilisateur) -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Magasin <span class="text-red-500">*</span>
+  <div class="space-y-4">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <!-- Magasin Filter -->
+      <div class="filter-item">
+        <label>
+          <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          Magasin
         </label>
-        <select 
-          formControlName="magasinId"
+        <select
+          [(ngModel)]="filters.magasin"
           (change)="onMagasinChange()"
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+          [disabled]="isLoadingMagasins"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100">
+          @if (isLoadingMagasins) {
+          <option>Chargement des magasins...</option>
+          } @else {
           <option value="">Sélectionner un magasin</option>
-          <option *ngFor="let magasin of getAvailableMagasins()" [value]="magasin.idMagasin">
-            {{ magasin.nom }} ({{ magasin.code }})
+          <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
+            {{ magasin.nom || magasin.nomMagasin }}
           </option>
+          }
         </select>
-        @if (!selectedMagasin) {
-        <p class="text-xs text-red-600 mt-1">Veuillez sélectionner un magasin pour voir les stocks</p>
-        }
       </div>
 
       <!-- Devise Filter -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Devise</label>
-        <select 
-          formControlName="devise"
+      <div class="filter-item">
+        <label>
+          <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+          </svg>
+          Devise
+        </label>
+        <select
+          [(ngModel)]="filters.devise"
           (change)="onDeviseChange()"
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
-          <option *ngFor="let devise of devises" [value]="devise.code">
+          [disabled]="isLoadingDevises"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-gray-100">
+          @if (isLoadingDevises) {
+          <option>Chargement des devises...</option>
+          } @else {
+          <option *ngFor="let devise of devises" [value]="devise.idDevise">
             {{ devise.nom }} ({{ devise.symbole }})
           </option>
+          }
         </select>
       </div>
 
       <!-- Search Filter -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Rechercher</label>
+      <div class="filter-item">
+        <label>
+          <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          Rechercher
+        </label>
         <div class="relative">
-          <input 
+          <input
             type="text"
-            formControlName="searchTerm"
-            [(ngModel)]="searchTerm"
+            [(ngModel)]="filters.searchTerm"
             placeholder="Code, référence ou description..."
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 pl-10 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 pl-10 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
         </div>
@@ -61,81 +96,129 @@
 
       <!-- Filter Actions -->
       <div class="flex items-end gap-2">
-        <button 
+        <button
+          (click)="applyFilters()"
           type="submit"
-          class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
-          🔍 Appliquer
+          [disabled]="isLoading"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+          @if (isLoading) {
+          <span class="-ml-1 mr-2 inline-block h-4 w-4 animate-spin text-white">⏳</span>
+          Recherche... } @else { 🔍 Appliquer }
         </button>
-        <button 
+        <button
           type="button"
           (click)="clearFilters()"
-          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+          [disabled]="isLoading"
+          class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
           🗑️ Effacer
         </button>
       </div>
     </div>
-  </form>
+  </div>
 </div>
 
 <!-- Summary Cards -->
 @if (selectedMagasin) {
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-  <div class="bg-white p-6 rounded-lg shadow-sm border">
+<div class="mb-6 grid grid-cols-1 gap-6 md:grid-cols-4">
+  <div class="rounded-lg border bg-white p-6 shadow-sm">
     <div class="flex items-center">
-      <div class="p-2 bg-blue-100 rounded-lg">
-        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+      <div class="rounded-lg bg-blue-100 p-2">
+        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
         </svg>
       </div>
       <div class="ml-4">
         <p class="text-sm font-medium text-gray-600">Articles en stock</p>
-        <p class="text-2xl font-bold text-gray-900">{{ totalItems }}</p>
+        <p class="text-2xl font-bold text-gray-900">
+          @if (isLoading) {
+          <span class="inline-block h-6 w-6 animate-spin text-gray-400">⏳</span>
+          } @else {
+          {{ totalItems }}
+          }
+        </p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white p-6 rounded-lg shadow-sm border">
+  <div class="rounded-lg border bg-white p-6 shadow-sm">
     <div class="flex items-center">
-      <div class="p-2 bg-green-100 rounded-lg">
-        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <div class="rounded-lg bg-green-100 p-2">
+        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
       </div>
       <div class="ml-4">
         <p class="text-sm font-medium text-gray-600">Quantité totale</p>
-        <p class="text-2xl font-bold text-gray-900">{{ getTotalStockQuantity() }}</p>
+        <p class="text-2xl font-bold text-gray-900">
+          @if (isLoading) {
+          <span class="inline-block h-6 w-6 animate-spin text-gray-400">⏳</span>
+          } @else {
+          {{ getTotalStockQuantity() }}
+          }
+        </p>
       </div>
     </div>
   </div>
 
-  <div class="bg-white p-6 rounded-lg shadow-sm border">
+  <div class="rounded-lg border bg-white p-6 shadow-sm">
     <div class="flex items-center">
-      <div class="p-2 bg-purple-100 rounded-lg">
-        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+      <div class="rounded-lg bg-purple-100 p-2">
+        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
         </svg>
       </div>
       <div class="ml-4">
         <p class="text-sm font-medium text-gray-600">Valeur totale</p>
         <p class="text-2xl font-bold text-gray-900">
-          {{ getTotalStockValue() | currency:selectedDevise:'symbol':'1.2-2' }}
+          @if (isLoading) {
+          <span class="inline-block h-6 w-6 animate-spin text-gray-400">⏳</span>
+          } @else {
+          {{ getTotalStockValue() }} {{ getSelectedDeviseName }}
+          }
         </p>
       </div>
     </div>
   </div>
 
   <!-- Nouvelle carte d'alerte pour les ruptures de stock -->
-  <div class="bg-white p-6 rounded-lg shadow-sm border" [class]="getAlertCount() > 0 ? 'border-red-200 bg-red-50' : ''">
+  <div class="rounded-lg border bg-white p-6 shadow-sm" [class]="getAlertCount() > 0 ? 'border-red-200 bg-red-50' : ''">
     <div class="flex items-center">
       <div class="p-2" [class]="getAlertCount() > 0 ? 'bg-red-100' : 'bg-gray-100'">
-        <svg class="w-6 h-6" [class]="getAlertCount() > 0 ? 'text-red-600' : 'text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        <svg
+          class="h-6 w-6"
+          [class]="getAlertCount() > 0 ? 'text-red-600' : 'text-gray-600'"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
         </svg>
       </div>
       <div class="ml-4">
-        <p class="text-sm font-medium" [class]="getAlertCount() > 0 ? 'text-red-600' : 'text-gray-600'">Alertes stock</p>
+        <p class="text-sm font-medium" [class]="getAlertCount() > 0 ? 'text-red-600' : 'text-gray-600'">
+          Alertes stock
+        </p>
         <p class="text-2xl font-bold" [class]="getAlertCount() > 0 ? 'text-red-900' : 'text-gray-900'">
+          @if (isLoading) {
+          <span class="inline-block h-6 w-6 animate-spin text-gray-400">⏳</span>
+          } @else {
           {{ getAlertCount() }}
+          }
         </p>
       </div>
     </div>
@@ -144,13 +227,12 @@
 }
 
 <!-- Stock Table -->
-<div class="bg-white rounded-lg shadow-sm border">
-  <div class="px-6 py-4 border-b border-gray-200">
+<div class="rounded-lg border bg-white shadow-sm">
+  <div class="border-b border-gray-200 px-6 py-4">
     <h2 class="text-lg font-semibold text-gray-800">
-      Détail des stocks
-      @if (selectedMagasin) {
+      Détail des stocks @if (selectedMagasin) {
       <span class="text-sm font-normal text-gray-600">
-        - <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-medium">{{ getSelectedMagasinName() }}</span>
+        - <span class="rounded-full bg-blue-100 px-3 py-1 font-medium text-blue-800">{{ getSelectedMagasinName }}</span>
       </span>
       }
     </h2>
@@ -160,16 +242,33 @@
   <!-- No magasin selected -->
   <div class="p-8 text-center">
     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
     </svg>
     <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun magasin sélectionné</h3>
     <p class="mt-1 text-sm text-gray-500">Veuillez sélectionner un magasin pour voir les stocks disponibles.</p>
+  </div>
+  } @else if (isLoading || isLoadingArticles) {
+  <!-- Loading state -->
+  <div class="p-8 text-center">
+    <span class="mx-auto inline-block h-12 w-12 animate-spin text-4xl text-blue-600">⏳</span>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">
+      @if (isLoadingArticles) { Chargement des articles... } @else { Chargement des données de stock... }
+    </h3>
+    <p class="mt-1 text-sm text-gray-500">Veuillez patienter pendant que nous récupérons les informations.</p>
   </div>
   } @else if (filteredArticles.length === 0) {
   <!-- No results -->
   <div class="p-8 text-center">
     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
     </svg>
     <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun article trouvé</h3>
     <p class="mt-1 text-sm text-gray-500">Aucun article ne correspond aux critères de recherche.</p>
@@ -180,56 +279,62 @@
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix </th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Min</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité disponible</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valeur stock</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Code</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Référence</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Description</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Prix</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Stock Min</th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            Quantité disponible
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Valeur stock</th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <tr 
+      <tbody class="divide-y divide-gray-200 bg-white">
+        <tr
           *ngFor="let article of getPaginatedArticles(); let i = index"
-          [ngClass]="getStockQuantity(article) === 0 ? 'bg-red-300' : 'hover:bg-gray-50 transition-colors duration-200'">
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+          [ngClass]="
+            getStockByMagasin(article) === 0 ? 'bg-red-300' : 'transition-colors duration-200 hover:bg-gray-50'
+          ">
+          <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-blue-600">
             {{ article.code }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
             {{ article.reference }}
           </td>
           <td class="px-6 py-4 text-sm text-gray-900">
             {{ article.description }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-            {{ article.prixAchat | currency:selectedDevise:'symbol':'1.2-2' }}
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+            {{ article.prix }}
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
             <span class="font-medium">{{ article.stockMin || 0 }}</span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap">
-            <span 
-              [class]="getStockStatusClass(getStockQuantity(article))"
-              class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
-              {{ getStockQuantity(article) }} unités
+          <td class="whitespace-nowrap px-6 py-4">
+            <span
+              [class]="getStockStatusClass(getStockByMagasin(article))"
+              class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">
+              {{ getStockByMagasin(article) }} unités
             </span>
           </td>
-          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-            {{ getStockValue(article) | currency:selectedDevise:'symbol':'1.2-2' }}
+          <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+            {{ getStockValue(article) | currency : getSelectedDeviseName : 'symbol' : '1.2-2' }}
           </td>
         </tr>
-        
+
         <tr *ngIf="getPaginatedArticles().length === 0">
           <td colspan="7" class="px-6 py-12 text-center">
             <div class="text-gray-500">
               <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
               <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun article trouvé</h3>
-              <p class="mt-1 text-sm text-gray-500">
-                Aucun article ne correspond aux critères de recherche.
-              </p>
+              <p class="mt-1 text-sm text-gray-500">Aucun article ne correspond aux critères de recherche.</p>
             </div>
           </td>
         </tr>
@@ -241,16 +346,17 @@
   <div class="border-t border-gray-200 bg-white px-6 py-3">
     <div class="flex items-center justify-between">
       <div class="text-sm text-gray-700">
-        Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} résultats
+        Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à
+        {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} résultats
       </div>
       <div class="flex items-center gap-2">
         <button
           (click)="changePage(currentPage - 1)"
           [disabled]="currentPage === 1"
-          class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
           Précédent
         </button>
-        
+
         <div class="flex items-center gap-1">
           <button
             *ngFor="let page of [].constructor(totalPages); let i = index"
@@ -260,11 +366,11 @@
             {{ i + 1 }}
           </button>
         </div>
-        
+
         <button
           (click)="changePage(currentPage + 1)"
           [disabled]="currentPage === totalPages"
-          class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
           Suivant
         </button>
       </div>

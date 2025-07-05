@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PopupComponent } from '../../shared/popup/popup.component';
+import { UserService } from 'src/app/core/services/user.service';
 
 @Component({
   selector: 'app-gestionusers',
@@ -10,11 +11,10 @@ import { PopupComponent } from '../../shared/popup/popup.component';
   imports: [CommonModule, FormsModule, PopupComponent],
 })
 export class GestionusersComponent implements OnInit {
-
   // Popup management
   createPopUp = false;
   deletedPopUp = false;
-  
+
   // Selection tracking
   selectdID: number | null = null;
   selectedUser: any = null;
@@ -29,10 +29,10 @@ export class GestionusersComponent implements OnInit {
   // Role options
   roles = [
     { value: 'ADMIN', label: 'Administrateur' },
-    { value: 'SALES', label: 'Commercial' }
+    { value: 'SALES', label: 'Commercial' },
   ];
 
-  constructor() {}
+  constructor(private userService: UserService) {}
 
   ngOnInit(): void {
     this.getUsers();
@@ -41,39 +41,12 @@ export class GestionusersComponent implements OnInit {
   }
 
   getUsers(): void {
-    // Mock data - replace with actual service call
-    this.users = [
-      { 
-        idUser: 1, 
-        email: 'admin@example.com', 
-        login: 'admin', 
-        password: '********', 
-        store: 'Magasin Central',
-        region: 'Tunis',
-        role: 'ADMIN',
-        roleLabel: 'Administrateur'
+    this.userService.getAll().subscribe({
+      next: (value) => {
+        this.users = value;
       },
-      { 
-        idUser: 2, 
-        email: 'commercial1@example.com', 
-        login: 'commercial1', 
-        password: '********', 
-        store: 'Magasin Nord',
-        region: 'Sousse',
-        role: 'SALES',
-        roleLabel: 'Commercial'
-      },
-      { 
-        idUser: 3, 
-        email: 'commercial2@example.com', 
-        login: 'commercial2', 
-        password: '********', 
-        store: 'Magasin Sud',
-        region: 'Monastir',
-        role: 'SALES',
-        roleLabel: 'Commercial'
-      }
-    ];
+      error: (err) => {},
+    });
   }
 
   getStores(): void {
@@ -83,7 +56,7 @@ export class GestionusersComponent implements OnInit {
       { idStore: 2, nomStore: 'Magasin Nord' },
       { idStore: 3, nomStore: 'Magasin Sud' },
       { idStore: 4, nomStore: 'Magasin Est' },
-      { idStore: 5, nomStore: 'Magasin Ouest' }
+      { idStore: 5, nomStore: 'Magasin Ouest' },
     ];
   }
 
@@ -93,7 +66,7 @@ export class GestionusersComponent implements OnInit {
       { idRegion: 1, nomRegion: 'Sousse' },
       { idRegion: 2, nomRegion: 'Monastir' },
       { idRegion: 3, nomRegion: 'Tunis' },
-      { idRegion: 4, nomRegion: 'Nabeul' }
+      { idRegion: 4, nomRegion: 'Nabeul' },
     ];
   }
 
@@ -128,30 +101,30 @@ export class GestionusersComponent implements OnInit {
 
     if (this.isEditing) {
       // Update existing user
-      const index = this.users.findIndex(u => u.idUser === this.formData.idUser);
+      const index = this.users.findIndex((u) => u.idUser === this.formData.idUser);
       if (index !== -1) {
-        const selectedStore = this.stores.find(s => s.idStore === this.formData.store);
-        const selectedRegion = this.regions.find(r => r.idRegion === this.formData.region);
-        const selectedRole = this.roles.find(r => r.value === this.formData.role);
-        this.users[index] = { 
+        const selectedStore = this.stores.find((s) => s.idStore === this.formData.store);
+        const selectedRegion = this.regions.find((r) => r.idRegion === this.formData.region);
+        const selectedRole = this.roles.find((r) => r.value === this.formData.role);
+        this.users[index] = {
           ...this.formData,
           store: selectedStore?.nomStore || '',
           region: selectedRegion?.nomRegion || '',
-          roleLabel: selectedRole?.label
+          roleLabel: selectedRole?.label,
         };
       }
       this.afterSave();
     } else {
       // Add new user
-      const selectedStore = this.stores.find(s => s.idStore === this.formData.store);
-      const selectedRegion = this.regions.find(r => r.idRegion === this.formData.region);
-      const selectedRole = this.roles.find(r => r.value === this.formData.role);
+      const selectedStore = this.stores.find((s) => s.idStore === this.formData.store);
+      const selectedRegion = this.regions.find((r) => r.idRegion === this.formData.region);
+      const selectedRole = this.roles.find((r) => r.value === this.formData.role);
       const newUser = {
         ...this.formData,
-        idUser: Math.max(...this.users.map(u => u.idUser), 0) + 1,
+        idUser: Math.max(...this.users.map((u) => u.idUser), 0) + 1,
         store: selectedStore?.nomStore || '',
         region: selectedRegion?.nomRegion || '',
-        roleLabel: selectedRole?.label
+        roleLabel: selectedRole?.label,
       };
       // Remove confirmPassword from the user object before saving
       delete newUser.confirmPassword;
@@ -161,18 +134,18 @@ export class GestionusersComponent implements OnInit {
   }
 
   edit(user: any): void {
-    this.formData = { 
+    this.formData = {
       ...user,
-      store: this.stores.find(s => s.nomStore === user.store)?.idStore,
-      region: this.regions.find(r => r.nomRegion === user.region)?.idRegion,
-      confirmPassword: '' // Clear confirm password when editing
+      store: this.stores.find((s) => s.nomStore === user.store)?.idStore,
+      region: this.regions.find((r) => r.nomRegion === user.region)?.idRegion,
+      confirmPassword: '', // Clear confirm password when editing
     };
     this.isEditing = true;
     this.createPopUp = true;
   }
 
   delete(id: number): void {
-    this.users = this.users.filter(u => u.idUser !== id);
+    this.users = this.users.filter((u) => u.idUser !== id);
     this.selectdID = null;
     this.selectedUser = null;
   }
@@ -185,7 +158,7 @@ export class GestionusersComponent implements OnInit {
       confirmPassword: '',
       store: '',
       region: '',
-      role: 'SALES'
+      role: 'SALES',
     };
   }
 

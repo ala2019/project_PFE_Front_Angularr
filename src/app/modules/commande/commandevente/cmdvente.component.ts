@@ -68,7 +68,7 @@ export class CmdventetComponent implements OnInit {
 
   // Pagination
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 5;
   totalItems = 0;
 
   // Math object for template
@@ -137,100 +137,12 @@ export class CmdventetComponent implements OnInit {
     });
 
     this.articles = [
-      { idArticle: 1, code: 'ART001', reference: 'REF001', description: 'Ordinateur portable', prix: 1200.00 }, // prix de vente
-      { idArticle: 2, code: 'ART002', reference: 'REF002', description: 'Écran 24"', prix: 300.00 }, // prix de vente
-      { idArticle: 3, code: 'ART003', reference: 'REF003', description: 'Bureau ergonomique', prix: 450.00 }, // prix de vente
-      { idArticle: 4, code: 'ART004', reference: 'REF004', description: 'Chaise de bureau', prix: 175.00 }, // prix de vente
-      { idArticle: 5, code: 'ART005', reference: 'REF005', description: 'Imprimante laser', prix: 350.00 }, // prix de vente
-      { idArticle: 6, code: 'ART006', reference: 'REF006', description: 'Scanner document', prix: 280.00 } // prix de vente
+      
     ];
 
     // Articles avec stock (prix de vente) - stocks par magasin
     this.articlesWithStock = [
-      { 
-        idArticle: 1, 
-        code: 'ART001', 
-        reference: 'REF001', 
-        description: 'Ordinateur portable',
-        prix: 1200.00, // prix de vente
-        stocks: {
-          1: 25, // Magasin 1
-          2: 15, // Magasin 2
-          3: 8,  // Magasin 3
-          4: 12, // Magasin 4
-          5: 20  // Magasin 5
-        }
-      },
-      { 
-        idArticle: 2, 
-        code: 'ART002', 
-        reference: 'REF002', 
-        description: 'Écran 24"',
-        prix: 300.00, // prix de vente
-        stocks: {
-          1: 40, // Magasin 1
-          2: 25, // Magasin 2
-          3: 15, // Magasin 3
-          4: 30, // Magasin 4
-          5: 18  // Magasin 5
-        }
-      },
-      { 
-        idArticle: 3, 
-        code: 'ART003', 
-        reference: 'REF003', 
-        description: 'Bureau ergonomique',
-        prix: 450.00, // prix de vente
-        stocks: {
-          1: 15, // Magasin 1
-          2: 8,  // Magasin 2
-          3: 12, // Magasin 3
-          4: 6,  // Magasin 4
-          5: 10  // Magasin 5
-        }
-      },
-      { 
-        idArticle: 4, 
-        code: 'ART004', 
-        reference: 'REF004', 
-        description: 'Chaise de bureau',
-        prix: 175.00, // prix de vente
-        stocks: {
-          1: 30, // Magasin 1
-          2: 20, // Magasin 2
-          3: 15, // Magasin 3
-          4: 25, // Magasin 4
-          5: 12  // Magasin 5
-        }
-      },
-      { 
-        idArticle: 5, 
-        code: 'ART005', 
-        reference: 'REF005', 
-        description: 'Imprimante laser',
-        prix: 350.00, // prix de vente
-        stocks: {
-          1: 8,  // Magasin 1
-          2: 12, // Magasin 2
-          3: 6,  // Magasin 3
-          4: 10, // Magasin 4
-          5: 15  // Magasin 5
-        }
-      },
-      { 
-        idArticle: 6, 
-        code: 'ART006', 
-        reference: 'REF006', 
-        description: 'Scanner document',
-        prix: 280.00, // prix de vente
-        stocks: {
-          1: 12, // Magasin 1
-          2: 8,  // Magasin 2
-          3: 5,  // Magasin 3
-          4: 15, // Magasin 4
-          5: 9   // Magasin 5
-        }
-      }
+      
     ];
 
     this.modesPaiement = [
@@ -559,16 +471,27 @@ export class CmdventetComponent implements OnInit {
     this.selectdID = commande.idCmd;
     this.selectedCommande = commande;
     this.isEditing = true;
-    
+
+    // Normaliser les lignes pour garantir la présence de 'reference'
+    let lignes = commande.lignes || commande.detailCmds || [];
+    lignes = lignes.map((l: any) => ({
+      ...l,
+      code: l.code || l.article?.code || '',
+      reference: l.reference || l.ref || l.article?.reference || '',
+      description: l.description || l.article?.description || '',
+      prixUnitaire: l.prixUnitaire || l.prix || l.article?.prix ||'',
+      tauxTva: l.tauxTva || l.tva || l.article?.tva || '',
+    }));
+
     this.commandeForm.patchValue({
-      libelle: commande.libelle,
-      dateCommande: commande.dateCommande,
-      clientId: this.clients.find(c => c.nom === commande.client)?.idClient,
-      modePaiement: commande.modePaiement || '',
-      lignes: commande.lignes || [],
-      magasinId: this.magasins.find(m => m.nom === commande.magasin)?.idMagasin
+      libelle: commande.libelle || commande.libCmd,
+      dateCommande: commande.dateCommande || (commande.dateCmd ? new Date(commande.dateCmd).toISOString().substring(0, 10) : ''),
+      clientId: commande?.personne?.nomPersonne || '',
+      modePaiement: commande?.modePaiement || '',
+      lignes,
+      magasinId: commande?.magasin?.nomMagasin || '',
+      
     });
-    
     this.createPopUp = true;
   }
 
@@ -675,9 +598,9 @@ export class CmdventetComponent implements OnInit {
       code: '',
       reference: '',
       description: '',
-      prixUnitaire: 0,
-      quantite: 1,
-      tauxTva: 19
+      prix: '',
+      quantite: '',
+      tauxTva: ''
     });
     this.currentLineIndex = null;
     this.showLineForm = false;

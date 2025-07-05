@@ -1,32 +1,44 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { StockService } from '../../core/services/stock.service';
+import { MagasinService } from '../../core/services/magasin.service';
+import { DeviseService } from '../../core/services/devise.service';
+import { ArticleService } from '../../core/services/article.service';
 
 @Component({
   selector: 'app-stock',
   templateUrl: './stock.component.html',
   styleUrls: ['./stock.component.scss'],
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
-  standalone: true
+  standalone: true,
 })
 export class StockComponent implements OnInit {
-
   // User rights and permissions
   userRights = {
     canViewAllMagasins: false,
     allowedMagasins: [1, 2], // IDs des magasins autorisés pour l'utilisateur
     canExport: true,
-    canPrint: true
+    canPrint: true,
   };
 
   // Data arrays
   articles: any[] = [];
+  allArticles: any[] = []; // Tous les articles sans stock
+  stocks: any[] = []; // Données de stock par magasin
   magasins: any[] = [];
   devises: any[] = [];
   filteredArticles: any[] = [];
 
   // Forms
   filterForm!: FormGroup;
+
+  // Filters object for template binding
+  filters = {
+    magasin: null as number | null,
+    devise: 'EUR',
+    searchTerm: '',
+  };
 
   // State management
   selectedMagasin: number | null = null;
@@ -38,15 +50,29 @@ export class StockComponent implements OnInit {
   itemsPerPage = 15;
   totalItems = 0;
 
+  // Loading states
+  isLoading = false;
+  isLoadingMagasins = false;
+  isLoadingDevises = false;
+  isLoadingArticles = false;
+
   // Math object for template
   Math = Math;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private stockService: StockService,
+    private magasinService: MagasinService,
+    private deviseService: DeviseService,
+    private articleService: ArticleService,
+  ) {
     this.initForms();
   }
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadMagasins();
+    this.loadDevises();
+    this.loadAllArticles();
     this.initializeUserRights();
   }
 
@@ -54,157 +80,244 @@ export class StockComponent implements OnInit {
     this.filterForm = this.fb.group({
       magasinId: [null, []],
       devise: ['EUR', []],
-      searchTerm: ['', []]
+      searchTerm: ['', []],
     });
   }
 
-  loadData(): void {
-    // Mock data - replace with actual service calls
-    this.magasins = [
-      { idMagasin: 1, nom: 'Magasin Moknine', code: 'MP' },
-      { idMagasin: 2, nom: 'Magasin Secondaire', code: 'MS' },
-      { idMagasin: 3, nom: 'Entrepôt Central', code: 'EC' },
-      { idMagasin: 4, nom: 'Point de Vente', code: 'PV' },
-      { idMagasin: 5, nom: 'Magasin Régional', code: 'MR' }
-    ];
+  loadMagasins(): void {
+    this.isLoadingMagasins = true;
+    this.magasinService.getAll().subscribe({
+      next: (data) => {
+        console.log('Magasins reçus:', data);
+        this.magasins = data;
+        this.isLoadingMagasins = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des magasins:', error);
+        this.isLoadingMagasins = false;
+      },
+    });
+  }
 
-    this.devises = [
-      { code: 'EUR', nom: 'Euro', symbole: '€', taux: 1.0 },
-      { code: 'USD', nom: 'Dollar US', symbole: '$', taux: 1.08 },
-      { code: 'GBP', nom: 'Livre Sterling', symbole: '£', taux: 0.86 },
-      { code: 'MAD', nom: 'Dirham Marocain', symbole: 'DH', taux: 10.8 }
-    ];
+  loadDevises(): void {
+    this.isLoadingDevises = true;
+    this.deviseService.getAll().subscribe({
+      next: (data) => {
+        console.log('Devises reçues:', data);
+        this.devises = data;
+        this.isLoadingDevises = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des devises:', error);
+        // Fallback aux devises par défaut en cas d'erreur
 
-    this.articles = [
-      {
-        idArticle: 1,
-        code: 'ART001',
-        reference: 'REF001',
-        description: 'Ordinateur portable Dell Latitude',
-        prixAchat: 850.00,
-        stockMin: 10,
-        stocks: {
-          1: { quantite: 0, valeur: 0.00 },
-          2: { quantite: 15, valeur: 12750.00 },
-          3: { quantite: 8, valeur: 6800.00 },
-          4: { quantite: 12, valeur: 10200.00 },
-          5: { quantite: 20, valeur: 17000.00 }
+        this.isLoadingDevises = false;
+      },
+    });
+  }
+
+  loadAllArticles(): void {
+    this.isLoadingArticles = true;
+    this.articleService.getArticles().subscribe({
+      next: (data) => {
+        console.log('Articles reçus:', data);
+        this.allArticles = data;
+        this.isLoadingArticles = false;
+        // Si un magasin est déjà sélectionné, charger les stocks
+        if (this.selectedMagasin) {
+          this.loadStockData();
         }
       },
-      {
-        idArticle: 2,
-        code: 'ART002',
-        reference: 'REF002',
-        description: 'Écran 24" Samsung',
-        prixAchat: 180.00,
-        stockMin: 15,
-        stocks: {
-          1: { quantite: 40, valeur: 7200.00 },
-          2: { quantite: 25, valeur: 4500.00 },
-          3: { quantite: 15, valeur: 2700.00 },
-          4: { quantite: 30, valeur: 5400.00 },
-          5: { quantite: 18, valeur: 3240.00 }
-        }
+      error: (error) => {
+        console.error('Erreur lors du chargement des articles:', error);
+        this.allArticles = [];
+        this.isLoadingArticles = false;
       },
-      {
-        idArticle: 3,
-        code: 'ART003',
-        reference: 'REF003',
-        description: 'Bureau ergonomique en bois',
-        prixAchat: 280.00,
-        stockMin: 8,
-        stocks: {
-          1: { quantite: 15, valeur: 4200.00 },
-          2: { quantite: 8, valeur: 2240.00 },
-          3: { quantite: 12, valeur: 3360.00 },
-          4: { quantite: 6, valeur: 1680.00 },
-          5: { quantite: 10, valeur: 2800.00 }
-        }
-      },
-      {
-        idArticle: 4,
-        code: 'ART004',
-        reference: 'REF004',
-        description: 'Chaise de bureau pivotante',
-        prixAchat: 120.00,
-        stockMin: 20,
-        stocks: {
-          1: { quantite: 30, valeur: 3600.00 },
-          2: { quantite: 20, valeur: 2400.00 },
-          3: { quantite: 15, valeur: 1800.00 },
-          4: { quantite: 25, valeur: 3000.00 },
-          5: { quantite: 12, valeur: 1440.00 }
-        }
-      }
-    ];
+    });
+  }
 
-    // Initialiser les articles filtrés
+  loadStockData(): void {
+    if (!this.selectedMagasin) {
+      this.articles = [];
+      this.filteredArticles = [];
+      this.totalItems = 0;
+      return;
+    }
+
+    this.isLoading = true;
+    this.stockService.getStockByMagasin(this.selectedMagasin).subscribe({
+      next: (data) => {
+        console.log('Stocks reçus pour le magasin', this.selectedMagasin, ':', data);
+        this.stocks = data;
+        this.combineArticlesWithStocks();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des stocks:', error);
+        this.stocks = [];
+        this.combineArticlesWithStocks();
+        this.isLoading = false;
+      },
+    });
+  }
+
+  combineArticlesWithStocks(): void {
+    console.log('=== DÉBUT COMBINAISON ARTICLES/STOCKS ===');
+    console.log('Articles disponibles:', this.allArticles.length);
+    console.log('Stocks disponibles:', this.stocks.length);
+
+    // Afficher quelques exemples d'articles
+    console.log(
+      "Exemples d'articles:",
+      this.allArticles.slice(0, 3).map((a) => ({
+        idArticle: a.idArticle,
+        code: a.code,
+        nom: a.nom,
+      })),
+    );
+
+    // Afficher quelques exemples de stocks
+    console.log(
+      'Exemples de stocks:',
+      this.stocks.slice(0, 3).map((s) => ({
+        idStock: s.idStock,
+        qteStock: s.qteStock,
+        articleId: s.article?.idArticle,
+        keys: Object.keys(s),
+      })),
+    );
+
+    // Combiner les articles avec leurs stocks
+    this.articles = this.allArticles.map((article) => {
+      const stockData = this.stocks.find((stock) => stock.article?.idArticle === article.idArticle);
+
+      console.log(`Article ${article.code} (ID: ${article.idArticle}):`, {
+        stockTrouve: !!stockData,
+        stockData: stockData,
+        quantite: stockData ? stockData.qteStock : 0,
+      });
+
+      return {
+        ...article,
+        quantite: stockData ? stockData.qteStock : 0,
+        stockMin: article.stockMin || 0,
+      };
+    });
+
     this.filteredArticles = [...this.articles];
-    this.totalItems = this.filteredArticles.length;
+    this.totalItems = this.filteredArticles.filter(f => f.quantite > 0).length;
+
+    // Afficher le résultat final
+    console.log(
+      'Articles avec quantités (premiers 3):',
+      this.articles.slice(0, 3).map((a) => ({
+        code: a.code,
+        quantite: a.quantite,
+      })),
+    );
+    console.log('=== FIN COMBINAISON ARTICLES/STOCKS ===');
   }
 
   initializeUserRights(): void {
     // Simuler les droits utilisateur - à remplacer par la vraie logique d'authentification
     // this.userRights = this.authService.getUserRights();
-    
+
     // Pour l'exemple, on limite l'accès aux magasins 1 et 2
     this.userRights.allowedMagasins = [1, 2];
     this.userRights.canViewAllMagasins = false;
-    
+
     // Sélectionner automatiquement le premier magasin autorisé
     if (this.userRights.allowedMagasins.length > 0) {
       this.selectedMagasin = this.userRights.allowedMagasins[0];
+      this.filters.magasin = this.selectedMagasin;
       this.filterForm.patchValue({ magasinId: this.selectedMagasin });
+      // Les stocks seront chargés après le chargement des articles
     }
   }
 
   // Filter methods
   applyFilters(): void {
-    this.filteredArticles = this.articles.filter(article => {
-      // Filtre par terme de recherche
-      if (this.searchTerm) {
-        const searchLower = this.searchTerm.toLowerCase();
-        if (!article.code.toLowerCase().includes(searchLower) &&
-            !article.reference.toLowerCase().includes(searchLower) &&
-            !article.description.toLowerCase().includes(searchLower)) {
-          return false;
+    if (!this.selectedMagasin) {
+      this.filteredArticles = [];
+      this.totalItems = 0;
+      return;
+    }
+
+    // Synchroniser searchTerm avec filters.searchTerm
+    this.searchTerm = this.filters.searchTerm;
+
+    // Si un terme de recherche est fourni, utiliser l'API de recherche
+    if (this.searchTerm && this.searchTerm.trim()) {
+      this.isLoading = true;
+      this.stockService.searchStock(this.selectedMagasin, this.searchTerm.trim()).subscribe({
+        next: (data) => {
+          // Combiner les résultats de recherche avec les données d'articles
+          this.filteredArticles = data.map((stockItem) => {
+            const article = this.allArticles.find((a) => a.idArticle === stockItem.article?.idArticle);
+            return {
+              ...article,
+              quantite: stockItem.qteStock || 0,
+              stockMin: article ? article.stockMin || 0 : 0,
+            };
+          });
+          this.totalItems = this.filteredArticles.filter(f => f.quantite > 0).length;
+          this.currentPage = 1;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Erreur lors de la recherche:', error);
+          this.filteredArticles = [];
+          this.totalItems = 0;
+          this.isLoading = false;
+        },
+      });
+    } else {
+      // Sinon, filtrer localement
+      this.filteredArticles = this.articles.filter((article) => {
+        // Filtre par terme de recherche
+        if (this.searchTerm) {
+          const searchLower = this.searchTerm.toLowerCase();
+          if (
+            !article.code?.toLowerCase().includes(searchLower) &&
+            !article.reference?.toLowerCase().includes(searchLower) &&
+            !article.description?.toLowerCase().includes(searchLower)
+          ) {
+            return false;
+          }
         }
-      }
-      
-      // Filtre par magasin (si sélectionné)
-      if (this.selectedMagasin && !article.stocks[this.selectedMagasin]) {
-        return false;
-      }
-      
-      return true;
-    });
-    
-    this.totalItems = this.filteredArticles.length;
-    this.currentPage = 1;
+
+        return true;
+      });
+
+      this.totalItems = this.filteredArticles.filter(f => f.quantite > 0).length;
+      this.currentPage = 1;
+    }
   }
 
   clearFilters(): void {
     this.searchTerm = '';
+    this.filters.searchTerm = '';
+    this.filters.devise = 'EUR';
     this.filterForm.patchValue({
       searchTerm: '',
-      devise: 'EUR'
+      devise: 'EUR',
     });
     this.applyFilters();
   }
 
   // Stock methods
-  getStockQuantity(article: any): number {
+  getStockByMagasin(article: any): number {
     if (!this.selectedMagasin) return 0;
-    return article.stocks[this.selectedMagasin]?.quantite || 0;
+    return article.quantite || 0;
   }
 
   getStockValue(article: any): number {
     if (!this.selectedMagasin) return 0;
-    const stock = article.stocks[this.selectedMagasin];
-    if (!stock) return 0;
-    
-    const devise = this.devises.find(d => d.code === this.selectedDevise);
-    return stock.valeur * (devise?.taux || 1.0);
+    const quantite = this.getStockByMagasin(article);
+    const prixAchat = article.prix || 0; // Utiliser article.prix au lieu de prixAchat
+
+    const devise = this.devises.find((d) => d.code === this.selectedDevise);
+    return quantite * prixAchat * (devise?.taux || 1.0);
   }
 
   getTotalStockValue(): number {
@@ -215,7 +328,7 @@ export class StockComponent implements OnInit {
 
   getTotalStockQuantity(): number {
     return this.filteredArticles.reduce((total, article) => {
-      return total + this.getStockQuantity(article);
+      return total + this.getStockByMagasin(article);
     }, 0);
   }
 
@@ -229,7 +342,7 @@ export class StockComponent implements OnInit {
   // Nouvelle méthode pour vérifier si l'article est en rupture de stock
   isStockAlert(article: any): boolean {
     if (!this.selectedMagasin) return false;
-    const currentStock = this.getStockQuantity(article);
+    const currentStock = this.getStockByMagasin(article);
     const stockMin = article.stockMin || 0;
     return currentStock <= stockMin;
   }
@@ -237,9 +350,9 @@ export class StockComponent implements OnInit {
   // Nouvelle méthode pour obtenir le statut d'alerte de stock
   getStockAlertStatus(article: any): string {
     if (!this.selectedMagasin) return 'normal';
-    const currentStock = this.getStockQuantity(article);
+    const currentStock = this.getStockByMagasin(article);
     const stockMin = article.stockMin || 0;
-    
+
     if (currentStock === 0) return 'rupture';
     if (currentStock <= stockMin) return 'alerte';
     return 'normal';
@@ -274,9 +387,9 @@ export class StockComponent implements OnInit {
   // Nouvelle méthode pour obtenir le message d'alerte
   getStockAlertMessage(article: any): string {
     const status = this.getStockAlertStatus(article);
-    const currentStock = this.getStockQuantity(article);
+    const currentStock = this.getStockByMagasin(article);
     const stockMin = article.stockMin || 0;
-    
+
     switch (status) {
       case 'rupture':
         return `Rupture de stock ! Stock minimum requis: ${stockMin}`;
@@ -289,12 +402,12 @@ export class StockComponent implements OnInit {
 
   // Nouvelle méthode pour compter les articles en alerte
   getAlertCount(): number {
-    return this.filteredArticles.filter(article => this.isStockAlert(article)).length;
+    return this.filteredArticles.filter((article) => article.quantite < 1).length;
   }
 
   // Nouvelle méthode pour obtenir les articles en alerte
   getAlertArticles(): any[] {
-    return this.filteredArticles.filter(article => this.isStockAlert(article));
+    return this.filteredArticles.filter((article) => this.isStockAlert(article));
   }
 
   // Magasin methods
@@ -302,22 +415,30 @@ export class StockComponent implements OnInit {
     if (this.userRights.canViewAllMagasins) {
       return this.magasins;
     }
-    return this.magasins.filter(m => this.userRights.allowedMagasins.includes(m.idMagasin));
+    return this.magasins.filter((m) => this.userRights.allowedMagasins.includes(m.idMagasin));
   }
 
-  getSelectedMagasinName(): string {
+  get getSelectedMagasinName(): string {
     if (!this.selectedMagasin) return '';
-    const magasin = this.magasins.find(m => m.idMagasin === this.selectedMagasin);
-    return magasin ? magasin.nom : '';
+    const magasin = this.magasins.find((m) => m.idMagasin == this.selectedMagasin);
+    return magasin ? magasin.nom || magasin.nomMagasin : '';
   }
+
+  get getSelectedDeviseName(): string {
+    if (!this.filters.devise) return '';
+    const devise = this.devises.find((m) => m.idDevise == this.filters.devise);
+    return devise ? devise.symbole || devise.symbole : 'DT';
+  }
+
 
   onMagasinChange(): void {
-    this.selectedMagasin = this.filterForm.get('magasinId')?.value;
-    this.applyFilters();
+    this.selectedMagasin = this.filters.magasin;
+
+    this.loadStockData();
   }
 
   onDeviseChange(): void {
-    this.selectedDevise = this.filterForm.get('devise')?.value;
+    this.selectedDevise = this.filters.devise;
   }
 
   // Pagination methods
@@ -363,7 +484,7 @@ export class StockComponent implements OnInit {
     const totalPages = this.getTotalPages();
     const pages: number[] = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -371,32 +492,32 @@ export class StockComponent implements OnInit {
     } else {
       const start = Math.max(1, this.currentPage - 2);
       const end = Math.min(totalPages, start + maxVisiblePages - 1);
-      
+
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
     }
-    
+
     return pages;
   }
 
   // Export and print methods
   exportStock(): void {
     if (!this.userRights.canExport) {
-      alert('Vous n\'avez pas les droits pour exporter les données.');
+      alert("Vous n'avez pas les droits pour exporter les données.");
       return;
     }
-    
+
     // Logique d'export à implémenter
     console.log('Exporting stock data...');
   }
 
   printStock(): void {
     if (!this.userRights.canPrint) {
-      alert('Vous n\'avez pas les droits pour imprimer.');
+      alert("Vous n'avez pas les droits pour imprimer.");
       return;
     }
-    
+
     // Logique d'impression à implémenter
     console.log('Printing stock report...');
   }

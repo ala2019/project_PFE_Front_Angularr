@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
   private apiUrl = 'http://localhost:8081/api/cmd';
+  private apiUrlDetail = 'http://localhost:8081/api/detcmd';
 
   constructor(private http: HttpClient) {}
 
@@ -26,5 +27,9 @@ export class CommandeService {
 
   pointerReception(id: number, idMagasin: number, data: any): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/recep/${id}/${idMagasin}`, data);
+  }
+
+  updateDetail(id: number, data: any) {
+    return this.http.put(`${this.apiUrlDetail}/${id}`, data);
   }
 }

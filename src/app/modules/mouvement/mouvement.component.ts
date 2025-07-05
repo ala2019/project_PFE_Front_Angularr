@@ -10,21 +10,13 @@ import { MouvementService } from '../../core/services/mouvement.service';
 import { MagasinService } from '../../core/services/magasin.service';
 import { ArticleService } from '../../core/services/article.service';
 import { Mouvement, MouvementLigne, MouvementFilter } from '../../core/models/mouvement.model';
+import { CommandeService } from 'src/app/core/services/commande.service';
 
 @Component({
   selector: 'app-mouvement',
   templateUrl: 'mouvement.component.html',
   styleUrl: 'mouvement.component.scss',
-  imports: [
-    CommonModule,
-    AngularSvgIconModule,
-    TableRowComponent,
-    TableFooterComponent,
-    TableHeaderComponent,
-    PopupComponent,
-    ReactiveFormsModule,
-    FormsModule,
-  ],
+  imports: [CommonModule, AngularSvgIconModule, PopupComponent, ReactiveFormsModule, FormsModule],
   standalone: true,
 })
 export class MouvementComponent implements OnInit {
@@ -36,11 +28,11 @@ export class MouvementComponent implements OnInit {
 
   // Selection tracking
   selectedId: number | null = null;
-  selectedMouvement: Mouvement | null = null;
+  selectedMouvement: any | null = null;
 
   // Data arrays
   mouvements: any[] = [];
-  filteredMouvements: Mouvement[] = [];
+  filteredMouvements: any[] = [];
   magasins: any[] = [];
   articles: any[] = [];
   articlesWithStock: any[] = [];
@@ -74,8 +66,8 @@ export class MouvementComponent implements OnInit {
 
   // Type options
   typeOptions = [
-    { value: 'ENTREE', label: 'Entrées' },
-    { value: 'SORTIE', label: 'Sorties' },
+    { value: '+', label: 'Entrées' },
+    { value: '-', label: 'Sorties' },
   ];
 
   statutOptions = [
@@ -89,6 +81,7 @@ export class MouvementComponent implements OnInit {
     private mouvementService: MouvementService,
     private magasinService: MagasinService,
     private articleService: ArticleService,
+    private commandeService: CommandeService,
   ) {
     this.initForms();
   }
@@ -112,7 +105,6 @@ export class MouvementComponent implements OnInit {
     this.ligneForm = this.fb.group({
       articleId: ['', Validators.required],
       quantite: [1, [Validators.required, Validators.min(1)]],
-      prixUnitaire: [0, [Validators.required, Validators.min(0)]],
     });
 
     this.filterForm = this.fb.group({
@@ -129,7 +121,9 @@ export class MouvementComponent implements OnInit {
     // Charger les mouvements
     this.mouvementService.getAll().subscribe({
       next: (data) => {
+        console.log(data);
         this.mouvements = data;
+
         this.filteredMouvements = [...this.mouvements];
         this.totalItems = this.mouvements.length;
       },
@@ -162,157 +156,9 @@ export class MouvementComponent implements OnInit {
   }
 
   loadMockData(): void {
-    /* this.mouvements = [
-      {
-        idMouvement: 1,
-        libelle: 'Mvt-2025-00001',
-        commandeLibelle: 'Cmd-achat-2025/00001',
-        typeMouvement: 'POINTAGE',
-        dateCreation: '2024-01-15T10:30:00',
-        dateMouvement: '2025-05-01',
-        magasinSource: 'Magasin hammemat',
-        magasinSourceId: 1,
-        statut: 'EN_COURS',
-        typeCommande: 'ACHAT',
-        lignes: [
-          {
-            idLigne: 1,
-            articleId: 1,
-            codeArticle: 'ART001',
-            referenceArticle: 'REF001',
-            descriptionArticle: 'Ordinateur portable',
-            quantite: 10,
-            prixUnitaire: 1200,
-            montantLigne: 12000
-          }
-        ],
-        montantTotal: 12000,
-        utilisateur: 'admin'
-      },
-      {
-        idMouvement: 2,
-        libelle: 'Mvt-2025-00002',
-        commandeLibelle: 'Cmd-TRS-2025/00002',
-        typeMouvement: 'TRANSFERT',
-        dateCreation: '2024-01-16T14:20:00',
-        dateMouvement: '2025-06-22',
-        magasinSource: 'Magasin Moknine',
-        magasinDestination: 'Magasin 2',
-        magasinSourceId: 1,
-        magasinDestinationId: 2,
-        statut: 'EN_COURS',
-        typeCommande: 'TRANSFERT',
-        lignes: [
-          {
-            idLigne: 2,
-            articleId: 1,
-            codeArticle: 'ART001',
-            referenceArticle: 'REF001',
-            descriptionArticle: 'Ordinateur portable',
-            quantite: 5,
-            prixUnitaire: 1200,
-            montantLigne: 6000
-          }
-        ],
-        montantTotal: 6000,
-        utilisateur: 'admin'
-      },
-      {
-        idMouvement: 3,
-        libelle: 'Mvt-2025-00003',
-        commandeId: 1,
-        commandeLibelle: 'Cmd-TRS-2025/00002',
-        typeMouvement: 'SORTIE',
-        dateCreation: '2024-01-17T09:15:00',
-        dateMouvement: '2025-06-22',
-        magasinSource: 'Magasin ksar héllal',
-        magasinSourceId: 1,
-        statut: 'TERMINE',
-        typeCommande: 'TRANSFERT',
-        lignes: [
-          {
-            idLigne: 3,
-            articleId: 1,
-            codeArticle: 'ART001',
-            referenceArticle: 'REF001',
-            descriptionArticle: 'Ordinateur portable',
-            quantite: 2,
-            prixUnitaire: 1200,
-            montantLigne: 2400
-          }
-        ],
-        montantTotal: 2400,
-        utilisateur: 'admin'
-      },
-      {
-        idMouvement: 4,
-        libelle: 'Mvt-2025-00004',
-        commandeId: 2,
-        commandeLibelle: 'Cmd-Achat-2025/00002',
-        typeMouvement: 'POINTAGE',
-        dateCreation: '2024-01-18T11:00:00',
-        dateMouvement: '2025-06-18',
-        magasinSource: 'Magasin Sfax',
-        magasinSourceId: 3,
-        statut: 'EN_COURS',
-        typeCommande: 'ACHAT',
-        lignes: [
-          {
-            idLigne: 4,
-            articleId: 2,
-            codeArticle: 'ART002',
-            referenceArticle: 'REF002',
-            descriptionArticle: 'Souris Gamer',
-            quantite: 50,
-            prixUnitaire: 75,
-            montantLigne: 3750
-          },
-          {
-            idLigne: 5,
-            articleId: 3,
-            codeArticle: 'ART003',
-            referenceArticle: 'REF003',
-            descriptionArticle: 'Clavier Mécanique',
-            quantite: 30,
-            prixUnitaire: 150,
-            montantLigne: 4500
-          }
-        ],
-        montantTotal: 8250,
-        utilisateur: 'user1'
-      },
-      {
-        idMouvement: 5,
-        libelle: 'Mvt-2025-00005',
-        commandeId: 3,
-        commandeLibelle: 'Cmd-Vente-2025/00001',
-        typeMouvement: 'SORTIE',
-        dateCreation: '2024-01-19T16:45:00',
-        dateMouvement: '2025-06-19',
-        magasinSource: 'Magasin Moknine',
-        magasinSourceId: 1,
-        statut: 'TERMINE',
-        typeCommande: 'VENTE',
-        lignes: [
-          {
-            idLigne: 6,
-            articleId: 1,
-            codeArticle: 'ART001',
-            referenceArticle: 'REF001',
-            descriptionArticle: 'Ordinateur portable',
-            quantite: 1,
-            prixUnitaire: 1350,
-            montantLigne: 1350
-          }
-        ],
-        montantTotal: 1350,
-        utilisateur: 'user2'
-      },
-      
-    ];*/
     this.mouvementService.getAll().subscribe({
       next: (value: any) => {
-        console.log(value)
+        console.log(value);
         this.mouvements = value;
         this.filteredMouvements = [...this.mouvements];
         this.totalItems = this.filteredMouvements.length;
@@ -383,7 +229,7 @@ export class MouvementComponent implements OnInit {
   }
 
   // Pagination methods
-  get paginatedMouvements(): Mouvement[] {
+  get paginatedMouvements(): any[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     return this.filteredMouvements.slice(startIndex, endIndex);
@@ -411,28 +257,38 @@ export class MouvementComponent implements OnInit {
     this.createPopUp = true;
   }
 
-  openEditPopup(mouvement: Mouvement): void {
+  openEditPopup(mouvement: any): void {
     this.isEditing = true;
     this.selectedMouvement = mouvement;
     this.selectedId = mouvement.idMouvement;
-
-    this.mouvementForm.patchValue({
-      libelle: mouvement.libelle,
-      commandeLibelle: mouvement.commandeLibelle,
-      typeMouvement: mouvement.typeMouvement,
-      dateMouvement: mouvement.dateMouvement,
-      magasinSourceId: mouvement.magasinSourceId,
-      magasinDestinationId: mouvement.magasinDestinationId,
-      observations: mouvement.observations,
-      lignes: mouvement.lignes || [],
+    this.mouvementService.getOneById(this.selectedMouvement.idMouvement).subscribe({
+      next: (value: any) => {
+        this.selectedMouvement = { ...value, libCmd: this.selectedMouvement.libCmd };
+        mouvement = this.selectedMouvement;
+        console.log(mouvement);
+        this.mouvementForm.patchValue({
+          libelle: mouvement.libMouvement,
+          commandeLibelle: mouvement.libCmd,
+          typeMouvement: mouvement.signe,
+          dateMouvement: new Date(mouvement.dateMvt).toISOString().substring(0, 10),
+          magasinSourceId: mouvement.magasin?.idMagasin,
+          lignes: mouvement.detailMvts || [],
+        });
+        this.createPopUp = true;
+      },
+      error: (err) => {},
     });
-
-    this.createPopUp = true;
   }
 
   openDetailsPopup(mouvement: Mouvement): void {
     this.selectedMouvement = mouvement;
-    this.detailsPopUp = true;
+    this.mouvementService.getOneById(this.selectedMouvement.idMouvement).subscribe({
+      next: (value: any) => {
+        this.selectedMouvement = { ...value, libCmd: this.selectedMouvement.libCmd };
+        this.detailsPopUp = true;
+      },
+      error: (err) => {},
+    });
   }
 
   openDeletePopup(mouvement: Mouvement): void {
@@ -537,8 +393,8 @@ export class MouvementComponent implements OnInit {
     const ligne = lignes[index];
 
     this.ligneForm.patchValue({
-      articleId: ligne.articleId,
-      quantite: ligne.quantite,
+      articleId: ligne.detailCmd?.article?.idArticle,
+      quantite: ligne.detailCmd?.quantite,
       prixUnitaire: ligne.prixUnitaire,
     });
 
@@ -548,30 +404,36 @@ export class MouvementComponent implements OnInit {
 
   updateLigne(): void {
     if (this.ligneForm.valid && this.currentLigneIndex !== null) {
-      const ligneData = this.ligneForm.value;
-      const article = this.articles.find((a) => a.idArticle === ligneData.articleId);
+      const lignes = this.mouvementForm.get('lignes')?.value || [];
 
-      if (article) {
-        const lignes = this.mouvementForm.get('lignes')?.value || [];
-        lignes[this.currentLigneIndex] = {
-          ...lignes[this.currentLigneIndex],
-          articleId: article.idArticle,
-          codeArticle: article.code,
-          referenceArticle: article.reference,
-          descriptionArticle: article.description,
-          quantite: ligneData.quantite,
-          prixUnitaire: ligneData.prixUnitaire,
-          montantLigne: ligneData.quantite * ligneData.prixUnitaire,
-        };
-
-        this.mouvementForm.patchValue({ lignes });
-        this.showLigneForm = false;
-        this.currentLigneIndex = null;
-        this.ligneForm.reset({
-          quantite: 1,
-          prixUnitaire: 0,
+      console.log(lignes[this.currentLigneIndex]);
+      console.log(this.ligneForm.value);
+      this.commandeService
+        .updateDetail(lignes[this.currentLigneIndex]?.detailCmd?.idDetailCmd, {
+          article: { idArticle: this.ligneForm.value.articleId },
+          quantite: this.ligneForm.value.quantite,
+        })
+        .subscribe({
+          next: (response) => {
+            this.mouvementForm.patchValue({ lignes });
+            this.showLigneForm = false;
+            this.currentLigneIndex = null;
+            this.ligneForm.reset({
+              quantite: 1,
+              prixUnitaire: 0,
+            });
+          },
+          error: (err) => {},
         });
-      }
+
+      lignes[this.currentLigneIndex] = {
+        ...lignes[this.currentLigneIndex],
+        detailCmd: {
+          ...lignes[this.currentLigneIndex].detailCmd,
+
+          quantite: this.ligneForm.value.quantite,
+        },
+      };
     }
   }
 

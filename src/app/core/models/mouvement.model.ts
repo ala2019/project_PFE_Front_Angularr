@@ -1,9 +1,9 @@
 export interface Mouvement {
   idMouvement: number;
-  libelle: string;
+  libMouvement: string;
   typeMouvement: 'POINTAGE' | 'TRANSFERT' | 'SORTIE';
   dateCreation: string;
-  dateMouvement: string;
+  dateMvt: string;
   magasinSource?: string;
   magasinDestination?: string;
   magasinSourceId?: number;
