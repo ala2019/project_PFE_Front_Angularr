@@ -27,6 +27,8 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   selectdID: any = null;
   deletedPopUp = false;
   createPopUp = false;
+  detailPopUp = false;
+  selectedArticleForDetail: any = null;
 
   // Variables pour la pagination
   currentPage = 1;
@@ -643,5 +645,23 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
     });
     
     this.totalItems = this.filteredArticles.length;
+  }
+
+  // Méthode pour obtenir l'article sélectionné
+  getSelectedArticle(): any {
+    if (!this.selectdID) return null;
+    return this.articles.find(article => article.idArticle === this.selectdID);
+  }
+
+  // Méthode pour ouvrir la popup de détails
+  viewArticleDetails(article: any) {
+    this.selectedArticleForDetail = article;
+    this.detailPopUp = true;
+  }
+
+  // Méthode pour fermer la popup de détails
+  closeDetailPopup() {
+    this.detailPopUp = false;
+    this.selectedArticleForDetail = null;
   }
 }
