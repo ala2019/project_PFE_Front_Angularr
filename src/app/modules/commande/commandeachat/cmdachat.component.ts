@@ -419,6 +419,50 @@ export class CmdAchatComponent implements OnInit {
     }
   }
 
+  // Update line quantity in table
+  updateLineQuantity(index: number, event: any): void {
+    const newQuantity = parseInt(event.target.value) || 1;
+    
+    if (newQuantity < 1) {
+      alert('La quantité doit être au moins égale à 1');
+      event.target.value = 1;
+      return;
+    }
+
+    const line = this.commandeLignes.at(index);
+    const currentValue = line.value;
+    const updatedLine = {
+      ...currentValue,
+      quantite: newQuantity,
+      sousTotal: currentValue.prixUnitaire * newQuantity,
+    };
+    
+    line.patchValue(updatedLine);
+    this.updateTotal();
+  }
+
+  // Update line prix unitaire in table
+  updateLinePrixUnitaire(index: number, event: any): void {
+    const newPrixUnitaire = parseFloat(event.target.value) || 0;
+    
+    if (newPrixUnitaire < 0) {
+      alert('Le prix unitaire doit être positif');
+      event.target.value = 0;
+      return;
+    }
+
+    const line = this.commandeLignes.at(index);
+    const currentValue = line.value;
+    const updatedLine = {
+      ...currentValue,
+      prixUnitaire: newPrixUnitaire,
+      sousTotal: newPrixUnitaire * currentValue.quantite,
+    };
+    
+    line.patchValue(updatedLine);
+    this.updateTotal();
+  }
+
   deleteLine(index: number): void {
     this.commandeLignes.removeAt(index);
     this.updateTotal();

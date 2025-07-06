@@ -305,7 +305,7 @@
     <form [formGroup]="commandeForm" (ngSubmit)="saveCommande()" class="space-y-6">
       <!-- Header Information -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
+        <div *ngIf="commandeForm.get('libelle')?.value">
           <label class="mb-1 block text-sm font-medium text-gray-700"> Libellé de la commande </label>
           <input
             type="text"
