@@ -1,40 +1,52 @@
 <!-- Filters Section -->
-<div class="filters-container p-6 mb-6">
+<div class="filters-container mb-6 p-6">
   <div class="filters-header">
     <div class="filter-icon">
-      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+      <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
       </svg>
     </div>
     <div class="flex items-center gap-4">
       <h3>Filtres de recherche</h3>
       @if (hasActiveFilters()) {
-      <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+      <span class="rounded-full bg-blue-100 px-2 py-1 text-sm text-blue-600">
         {{ getFilteredCount() }} résultat(s) trouvé(s)
       </span>
       }
     </div>
   </div>
-  
+
   <div class="filters-grid">
     <div class="filter-item">
       <label>
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
         Libellé commande
       </label>
-      <input 
+      <input
         type="text"
         [(ngModel)]="filters.libelle"
         (ngModelChange)="onFilterChange()"
-        placeholder="Rechercher par libellé...">
+        placeholder="Rechercher par libellé..." />
     </div>
-    
+
     <div class="filter-item">
       <label>
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
         </svg>
         Client
       </label>
@@ -45,11 +57,15 @@
         </option>
       </select>
     </div>
-    
+
     <div class="filter-item">
       <label>
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
         </svg>
         Magasin
       </label>
@@ -60,52 +76,53 @@
         </option>
       </select>
     </div>
-    
+
     <div class="filter-item">
       <label>
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
         Date de début
       </label>
-      <input 
-        type="date" 
-        [(ngModel)]="filters.dateDebut"
-        (ngModelChange)="onFilterChange()"
-        [max]="filters.dateFin">
+      <input type="date" [(ngModel)]="filters.dateDebut" (ngModelChange)="onFilterChange()" [max]="filters.dateFin" />
     </div>
-    
+
     <div class="filter-item">
       <label>
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
         Date de fin
       </label>
-      <input 
-        type="date" 
-        [(ngModel)]="filters.dateFin"
-        (ngModelChange)="onFilterChange()"
-        [min]="filters.dateDebut">
+      <input type="date" [(ngModel)]="filters.dateFin" (ngModelChange)="onFilterChange()" [min]="filters.dateDebut" />
     </div>
 
     <!-- Boutons intégrés dans la grille -->
     <div class="filter-item button-item">
       <div class="compact-buttons">
-        <button 
+        <button
           (click)="applyFiltersWithValidation()"
           [class]="hasActiveFilters() ? 'action-button apply-button active' : 'action-button apply-button'"
           class="action-button apply-button">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
           </svg>
           Appliquer
         </button>
-        <button 
-          (click)="clearFilters()"
-          [disabled]="!hasActiveFilters()"
-          class="action-button clear-button">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button (click)="clearFilters()" [disabled]="!hasActiveFilters()" class="action-button clear-button">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
           Effacer
@@ -119,37 +136,40 @@
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
   <div
     class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
-    
     <!-- Header Title and Stats -->
-    <div class="flex justify-between items-start mb-4 pt-6">
+    <div class="mb-4 flex items-start justify-between pt-6">
       <div class="flex items-center gap-4">
-        <div class="p-2 bg-blue-100 rounded-lg">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        <div class="rounded-lg bg-blue-100 p-2">
+          <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
         </div>
         <div>
           <h1 class="text-2xl font-bold text-gray-800">Commandes de vente</h1>
-          <p class="text-sm text-gray-600 mt-1">Total: {{ totalItems }} commande(s)</p>
+          <p class="mt-1 text-sm text-gray-600">Total: {{ totalItems }} commande(s)</p>
         </div>
       </div>
-      
+
       <!-- Action Buttons -->
       <div class="flex gap-2">
-        <button 
+        <button
           (click)="openModal()"
-          class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          class="flex-none cursor-pointer rounded-md bg-green-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-green-700">
           + Nouvelle commande
         </button>
         <button
           *ngIf="selectdID"
           (click)="editCommande(selectedCommande)"
-          class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          class="flex-none cursor-pointer rounded-md bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">
           Modifier
         </button>
         <button
           *ngIf="selectdID"
-          class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
+          class="flex-none cursor-pointer rounded-md bg-red-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-red-700"
           (click)="deletedPopUp = true">
           Supprimer
         </button>
@@ -158,18 +178,18 @@
 
     <!-- Selection Status and Invoice Button -->
     @if (selectedCommandes.length > 0) {
-    <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4">
+    <div class="mb-4 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
       <div class="flex items-center gap-3">
-        <span class="text-sm text-blue-700 font-medium">
+        <span class="text-sm font-medium text-blue-700">
           {{ selectedCommandes.length }} commande(s) sélectionnée(s)
         </span>
-        <span class="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full font-medium">
+        <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
           ✅ Prêt pour facturation
         </span>
       </div>
-      <button 
+      <button
         (click)="openFactureForm()"
-        class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-semibold">
+        class="rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
         📄 Imprimer facture
       </button>
     </div>
@@ -180,11 +200,11 @@
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
         <tr>
           <th class="px-6 py-3">
-            <input 
+            <input
               type="checkbox"
               [checked]="isAllCommandesSelected()"
               (change)="toggleSelectAllCommandes()"
-              class="rounded border-gray-300 text-green-500 focus:ring-green-500">
+              class="rounded border-gray-300 text-green-500 focus:ring-green-500" />
           </th>
           <th class="px-6 py-3">Libellé</th>
           <th class="px-6 py-3">Date commande</th>
@@ -197,25 +217,32 @@
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
         @for (commande of getPaginatedCommandes(); track $index) {
-        <tr 
+        <tr
           class="cursor-pointer hover:bg-green-50"
-          [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == commande.idCmd }"
+          [ngClass]="{ 'border-l-4 border-green-500 bg-green-100': selectdID == commande.idCmd }"
           (click)="selectdID = commande.idCmd; selectedCommande = commande; toggleCommandeSelection(commande)">
           <td class="px-6 py-4">
-            <input 
+            <input
               type="checkbox"
               [checked]="isCommandeSelected(commande)"
               (click)="$event.stopPropagation()"
               (change)="toggleCommandeSelection(commande)"
-              class="rounded border-gray-300 text-green-500 focus:ring-green-500">
+              class="rounded border-gray-300 text-green-500 focus:ring-green-500" />
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.libelle || commande.libCmd }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.dateCommande || commande.dateCmd | date:'dd/MM/yyyy' }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{commande.personne?.nomPersonne }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{commande?.personne?.devise?.devise }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ commande.dateCommande || commande.dateCmd | date : 'dd/MM/yyyy' }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.personne?.nomPersonne }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ commande?.personne?.devise?.devise }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande?.magasin?.nomMagasin }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.modePaiement || '-' }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ (commande.montantTtc || commande.montantTotal) | currency:getDeviseSymbolForCommande(commande):'symbol':'1.2-2' }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{
+              commande.montantTtc || commande.montantTotal
+                | currency : getDeviseSymbolForCommande(commande) : 'symbol' : '1.2-2'
+            }}
+          </td>
         </tr>
         } @empty {
         <tr>
@@ -229,16 +256,17 @@
     <div class="border-t border-gray-200 bg-white px-6 py-3">
       <div class="flex items-center justify-between">
         <div class="text-sm text-gray-700">
-          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} résultats
+          Affichage de {{ (currentPage - 1) * itemsPerPage + 1 }} à
+          {{ Math.min(currentPage * itemsPerPage, totalItems) }} sur {{ totalItems }} résultats
         </div>
         <div class="flex items-center gap-2">
           <button
             (click)="changePage(currentPage - 1)"
             [disabled]="currentPage === 1"
-            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
             Précédent
           </button>
-          
+
           <div class="flex items-center gap-1">
             <button
               *ngFor="let page of [].constructor(totalPages); let i = index"
@@ -248,11 +276,11 @@
               {{ i + 1 }}
             </button>
           </div>
-          
+
           <button
             (click)="changePage(currentPage + 1)"
             [disabled]="currentPage === totalPages"
-            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
             Suivant
           </button>
         </div>
@@ -265,14 +293,10 @@
 @if (createPopUp) {
 <app-popup>
   <div popup-content class="w-[800px] max-w-4xl">
-    <div class="flex justify-between items-center mb-6">
-      <h3 class="text-xl font-semibold text-gray-800">
-        {{ isEditing ? 'Modifier' : 'Nouvelle' }} commande de vente
-      </h3>
-      <button 
-        (click)="closeModal()"
-        class="text-gray-400 hover:text-gray-600">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="mb-6 flex items-center justify-between">
+      <h3 class="text-xl font-semibold text-gray-800">{{ isEditing ? 'Modifier' : 'Nouvelle' }} commande de vente</h3>
+      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
@@ -280,58 +304,55 @@
 
     <form [formGroup]="commandeForm" (ngSubmit)="saveCommande()" class="space-y-6">
       <!-- Header Information -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Libellé de la commande <span class="text-red-500">*</span>
-          </label>
-          <input 
+          <label class="mb-1 block text-sm font-medium text-gray-700"> Libellé de la commande </label>
+          <input
             type="text"
             formControlName="libelle"
+            readonly
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-            placeholder="Libellé de la commande">
+            placeholder="Libellé de la commande" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
             Date de commande <span class="text-red-500">*</span>
           </label>
-          <input 
+          <input
             type="date"
             formControlName="dateCommande"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
             Client <span class="text-red-500">*</span>
           </label>
-          <select 
+          <select
             formControlName="clientId"
             (change)="onClientChange()"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
             <option value="">Sélectionner un client</option>
-            <option *ngFor="let client of clients" [value]="client.idClient">
-              {{ client.nomPersonne }} 
+            <option *ngFor="let client of clients" [value]="client.idPersonne">
+              {{ client.nomPersonne }}
             </option>
           </select>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Devise
-          </label>
+          <label class="mb-1 block text-sm font-medium text-gray-700"> Devise </label>
           <p
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50 focus:border-blue-500 focus:ring focus:ring-blue-200">
+            class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
             {{ getDevise }}
           </p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
             Magasin <span class="text-red-500">*</span>
           </label>
-          <select 
+          <select
             formControlName="magasinId"
             (change)="onMagasinChange()"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
@@ -343,10 +364,10 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
             Mode de paiement <span class="text-red-500">*</span>
           </label>
-          <select 
+          <select
             formControlName="modePaiement"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
             <option value="">Sélectionner un mode de paiement</option>
@@ -359,77 +380,72 @@
 
       <!-- Line Items Section -->
       <div class="border-t pt-6">
-        <div class="flex justify-between items-center mb-4">
+        <div class="mb-4 flex items-center justify-between">
           <h4 class="text-lg font-medium text-gray-800">Lignes de commande</h4>
-          <button 
+          <button
             type="button"
             (click)="openArticleSelection()"
-            class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+            class="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700">
             + Ajouter un article
           </button>
         </div>
 
         <!-- Line Form -->
         @if (showLineForm) {
-        <div class="bg-gray-50 p-4 rounded-lg mb-4">
-          <h5 class="text-sm font-medium text-gray-700 mb-3">
+        <div class="mb-4 rounded-lg bg-gray-50 p-4">
+          <h5 class="mb-3 text-sm font-medium text-gray-700">
             {{ currentLineIndex !== null ? 'Modifier' : 'Ajouter' }} une ligne
           </h5>
-          <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
-            <input 
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-6">
+            <input
               type="text"
               formControlName="code"
               placeholder="Code"
-              class="rounded border border-gray-300 px-3 py-2 text-sm">
-            <input 
+              class="rounded border border-gray-300 px-3 py-2 text-sm" />
+            <input
               type="text"
               formControlName="reference"
               placeholder="Référence"
-              class="rounded border border-gray-300 px-3 py-2 text-sm">
-            <input 
+              class="rounded border border-gray-300 px-3 py-2 text-sm" />
+            <input
               type="text"
               formControlName="description"
               placeholder="Description"
-              class="rounded border border-gray-300 px-3 py-2 text-sm">
-            <input 
+              class="rounded border border-gray-300 px-3 py-2 text-sm" />
+            <input
               type="number"
               formControlName="prixUnitaire"
               placeholder="Prix"
-              class="rounded border border-gray-300 px-3 py-2 text-sm">
-            <input 
+              class="rounded border border-gray-300 px-3 py-2 text-sm" />
+            <input
               type="number"
               formControlName="quantite"
               placeholder="Quantité"
               class="rounded border border-gray-300 px-3 py-2 text-sm"
               [max]="getMaxQuantity()"
-              (input)="onQuantityChange()">
-            <input 
+              (input)="onQuantityChange()" />
+            <input
               type="number"
               formControlName="tauxTva"
               placeholder="TVA %"
               class="rounded border border-gray-300 px-3 py-2 text-sm"
-              min="0" 
-              max="100" 
-              step="0.01">
+              min="0"
+              max="100"
+              step="0.01" />
           </div>
-          <!-- Stock info -->
-          @if (getCurrentStock() !== null) {
-          <div class="mt-2 text-xs text-gray-600">
-            Stock disponible: <span class="font-medium">{{ getCurrentStock() }}</span> unités
-          </div>
-          }
-          <div class="flex gap-2 mt-3">
-            <button 
+
+          <div class="mt-3 flex gap-2">
+            <button
               type="button"
               (click)="currentLineIndex !== null ? updateLine() : addLine()"
               [disabled]="lineForm.invalid || isQuantityExceedingStock()"
-              class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50">
               {{ currentLineIndex !== null ? 'Mettre à jour' : 'Ajouter' }}
             </button>
-            <button 
+            <button
               type="button"
               (click)="resetLineForm()"
-              class="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400">
+              class="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400">
               Annuler
             </button>
           </div>
@@ -446,14 +462,13 @@
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Description</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">TVA %</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Prix</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Stock disponible</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Quantité</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Sous-total</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr 
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <tr
                 *ngFor="let line of commandeForm.get('lignes')?.value; let i = index"
                 [class]="getLineStatusClass()"
                 class="transition-colors duration-200">
@@ -461,34 +476,30 @@
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.reference }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.description }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.tauxTva || 19 }}%</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:getDeviseSymbol:'symbol':'1.2-2' }}</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ line.stockDisponible }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">
-                  <input 
+                  {{ line.prixUnitaire * getCofDevise | currency : getDeviseSymbol : 'symbol' : '1.2-2' }}
+                </td>
+                <td class="px-3 py-2 text-sm text-gray-900">
+                  <input
                     type="number"
                     [value]="line.quantite"
                     (input)="updateLineQuantity(i, $event)"
-                    class="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-center focus:border-blue-500 focus:ring focus:ring-blue-200"
+                    class="w-20 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
                     min="1"
-                    [max]="line.stockDisponible">
+                    [max]="line.stockDisponible" />
                 </td>
-                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:getDeviseSymbol:'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-gray-900">
+                  {{ line.sousTotal * getCofDevise | currency : getDeviseSymbol : 'symbol' : '1.2-2' }}
+                </td>
                 <td class="px-3 py-2 text-sm">
                   <div class="flex items-center gap-2">
-                    <button 
-                      type="button"
-                      (click)="editLine(i)"
-                      class="text-green-600 hover:text-green-900">
+                    <button type="button" (click)="deleteLine(i)" class="text-red-600 hover:text-red-900">
                       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                      </svg>
-                    </button>
-                    <button 
-                      type="button"
-                      (click)="deleteLine(i)"
-                      class="text-red-600 hover:text-red-900">
-                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                       </svg>
                     </button>
                   </div>
@@ -503,32 +514,38 @@
           <div class="w-64 space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Montant HT:</span>
-              <span class="font-medium">{{ calculateMontantHt() | currency:getDeviseSymbol:'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{
+                calculateMontantHt() * getCofDevise | currency : getDeviseSymbol : 'symbol' : '1.2-2'
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total TVA:</span>
-              <span class="font-medium">{{ calculateMontantTva() | currency:getDeviseSymbol:'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{
+                calculateMontantTva() * getCofDevise | currency : getDeviseSymbol : 'symbol' : '1.2-2'
+              }}</span>
             </div>
             <div class="flex justify-between border-t pt-2">
               <span class="text-sm font-semibold">Montant TTC:</span>
-              <span class="font-bold text-lg">{{ calculateMontantTtc() | currency:getDeviseSymbol:'symbol':'1.2-2' }}</span>
+              <span class="text-lg font-bold">{{
+                calculateMontantTtc() * getCofDevise | currency : getDeviseSymbol : 'symbol' : '1.2-2'
+              }}</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Form Actions -->
-      <div class="flex justify-end gap-3 pt-6 border-t">
-        <button 
+      <div class="flex justify-end gap-3 border-t pt-6">
+        <button
           type="button"
           (click)="closeModal()"
-          class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
+          class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
           Annuler
         </button>
-        <button 
+        <button
           type="submit"
           [disabled]="commandeForm.invalid"
-          class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50">
+          class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50">
           {{ isEditing ? 'Mettre à jour' : 'Enregistrer' }}
         </button>
       </div>
@@ -541,12 +558,10 @@
 @if (detailsPopUp) {
 <app-popup>
   <div popup-content class="w-[600px] max-w-2xl">
-    <div class="flex justify-between items-center mb-6">
+    <div class="mb-6 flex items-center justify-between">
       <h3 class="text-xl font-semibold text-gray-800">Détails de la commande</h3>
-      <button 
-        (click)="closeModal()"
-        class="text-gray-400 hover:text-gray-600">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
@@ -560,7 +575,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Date de commande</label>
-          <p class="text-sm text-gray-900">{{ selectedCommande?.dateCommande | date:'dd/MM/yyyy' }}</p>
+          <p class="text-sm text-gray-900">{{ selectedCommande?.dateCommande | date : 'dd/MM/yyyy' }}</p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Client</label>
@@ -568,7 +583,9 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Devise</label>
-          <p class="text-sm text-gray-900">{{ getClientDevise(selectedCommande?.clientId || selectedCommande?.client || selectedCommande?.idClient) }}</p>
+          <p class="text-sm text-gray-900">
+            {{ getClientDevise(selectedCommande?.clientId || selectedCommande?.client || selectedCommande?.idClient) }}
+          </p>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Magasin</label>
@@ -583,7 +600,7 @@
       <!-- Lines Details -->
       @if (selectedCommande?.lignes?.length > 0) {
       <div class="border-t pt-4">
-        <h4 class="text-lg font-medium text-gray-800 mb-3">Lignes de commande</h4>
+        <h4 class="mb-3 text-lg font-medium text-gray-800">Lignes de commande</h4>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -597,8 +614,8 @@
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Sous-total</th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr 
+            <tbody class="divide-y divide-gray-200 bg-white">
+              <tr
                 *ngFor="let line of selectedCommande.lignes"
                 [class]="getLineStatusClass()"
                 class="transition-colors duration-200">
@@ -606,9 +623,13 @@
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.reference }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.description }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.tauxTva || 19 }}%</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">
+                  {{ line.prixUnitaire | currency : getDeviseSymbolForCommande(selectedCommande) : 'symbol' : '1.2-2' }}
+                </td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.quantite }}</td>
-                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-gray-900">
+                  {{ line.sousTotal | currency : getDeviseSymbolForCommande(selectedCommande) : 'symbol' : '1.2-2' }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -619,15 +640,24 @@
           <div class="w-64 space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Montant HT:</span>
-              <span class="font-medium">{{ selectedCommande?.montantHt | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{
+                selectedCommande?.montantHt
+                  | currency : getDeviseSymbolForCommande(selectedCommande) : 'symbol' : '1.2-2'
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total TVA:</span>
-              <span class="font-medium">{{ selectedCommande?.montantTva | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{
+                selectedCommande?.montantTva
+                  | currency : getDeviseSymbolForCommande(selectedCommande) : 'symbol' : '1.2-2'
+              }}</span>
             </div>
             <div class="flex justify-between border-t pt-2">
               <span class="text-sm font-semibold">Montant TTC:</span>
-              <span class="font-bold text-lg">{{ selectedCommande?.montantTtc | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</span>
+              <span class="text-lg font-bold">{{
+                selectedCommande?.montantTtc
+                  | currency : getDeviseSymbolForCommande(selectedCommande) : 'symbol' : '1.2-2'
+              }}</span>
             </div>
           </div>
         </div>
@@ -635,10 +665,10 @@
       }
     </div>
 
-    <div class="flex justify-end mt-6">
-      <button 
+    <div class="mt-6 flex justify-end">
+      <button
         (click)="closeModal()"
-        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+        class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400">
         Fermer
       </button>
     </div>
@@ -653,7 +683,9 @@
     <h3 class="text-lg font-semibold">Êtes-vous sûr de vouloir supprimer cette commande ?</h3>
     <div class="flex w-full justify-between p-3 py-5">
       <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
-      <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="selectdID && deleteCommande(selectdID); deletedPopUp = false">
+      <button
+        class="mt-3 cursor-pointer text-sm text-red-500 hover:underline"
+        (click)="selectdID && deleteCommande(selectdID); deletedPopUp = false">
         Supprimer
       </button>
     </div>
@@ -665,12 +697,10 @@
 @if (articleSelectionPopUp) {
 <app-popup>
   <div popup-content class="w-[900px] max-w-5xl">
-    <div class="flex justify-between items-center mb-6">
+    <div class="mb-6 flex items-center justify-between">
       <h3 class="text-xl font-semibold text-gray-800">Sélectionner des articles</h3>
-      <button 
-        (click)="closeArticleSelection()"
-        class="text-gray-400 hover:text-gray-600">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button (click)="closeArticleSelection()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
@@ -683,16 +713,20 @@
 
     <!-- Search Filter -->
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Rechercher un article</label>
+      <label class="mb-1 block text-sm font-medium text-gray-700">Rechercher un article</label>
       <div class="relative">
-        <input 
+        <input
           type="text"
           [(ngModel)]="articleSearchFilter"
           placeholder="Rechercher par code, référence ou description..."
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 pl-10 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 pl-10 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
           <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
         </div>
       </div>
@@ -708,49 +742,38 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              <input 
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <input
                 type="checkbox"
                 [checked]="isAllSelected()"
                 (change)="toggleSelectAll()"
-                class="rounded border-gray-300 text-green-500 focus:ring-green-500">
+                class="rounded border-gray-300 text-green-500 focus:ring-green-500" />
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock disponible</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Code</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Référence</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Description</th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Prix</th>
+
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr 
-            *ngFor="let article of getFilteredArticles()" 
-            class="hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+        <tbody class="divide-y divide-gray-200 bg-white">
+          <tr
+            *ngFor="let article of getFilteredArticles()"
+            class="cursor-pointer transition-colors duration-200 hover:bg-gray-50"
             (click)="toggleArticleSelection(article)">
-            <td class="px-4 py-3 whitespace-nowrap">
-              <input 
+            <td class="whitespace-nowrap px-4 py-3">
+              <input
                 type="checkbox"
                 [checked]="isArticleSelected(article)"
                 (click)="$event.stopPropagation()"
                 (change)="toggleArticleSelection(article)"
-                class="rounded border-gray-300 text-green-500 focus:ring-green-500">
+                class="rounded border-gray-300 text-green-500 focus:ring-green-500" />
             </td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ article.code }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.reference }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.description }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.prix | currency:getDeviseSymbol:'symbol':'1.2-2' }}</td>
-            <td class="whitespace-nowrap px-4 py-3">
-              <span
-                [class]="
-                  article.stockDisponible > 10
-                    ? 'bg-green-100 text-green-800'
-                    : article.stockDisponible > 5
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
-                "
-                class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">
-                {{ article.stockDisponible }} unités
-              </span>
+            <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">{{ article.code }}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">{{ article.reference }}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">{{ article.description }}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
+              {{ article.prix | currency : getDeviseSymbol : 'symbol' : '1.2-2' }}
             </td>
           </tr>
         </tbody>
@@ -772,27 +795,25 @@
 
     <!-- Selection summary -->
     @if (selectedArticles.length > 0) {
-    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+    <div class="mt-4 rounded-lg bg-blue-50 p-3">
       <p class="text-sm text-blue-800">
         <strong>{{ selectedArticles.length }}</strong> article(s) sélectionné(s)
       </p>
     </div>
     }
 
-    <div class="flex justify-between items-center mt-6">
-      <div class="text-sm text-gray-600">
-        {{ selectedArticles.length }} article(s) sélectionné(s)
-      </div>
+    <div class="mt-6 flex items-center justify-between">
+      <div class="text-sm text-gray-600">{{ selectedArticles.length }} article(s) sélectionné(s)</div>
       <div class="flex gap-2">
-        <button 
+        <button
           (click)="closeArticleSelection()"
-          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+          class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400">
           Annuler
         </button>
-        <button 
+        <button
           (click)="addSelectedArticles()"
           [disabled]="selectedArticles.length === 0"
-          class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
           Ajouter {{ selectedArticles.length }} article(s)
         </button>
       </div>
@@ -805,12 +826,10 @@
 @if (showFactureForm) {
 <app-popup>
   <div popup-content class="w-[800px] max-w-4xl">
-    <div class="flex justify-between items-center mb-6">
+    <div class="mb-6 flex items-center justify-between">
       <h3 class="text-xl font-semibold text-gray-800">Générer une facture</h3>
-      <button 
-        (click)="closeFactureForm()"
-        class="text-gray-400 hover:text-gray-600">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button (click)="closeFactureForm()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
@@ -818,44 +837,42 @@
 
     <!-- Client Info -->
     @if (selectedCommandes.length > 0) {
-    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-      <p class="text-sm text-blue-800">
-        <strong>Client:</strong> {{ selectedCommandes[0]?.client }}
-      </p>
+    <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+      <p class="text-sm text-blue-800"><strong>Client:</strong> {{ selectedCommandes[0]?.client }}</p>
     </div>
     }
 
     <form [formGroup]="factureForm" (ngSubmit)="printFacture()" class="space-y-6">
       <!-- Facture Information -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
             Numéro de facture <span class="text-red-500">*</span>
           </label>
-          <input 
+          <input
             type="text"
             formControlName="numFacture"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50"
+            class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm"
             readonly
-            placeholder="Numéro généré automatiquement">
-          <p class="text-xs text-gray-500 mt-1">Numéro généré automatiquement</p>
+            placeholder="Numéro généré automatiquement" />
+          <p class="mt-1 text-xs text-gray-500">Numéro généré automatiquement</p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="mb-1 block text-sm font-medium text-gray-700">
             Date de facture <span class="text-red-500">*</span>
           </label>
-          <input 
+          <input
             type="date"
             formControlName="dateFacture"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
         </div>
       </div>
 
       <!-- Selected Commandes Summary -->
       <div class="border-t pt-6">
-        <h4 class="text-lg font-medium text-gray-800 mb-4">Commandes sélectionnées ({{ selectedCommandes.length }})</h4>
-        
+        <h4 class="mb-4 text-lg font-medium text-gray-800">Commandes sélectionnées ({{ selectedCommandes.length }})</h4>
+
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -866,21 +883,25 @@
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Montant TTC</th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="divide-y divide-gray-200 bg-white">
               <ng-container *ngFor="let commande of selectedCommandes; let i = index">
-                <tr 
-                  class="transition-colors duration-200 cursor-pointer hover:bg-gray-50"
+                <tr
+                  class="cursor-pointer transition-colors duration-200 hover:bg-gray-50"
                   (click)="toggleCommandeDetails(commande.idCmd)">
                   <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle }}</td>
-                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.dateCommande | date:'dd/MM/yyyy' }}</td>
-                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.montantHt | currency:'EUR':'symbol':'1.2-2' }}</td>
-                  <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ commande.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.dateCommande | date : 'dd/MM/yyyy' }}</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">
+                    {{ commande.montantHt | currency : 'EUR' : 'symbol' : '1.2-2' }}
+                  </td>
+                  <td class="px-3 py-2 text-sm font-medium text-gray-900">
+                    {{ commande.montantTtc | currency : 'EUR' : 'symbol' : '1.2-2' }}
+                  </td>
                 </tr>
                 <tr *ngIf="expandedCommandes.has(commande.idCmd)">
                   <td colspan="4" class="p-0">
-                    <div class="p-4 bg-gray-100">
-                      <h5 class="font-semibold mb-2">Détails de la commande : {{commande.libelle}}</h5>
-                      <table class="min-w-full bg-white rounded">
+                    <div class="bg-gray-100 p-4">
+                      <h5 class="mb-2 font-semibold">Détails de la commande : {{ commande.libelle }}</h5>
+                      <table class="min-w-full rounded bg-white">
                         <thead class="bg-gray-200">
                           <tr>
                             <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Article</th>
@@ -891,10 +912,10 @@
                         </thead>
                         <tbody>
                           <tr *ngFor="let ligne of commande.lignes">
-                            <td class="px-2 py-1 text-sm">{{ligne.description}}</td>
-                            <td class="px-2 py-1 text-sm">{{ligne.quantite}}</td>
-                            <td class="px-2 py-1 text-sm">{{ligne.prixUnitaire | currency:'EUR':'symbol'}}</td>
-                            <td class="px-2 py-1 text-sm">{{ligne.sousTotal | currency:'EUR':'symbol'}}</td>
+                            <td class="px-2 py-1 text-sm">{{ ligne.description }}</td>
+                            <td class="px-2 py-1 text-sm">{{ ligne.quantite }}</td>
+                            <td class="px-2 py-1 text-sm">{{ ligne.prixUnitaire | currency : 'EUR' : 'symbol' }}</td>
+                            <td class="px-2 py-1 text-sm">{{ ligne.sousTotal | currency : 'EUR' : 'symbol' }}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -911,32 +932,34 @@
           <div class="w-64 space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total HT:</span>
-              <span class="font-medium">{{ calculateFactureTotalHt() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{ calculateFactureTotalHt() | currency : 'EUR' : 'symbol' : '1.2-2' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total TVA:</span>
-              <span class="font-medium">{{ calculateFactureTotalTva() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{ calculateFactureTotalTva() | currency : 'EUR' : 'symbol' : '1.2-2' }}</span>
             </div>
             <div class="flex justify-between border-t pt-2">
               <span class="text-sm font-semibold">Total TTC:</span>
-              <span class="font-bold text-lg">{{ calculateFactureTotal() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="text-lg font-bold">{{
+                calculateFactureTotal() | currency : 'EUR' : 'symbol' : '1.2-2'
+              }}</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Form Actions -->
-      <div class="flex justify-end gap-3 pt-6 border-t">
-        <button 
+      <div class="flex justify-end gap-3 border-t pt-6">
+        <button
           type="button"
           (click)="closeFactureForm()"
-          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-400">
+          class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400">
           Annuler
         </button>
-        <button 
+        <button
           type="submit"
           [disabled]="factureForm.invalid"
-          class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-50">
+          class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50">
           🖨️ Imprimer la facture
         </button>
       </div>

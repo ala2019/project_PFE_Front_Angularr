@@ -8,6 +8,15 @@
 
   <!-- Filters Section -->
   <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-medium text-gray-900">Filtres de recherche</h3>
+      @if (hasActiveFilters()) {
+      <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+        {{ getFilteredCount() }} résultat(s) trouvé(s)
+      </span>
+      }
+    </div>
+    
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <!-- Magasin Filter -->
       <div class="filter-item">
@@ -75,11 +84,15 @@
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           Rechercher
+          @if (filters.searchTerm && filters.searchTerm.trim()) {
+          <span class="ml-1 text-xs text-blue-600">({{ getFilteredCount() }} résultat(s))</span>
+          }
         </label>
         <div class="relative">
           <input
             type="text"
             [(ngModel)]="filters.searchTerm"
+            (input)="onFilterChange()"
             placeholder="Code, référence ou description..."
             class="w-full rounded-lg border border-gray-300 px-3 py-2 pl-10 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
           <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -91,15 +104,24 @@
                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
           </div>
+          @if (filters.searchTerm && filters.searchTerm.trim()) {
+          <button
+            (click)="filters.searchTerm = ''; onFilterChange()"
+            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          }
         </div>
       </div>
 
       <!-- Filter Actions -->
       <div class="flex items-end gap-2">
         <button
-          (click)="applyFilters()"
+          (click)="applyFiltersWithValidation()"
           type="submit"
-          [disabled]="isLoading"
+          [disabled]="isLoading || !selectedMagasin"
           class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
           @if (isLoading) {
           <span class="-ml-1 mr-2 inline-block h-4 w-4 animate-spin text-white">⏳</span>
@@ -108,7 +130,7 @@
         <button
           type="button"
           (click)="clearFilters()"
-          [disabled]="isLoading"
+          [disabled]="isLoading || !hasActiveFilters()"
           class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
           🗑️ Effacer
         </button>
@@ -270,8 +292,27 @@
         stroke-width="2"
         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
     </svg>
-    <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun article trouvé</h3>
-    <p class="mt-1 text-sm text-gray-500">Aucun article ne correspond aux critères de recherche.</p>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">
+      @if (hasActiveFilters()) {
+        Aucun article trouvé avec les filtres actuels
+      } @else {
+        Aucun article en stock dans ce magasin
+      }
+    </h3>
+    <p class="mt-1 text-sm text-gray-500">
+      @if (hasActiveFilters()) {
+        Essayez de modifier vos critères de recherche ou d'effacer les filtres.
+      } @else {
+        Ce magasin ne contient actuellement aucun article en stock.
+      }
+    </p>
+    @if (hasActiveFilters()) {
+    <button
+      (click)="clearFilters()"
+      class="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+      Effacer les filtres
+    </button>
+    }
   </div>
   } @else {
   <!-- Stock Table -->

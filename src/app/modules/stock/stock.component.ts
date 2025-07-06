@@ -173,6 +173,8 @@ export class StockComponent implements OnInit {
         idArticle: a.idArticle,
         code: a.code,
         nom: a.nom,
+        reference: a.reference,
+        description: a.description
       })),
     );
 
@@ -204,8 +206,8 @@ export class StockComponent implements OnInit {
       };
     });
 
-    this.filteredArticles = [...this.articles];
-    this.totalItems = this.filteredArticles.filter((f) => f.quantite > 0).length;
+    // Appliquer les filtres après la combinaison
+    this.applyFilters();
 
     // Afficher le résultat final
     console.log(
@@ -246,63 +248,69 @@ export class StockComponent implements OnInit {
     // Synchroniser searchTerm avec filters.searchTerm
     this.searchTerm = this.filters.searchTerm;
 
-    // Si un terme de recherche est fourni, utiliser l'API de recherche
-    if (this.searchTerm && this.searchTerm.trim()) {
-      this.isLoading = true;
-      this.stockService.searchStock(this.selectedMagasin, this.searchTerm.trim()).subscribe({
-        next: (data) => {
-          // Combiner les résultats de recherche avec les données d'articles
-          this.filteredArticles = data.map((stockItem) => {
-            const article = this.allArticles.find((a) => a.idArticle === stockItem.article?.idArticle);
-            return {
-              ...article,
-              quantite: stockItem.qteStock || 0,
-              stockMin: article ? article.stockMin || 0 : 0,
-            };
-          });
-          this.totalItems = this.filteredArticles.filter((f) => f.quantite > 0).length;
-          this.currentPage = 1;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Erreur lors de la recherche:', error);
-          this.filteredArticles = [];
-          this.totalItems = 0;
-          this.isLoading = false;
-        },
-      });
-    } else {
-      // Sinon, filtrer localement
-      this.filteredArticles = this.articles.filter((article) => {
-        // Filtre par terme de recherche
-        if (this.searchTerm) {
-          const searchLower = this.searchTerm.toLowerCase();
-          if (
-            !article.code?.toLowerCase().includes(searchLower) &&
-            !article.reference?.toLowerCase().includes(searchLower) &&
-            !article.description?.toLowerCase().includes(searchLower)
-          ) {
-            return false;
-          }
+    console.log('Application des filtres:', {
+      magasin: this.selectedMagasin,
+      searchTerm: this.searchTerm,
+      articlesDisponibles: this.articles.length
+    });
+
+    // Filtrer localement les articles
+    this.filteredArticles = this.articles.filter((article) => {
+      // Filtre par terme de recherche
+      if (this.searchTerm && this.searchTerm.trim()) {
+        const searchLower = this.searchTerm.toLowerCase().trim();
+        const codeMatch = article.code?.toLowerCase().includes(searchLower) || false;
+        const referenceMatch = article.reference?.toLowerCase().includes(searchLower) || false;
+        const descriptionMatch = article.description?.toLowerCase().includes(searchLower) || false;
+        const nomMatch = article.nom?.toLowerCase().includes(searchLower) || false;
+        
+        console.log(`Article ${article.code}:`, {
+          code: article.code,
+          reference: article.reference,
+          description: article.description,
+          nom: article.nom,
+          searchTerm: searchLower,
+          matches: { codeMatch, referenceMatch, descriptionMatch, nomMatch }
+        });
+
+        if (!codeMatch && !referenceMatch && !descriptionMatch && !nomMatch) {
+          return false;
         }
+      }
 
-        return true;
-      });
+      return true;
+    });
 
-      this.totalItems = this.filteredArticles.filter((f) => f.quantite > 0).length;
-      this.currentPage = 1;
-    }
+    this.totalItems = this.filteredArticles.length;
+    this.currentPage = 1;
+
+    console.log('Filtres appliqués:', {
+      magasin: this.selectedMagasin,
+      searchTerm: this.searchTerm,
+      results: this.filteredArticles.length,
+      articlesFiltres: this.filteredArticles.slice(0, 3).map(a => ({
+        code: a.code,
+        reference: a.reference,
+        description: a.description
+      }))
+    });
   }
 
   clearFilters(): void {
     this.searchTerm = '';
     this.filters.searchTerm = '';
     this.filters.devise = 'EUR';
+    this.selectedDevise = 'EUR';
+    
     this.filterForm.patchValue({
       searchTerm: '',
       devise: 'EUR',
     });
+    
+    // Réappliquer les filtres pour afficher tous les articles
     this.applyFilters();
+    
+    console.log('Filtres effacés, affichage de tous les articles');
   }
 
   // Stock methods
@@ -531,5 +539,102 @@ export class StockComponent implements OnInit {
 
     // Logique d'impression à implémenter
     console.log('Printing stock report...');
+  }
+
+  // Vérifier si des filtres sont actifs
+  hasActiveFilters(): boolean {
+    const hasSearchTerm = Boolean(this.filters.searchTerm && this.filters.searchTerm.trim() !== '');
+    const hasCustomDevise = Boolean(this.filters.devise && this.filters.devise !== 'EUR');
+    return hasSearchTerm || hasCustomDevise;
+  }
+
+  // Obtenir le nombre de résultats filtrés
+  getFilteredCount(): number {
+    return this.filteredArticles.length;
+  }
+
+  // Méthode de test pour la recherche
+  testSearch(searchTerm: string): void {
+    console.log('=== TEST RECHERCHE ===');
+    console.log('Terme de recherche:', searchTerm);
+    
+    if (!this.articles || this.articles.length === 0) {
+      console.log('Aucun article disponible pour la recherche');
+      return;
+    }
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    const results = this.articles.filter(article => {
+      const codeMatch = article.code?.toLowerCase().includes(searchLower) || false;
+      const referenceMatch = article.reference?.toLowerCase().includes(searchLower) || false;
+      const descriptionMatch = article.description?.toLowerCase().includes(searchLower) || false;
+      const nomMatch = article.nom?.toLowerCase().includes(searchLower) || false;
+      
+      return codeMatch || referenceMatch || descriptionMatch || nomMatch;
+    });
+    
+    console.log('Résultats trouvés:', results.length);
+    console.log('Premiers résultats:', results.slice(0, 3).map(r => ({
+      code: r.code,
+      reference: r.reference,
+      description: r.description,
+      nom: r.nom
+    })));
+    console.log('=== FIN TEST RECHERCHE ===');
+  }
+
+  // Méthode de débogage pour vérifier les données des articles
+  debugArticleData(): void {
+    console.log('=== DÉBOGAGE DONNÉES ARTICLES ===');
+    console.log('Articles totaux:', this.articles.length);
+    console.log('Articles filtrés:', this.filteredArticles.length);
+    
+    if (this.articles.length > 0) {
+      const sampleArticle = this.articles[0];
+      console.log('Exemple d\'article:', {
+        idArticle: sampleArticle.idArticle,
+        code: sampleArticle.code,
+        reference: sampleArticle.reference,
+        description: sampleArticle.description,
+        nom: sampleArticle.nom,
+        quantite: sampleArticle.quantite,
+        stockMin: sampleArticle.stockMin
+      });
+    }
+    
+    console.log('Terme de recherche actuel:', this.searchTerm);
+    console.log('Magasin sélectionné:', this.selectedMagasin);
+    console.log('=== FIN DÉBOGAGE ===');
+  }
+
+  // Appliquer les filtres automatiquement quand les valeurs changent
+  onFilterChange(): void {
+    // Tester la recherche si un terme est fourni
+    if (this.filters.searchTerm && this.filters.searchTerm.trim()) {
+      this.testSearch(this.filters.searchTerm);
+    }
+    
+    // Appliquer les filtres immédiatement pour une meilleure réactivité
+    this.applyFilters();
+    // Déboguer les données
+    this.debugArticleData();
+  }
+
+  // Validation des filtres
+  validateFilters(): boolean {
+    // Vérifier que le magasin est sélectionné
+    if (!this.selectedMagasin) {
+      console.warn('Aucun magasin sélectionné');
+      return false;
+    }
+    return true;
+  }
+
+  // Appliquer les filtres avec validation
+  applyFiltersWithValidation(): void {
+    if (!this.validateFilters()) {
+      return;
+    }
+    this.applyFilters();
   }
 }

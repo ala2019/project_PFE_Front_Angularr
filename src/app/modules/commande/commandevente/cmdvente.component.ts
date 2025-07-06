@@ -12,16 +12,15 @@ import { StockService } from 'src/app/core/services/stock.service';
   templateUrl: './cmdvente.component.html',
   styleUrls: ['./cmdvente.component.scss'],
   imports: [CommonModule, ReactiveFormsModule, FormsModule, PopupComponent],
-  standalone: true
+  standalone: true,
 })
 export class CmdventetComponent implements OnInit {
-
   // Popup management
   createPopUp = false;
   detailsPopUp = false;
   deletedPopUp = false;
   articleSelectionPopUp = false;
-  
+
   // Selection tracking
   selectdID: number | null = null;
   selectedCommande: any = null;
@@ -36,12 +35,12 @@ export class CmdventetComponent implements OnInit {
   articles: any[] = [];
   articlesWithStock: any[] = [];
   modesPaiement: any[] = [];
-  
+
   // Forms
   commandeForm!: FormGroup;
   lineForm!: FormGroup;
   factureForm!: FormGroup;
-  
+
   // State management
   isEditing = false;
   showLineForm = false;
@@ -53,7 +52,7 @@ export class CmdventetComponent implements OnInit {
     client: '',
     magasin: '',
     dateDebut: '',
-    dateFin: ''
+    dateFin: '',
   };
 
   // Article search filter
@@ -77,11 +76,11 @@ export class CmdventetComponent implements OnInit {
   Math = Math;
 
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private service: CommandeService,
     private fournisseurClientService: FournisseurClientService,
     private magasinService: MagasinService,
-    private stockService: StockService
+    private stockService: StockService,
   ) {
     this.initForms();
   }
@@ -93,13 +92,12 @@ export class CmdventetComponent implements OnInit {
 
   initForms(): void {
     this.commandeForm = this.fb.group({
-      libelle: ['', Validators.required],
+      libelle: [''],
       dateCommande: [new Date().toISOString().substring(0, 10), Validators.required],
       clientId: ['', Validators.required],
-      devise: ['', Validators.required],
       modePaiement: ['', Validators.required],
       lignes: [[]],
-      magasinId: [null, Validators.required]
+      magasinId: [null, Validators.required],
     });
 
     this.lineForm = this.fb.group({
@@ -108,14 +106,14 @@ export class CmdventetComponent implements OnInit {
       description: ['', Validators.required],
       prixUnitaire: [0, [Validators.required, Validators.min(0)]],
       quantite: [1, [Validators.required, Validators.min(1)]],
-      tauxTva: [19, [Validators.required, Validators.min(0), Validators.max(100)]]
+      tauxTva: [19, [Validators.required, Validators.min(0), Validators.max(100)]],
     });
 
     this.factureForm = this.fb.group({
       numFacture: [this.nextFactureNumber, Validators.required],
       dateFacture: [new Date().toISOString().substring(0, 10), Validators.required],
       clientId: ['', Validators.required],
-      commandes: [[], Validators.required]
+      commandes: [[], Validators.required],
     });
   }
 
@@ -141,7 +139,7 @@ export class CmdventetComponent implements OnInit {
       { idModePaiement: 1, nom: 'Espèces' },
       { idModePaiement: 2, nom: 'Chèque' },
       { idModePaiement: 3, nom: 'Virement' },
-      { idModePaiement: 4, nom: 'Carte bancaire' }
+      { idModePaiement: 4, nom: 'Carte bancaire' },
     ];
   }
 
@@ -151,9 +149,9 @@ export class CmdventetComponent implements OnInit {
       next: (data) => {
         this.magasins = data || [];
         console.log('Magasins chargés:', this.magasins);
-        
+
         // Charger les stocks pour chaque magasin
-        this.magasins.forEach(magasin => {
+        this.magasins.forEach((magasin) => {
           this.loadStocksForMagasin(magasin.idMagasin);
         });
       },
@@ -175,18 +173,18 @@ export class CmdventetComponent implements OnInit {
       error: (error) => {
         console.error(`Erreur lors du chargement des stocks pour le magasin ${magasinId}:`, error);
         this.stocksByMagasin[magasinId] = [];
-      }
+      },
     });
   }
 
   // Méthode pour extraire les articles avec stocks d'un magasin sélectionné
   getArticlesFromMagasin(magasinId: number): any[] {
-    console.log('Recherche d\'articles pour le magasin ID:', magasinId);
+    console.log("Recherche d'articles pour le magasin ID:", magasinId);
     console.log('Stocks disponibles par magasin:', this.stocksByMagasin);
-    
+
     const stocks = this.stocksByMagasin[magasinId];
     console.log('Stocks pour ce magasin:', stocks);
-    
+
     if (!stocks || stocks.length === 0) {
       console.log('Aucun stock trouvé pour le magasin:', magasinId);
       return [];
@@ -211,18 +209,21 @@ export class CmdventetComponent implements OnInit {
     if (!stocks) return 0;
 
     const stock = stocks.find((s: any) => s.article?.idArticle === articleId);
-    return stock ? (stock.qteStock || stock.quantite || 0) : 0;
+    return stock ? stock.qteStock || stock.quantite || 0 : 0;
   }
 
   // Filter methods
   applyFilters(): void {
-    this.filteredCommandes = this.commandes.filter(commande => {
+    this.filteredCommandes = this.commandes.filter((commande) => {
       // Filtre par libellé
-      if (this.filters.libelle && !commande.libelle?.toLowerCase().includes(this.filters.libelle.toLowerCase()) && 
-          !commande.libCmd?.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
+      if (
+        this.filters.libelle &&
+        !commande.libelle?.toLowerCase().includes(this.filters.libelle.toLowerCase()) &&
+        !commande.libCmd?.toLowerCase().includes(this.filters.libelle.toLowerCase())
+      ) {
         return false;
       }
-      
+
       // Filtre par client
       if (this.filters.client) {
         const clientId = commande?.personne?.idPersonne || commande?.clientId || commande?.client;
@@ -230,7 +231,7 @@ export class CmdventetComponent implements OnInit {
           return false;
         }
       }
-      
+
       // Filtre par magasin
       if (this.filters.magasin) {
         const magasinId = commande?.magasin?.idMagasin || commande?.magasinId;
@@ -238,7 +239,7 @@ export class CmdventetComponent implements OnInit {
           return false;
         }
       }
-      
+
       // Filtre par date de début
       if (this.filters.dateDebut) {
         const commandeDate = commande.dateCommande || commande.dateCmd;
@@ -246,7 +247,7 @@ export class CmdventetComponent implements OnInit {
           return false;
         }
       }
-      
+
       // Filtre par date de fin
       if (this.filters.dateFin) {
         const commandeDate = commande.dateCommande || commande.dateCmd;
@@ -254,14 +255,14 @@ export class CmdventetComponent implements OnInit {
           return false;
         }
       }
-      
+
       return true;
     });
-    
+
     // Mettre à jour le total et revenir à la première page
     this.totalItems = this.filteredCommandes.length;
     this.currentPage = 1;
-    
+
     console.log('Filtres appliqués:', this.filters);
     console.log('Commandes filtrées:', this.filteredCommandes.length);
   }
@@ -272,24 +273,26 @@ export class CmdventetComponent implements OnInit {
       client: '',
       magasin: '',
       dateDebut: '',
-      dateFin: ''
+      dateFin: '',
     };
-    
+
     // Réinitialiser les commandes filtrées
     this.filteredCommandes = [...this.commandes];
     this.totalItems = this.filteredCommandes.length;
     this.currentPage = 1;
-    
+
     console.log('Filtres effacés, affichage de toutes les commandes');
   }
 
   // Vérifier si des filtres sont actifs
   hasActiveFilters(): boolean {
-    return this.filters.libelle !== '' || 
-           this.filters.client !== '' || 
-           this.filters.magasin !== '' || 
-           this.filters.dateDebut !== '' || 
-           this.filters.dateFin !== '';
+    return (
+      this.filters.libelle !== '' ||
+      this.filters.client !== '' ||
+      this.filters.magasin !== '' ||
+      this.filters.dateDebut !== '' ||
+      this.filters.dateFin !== ''
+    );
   }
 
   // Obtenir le nombre de résultats filtrés
@@ -306,7 +309,7 @@ export class CmdventetComponent implements OnInit {
     const articlesFromMagasin = this.getArticlesFromMagasin(parseInt(magasinId));
 
     return articlesFromMagasin
-      .filter(article => {
+      .filter((article) => {
         const searchTerm = this.articleSearchFilter.toLowerCase().trim();
         if (!searchTerm) return true; // Si pas de recherche, afficher tous les articles
 
@@ -317,7 +320,7 @@ export class CmdventetComponent implements OnInit {
           article.description.toLowerCase().includes(searchTerm)
         );
       })
-      .filter(article => article.stockDisponible > 0); // Seulement les articles en stock
+      .filter((article) => article.stockDisponible > 0); // Seulement les articles en stock
   }
 
   // Get stock for selected magasin
@@ -328,8 +331,8 @@ export class CmdventetComponent implements OnInit {
   // Get stock for article by code
   getArticleStockByCode(code: string): number {
     if (!this.selectedMagasin) return 0;
-    const article = this.getFilteredArticles().find(a => a.code === code);
-    return article ? (article.stockDisponible || 0) : 0;
+    const article = this.getFilteredArticles().find((a) => a.code === code);
+    return article ? article.stockDisponible || 0 : 0;
   }
 
   // Get current stock for the line being edited
@@ -358,7 +361,7 @@ export class CmdventetComponent implements OnInit {
     const quantity = this.lineForm.get('quantite')?.value || 0;
     const prixUnitaire = this.lineForm.get('prixUnitaire')?.value || 0;
     const sousTotal = quantity * prixUnitaire;
-    
+
     // Update sous-total in the form for display
     this.lineForm.patchValue({ sousTotal });
   }
@@ -367,29 +370,24 @@ export class CmdventetComponent implements OnInit {
   updateLineQuantity(index: number, event: any): void {
     const newQuantity = parseInt(event.target.value) || 1;
     const lignes = this.commandeForm.get('lignes')?.value || [];
-    
+
     if (index >= 0 && index < lignes.length) {
       const line = lignes[index];
       const stockDisponible = line.stockDisponible || 0;
-      
+
       // Vérifier que la quantité ne dépasse pas le stock disponible
-      if (newQuantity > stockDisponible) {
-        alert(`La quantité ne peut pas dépasser le stock disponible (${stockDisponible} unités)`);
-        event.target.value = Math.min(newQuantity, stockDisponible);
-        return;
-      }
-      
+
       // Vérifier que la quantité est au moins égale à 1
       if (newQuantity < 1) {
         alert('La quantité doit être au moins égale à 1');
         event.target.value = 1;
         return;
       }
-      
+
       // Mettre à jour la quantité et recalculer le sous-total
       line.quantite = newQuantity;
       line.sousTotal = line.prixUnitaire * newQuantity;
-      
+
       this.commandeForm.patchValue({ lignes });
       this.updateTotals();
     }
@@ -406,7 +404,7 @@ export class CmdventetComponent implements OnInit {
   getSelectedMagasinName(): string {
     const magasinId = this.commandeForm.get('magasinId')?.value;
     if (!magasinId) return '';
-    const magasin = this.magasins.find(m => m.idMagasin === parseInt(magasinId));
+    const magasin = this.magasins.find((m) => m.idMagasin === parseInt(magasinId));
     return magasin ? magasin.nomMagasin : '';
   }
 
@@ -414,7 +412,7 @@ export class CmdventetComponent implements OnInit {
   getFactureClientName(): string {
     const clientId = this.factureForm?.get('clientId')?.value;
     if (!clientId) return '';
-    const client = this.clients.find(c => c.idClient === clientId);
+    const client = this.clients.find((c) => c.idClient === clientId);
     return client ? client.nom : '';
   }
 
@@ -438,12 +436,12 @@ export class CmdventetComponent implements OnInit {
     // Vérifier si un magasin est sélectionné
     const magasinId = this.commandeForm.get('magasinId')?.value;
     if (!magasinId) {
-      alert('Veuillez d\'abord sélectionner un magasin avant d\'ajouter des articles.');
+      alert("Veuillez d'abord sélectionner un magasin avant d'ajouter des articles.");
       return;
     }
-    
+
     const magasinIdNum = parseInt(magasinId);
-    
+
     // Vérifier si les stocks sont chargés pour ce magasin
     if (!this.stocksByMagasin[magasinIdNum]) {
       console.log('Stocks non encore chargés pour le magasin, chargement en cours...');
@@ -451,14 +449,14 @@ export class CmdventetComponent implements OnInit {
       alert('Chargement des stocks en cours. Veuillez réessayer dans quelques secondes.');
       return;
     }
-    
+
     // Vérifier que le magasin a des articles en stock
     const articlesFromMagasin = this.getArticlesFromMagasin(magasinIdNum);
     if (articlesFromMagasin.length === 0) {
       alert('Aucun article disponible en stock dans ce magasin');
       return;
     }
-    
+
     this.articleSelectionPopUp = true;
     this.articleSearchFilter = '';
     this.selectedArticles = [];
@@ -467,7 +465,7 @@ export class CmdventetComponent implements OnInit {
 
   // Toggle article selection (comme dans transfert)
   toggleArticleSelection(article: any): void {
-    const index = this.selectedArticles.findIndex(a => a.idArticle === article.idArticle);
+    const index = this.selectedArticles.findIndex((a) => a.idArticle === article.idArticle);
     if (index > -1) {
       this.selectedArticles.splice(index, 1);
     } else {
@@ -477,7 +475,7 @@ export class CmdventetComponent implements OnInit {
 
   // Check if article is selected (comme dans transfert)
   isArticleSelected(article: any): boolean {
-    return this.selectedArticles.some(a => a.idArticle === article.idArticle);
+    return this.selectedArticles.some((a) => a.idArticle === article.idArticle);
   }
 
   // Toggle select all articles (comme dans transfert)
@@ -498,7 +496,7 @@ export class CmdventetComponent implements OnInit {
 
   // Add selected articles to commande (comme dans transfert)
   addSelectedArticles(): void {
-    this.selectedArticles.forEach(article => {
+    this.selectedArticles.forEach((article) => {
       const newLine = {
         code: article.code,
         reference: article.reference,
@@ -509,14 +507,14 @@ export class CmdventetComponent implements OnInit {
         sousTotal: article.prix || 0,
         stockDisponible: article.stockDisponible,
         idArticle: article.idArticle,
-        idStock: article.idStock
+        idStock: article.idStock,
       };
-      
+
       const lignes = this.commandeForm.get('lignes')?.value || [];
       lignes.push(newLine);
       this.commandeForm.patchValue({ lignes });
     });
-    
+
     this.closeArticleSelection();
     this.updateTotals();
   }
@@ -532,11 +530,11 @@ export class CmdventetComponent implements OnInit {
   onClientChange(): void {
     const clientId = this.commandeForm.get('clientId')?.value;
     if (clientId) {
-      const client = this.clients.find(c => c.idClient === clientId);
+      const client = this.clients.find((c) => c.idClient === clientId);
       if (client) {
         // Mettre à jour le taux TVA par défaut pour les nouvelles lignes
         this.lineForm.patchValue({ tauxTva: client.tauxTva });
-        
+
         // Récupérer et mettre à jour la devise du client
         let devise = '';
         if (client.devise) {
@@ -546,10 +544,10 @@ export class CmdventetComponent implements OnInit {
             devise = client.devise;
           }
         }
-        
+
         // Mettre à jour le champ devise dans le formulaire
         this.commandeForm.patchValue({ devise: devise });
-        
+
         console.log('Client sélectionné:', client.nomPersonne, 'Devise:', devise);
       }
     } else {
@@ -574,19 +572,16 @@ export class CmdventetComponent implements OnInit {
   saveCommande(): void {
     if (this.commandeForm.valid) {
       const formData = this.commandeForm.value;
-      
+
       // Préparer les données selon le format de l'API
       const commandeData = {
         dateCmd: formData.dateCommande,
         montantTotal: this.calculateMontantTtc(),
         modePaiement: formData.modePaiement,
-        dateLivraison: formData.dateCommande,
         type: 'VENTE',
-        statut: 'LANCE',
-        devise: formData.devise,
         detailCmds: this.prepareDetailCmds(formData.lignes),
-        client: { idPersonne: formData.clientId },
-        magasin: { idMagasin: parseInt(formData.magasinId) }
+        personne: { idPersonne: formData.clientId },
+        magasin: { idMagasin: formData.magasinId },
       };
 
       if (this.isEditing) {
@@ -594,7 +589,7 @@ export class CmdventetComponent implements OnInit {
         this.service.update(this.selectdID, commandeData).subscribe({
           next: (updatedCommande) => {
             // Mettre à jour la liste locale
-            const index = this.commandes.findIndex(c => c.idCmd === this.selectdID);
+            const index = this.commandes.findIndex((c) => c.idCmd === this.selectdID);
             if (index !== -1) {
               this.commandes[index] = updatedCommande;
               this.filteredCommandes = [...this.commandes];
@@ -605,7 +600,7 @@ export class CmdventetComponent implements OnInit {
           error: (error) => {
             console.error('Erreur lors de la mise à jour de la commande:', error);
             alert('Erreur lors de la mise à jour de la commande');
-          }
+          },
         });
       } else {
         // Add new commande via API
@@ -620,7 +615,7 @@ export class CmdventetComponent implements OnInit {
           error: (error) => {
             console.error('Erreur lors de la création de la commande:', error);
             alert('Erreur lors de la création de la commande');
-          }
+          },
         });
       }
     }
@@ -629,11 +624,10 @@ export class CmdventetComponent implements OnInit {
   // Méthode pour préparer les détails de commande (comme dans transfert)
   prepareDetailCmds(lignes: any[]): any[] {
     return lignes.map((ligne: any) => ({
+      idDetailCmd: ligne?.idDetailCmd,
       article: { idArticle: ligne.idArticle },
       quantite: ligne.quantite,
-      prixUnitaire: ligne.prixUnitaire,
-      tauxTva: ligne.tauxTva || 19,
-      stock: { idStock: ligne.idStock }
+      prix: ligne.prixUnitaire,
     }));
   }
 
@@ -651,16 +645,15 @@ export class CmdventetComponent implements OnInit {
       description: l.description || l.article?.description || '',
       prixUnitaire: l.prixUnitaire || l.prix || l.article?.prix || 0,
       tauxTva: l.tauxTva || l.tva || l.article?.tva || 19,
-      stockDisponible: l.stockDisponible || 0,
       idArticle: l.idArticle || l.article?.idArticle,
-      idStock: l.idStock
+      idStock: l.idStock,
     }));
 
     // Récupérer la devise du client
     let devise = '';
     const clientId = commande?.personne?.idPersonne || commande?.clientId || '';
     if (clientId) {
-      const client = this.clients.find(c => c.idClient === clientId);
+      const client = this.clients.find((c) => c.idClient === clientId);
       if (client && client.devise) {
         if (typeof client.devise === 'object' && client.devise !== null) {
           devise = client.devise.code || client.devise.nom || client.devise.libelle || '';
@@ -672,14 +665,15 @@ export class CmdventetComponent implements OnInit {
 
     this.commandeForm.patchValue({
       libelle: commande.libelle || commande.libCmd,
-      dateCommande: commande.dateCommande || (commande.dateCmd ? new Date(commande.dateCmd).toISOString().substring(0, 10) : ''),
+      dateCommande:
+        commande.dateCommande || (commande.dateCmd ? new Date(commande.dateCmd).toISOString().substring(0, 10) : ''),
       clientId: clientId,
       devise: devise,
       modePaiement: commande?.modePaiement || '',
       lignes,
       magasinId: commande?.magasin?.idMagasin || commande?.magasinId || '',
     });
-    
+
     // Charger les stocks pour ce magasin si nécessaire
     const magasinId = commande?.magasin?.idMagasin || commande?.magasinId;
     if (magasinId && !this.stocksByMagasin[magasinId]) {
@@ -692,8 +686,8 @@ export class CmdventetComponent implements OnInit {
     this.service.delete(id).subscribe({
       next: () => {
         // Mettre à jour la liste locale
-        this.commandes = this.commandes.filter(c => c.idCmd !== id);
-        this.filteredCommandes = this.filteredCommandes.filter(c => c.idCmd !== id);
+        this.commandes = this.commandes.filter((c) => c.idCmd !== id);
+        this.filteredCommandes = this.filteredCommandes.filter((c) => c.idCmd !== id);
         this.totalItems = this.commandes.length;
         this.selectdID = null;
         this.selectedCommande = null;
@@ -701,7 +695,7 @@ export class CmdventetComponent implements OnInit {
       error: (error) => {
         console.error('Erreur lors de la suppression de la commande:', error);
         alert('Erreur lors de la suppression de la commande');
-      }
+      },
     });
   }
 
@@ -715,16 +709,16 @@ export class CmdventetComponent implements OnInit {
     if (this.lineForm.valid) {
       const lineData = this.lineForm.value;
       const sousTotal = lineData.prixUnitaire * lineData.quantite;
-      
+
       const newLine = {
         ...lineData,
-        sousTotal: sousTotal
+        sousTotal: sousTotal,
       };
-      
+
       const lignes = this.commandeForm.get('lignes')?.value || [];
       lignes.push(newLine);
       this.commandeForm.patchValue({ lignes });
-      
+
       this.updateTotals();
       this.resetLineForm();
     }
@@ -733,7 +727,7 @@ export class CmdventetComponent implements OnInit {
   editLine(index: number): void {
     const lignes = this.commandeForm.get('lignes')?.value || [];
     const line = lignes[index];
-    
+
     this.lineForm.patchValue(line);
     this.currentLineIndex = index;
     this.showLineForm = true;
@@ -743,13 +737,13 @@ export class CmdventetComponent implements OnInit {
     if (this.lineForm.valid && this.currentLineIndex !== null) {
       const lineData = this.lineForm.value;
       const sousTotal = lineData.prixUnitaire * lineData.quantite;
-      
+
       const lignes = this.commandeForm.get('lignes')?.value || [];
       lignes[this.currentLineIndex] = {
         ...lineData,
-        sousTotal: sousTotal
+        sousTotal: sousTotal,
       };
-      
+
       this.commandeForm.patchValue({ lignes });
       this.updateTotals();
       this.resetLineForm();
@@ -768,15 +762,15 @@ export class CmdventetComponent implements OnInit {
     const montantHt = lignes.reduce((sum: number, line: any) => sum + line.sousTotal, 0);
     const montantTva = lignes.reduce((sum: number, line: any) => {
       const tauxTva = line.tauxTva || 19; // Taux par défaut si non défini
-      return sum + (line.sousTotal * (tauxTva / 100));
+      return sum + line.sousTotal * (tauxTva / 100);
     }, 0);
     const montantTtc = montantHt + montantTva;
-    
+
     // Update form values for display
     this.commandeForm.patchValue({
       montantHt: montantHt,
       montantTva: montantTva,
-      montantTtc: montantTtc
+      montantTtc: montantTtc,
     });
   }
 
@@ -789,7 +783,7 @@ export class CmdventetComponent implements OnInit {
     const lignes = this.commandeForm.get('lignes')?.value || [];
     return lignes.reduce((sum: number, line: any) => {
       const tauxTva = line.tauxTva || 19; // Taux par défaut si non défini
-      return sum + (line.sousTotal * (tauxTva / 100));
+      return sum + line.sousTotal * (tauxTva / 100);
     }, 0);
   }
 
@@ -804,7 +798,7 @@ export class CmdventetComponent implements OnInit {
       description: '',
       prixUnitaire: 0,
       quantite: 1,
-      tauxTva: 19
+      tauxTva: 19,
     });
     this.currentLineIndex = null;
     this.showLineForm = false;
@@ -823,7 +817,7 @@ export class CmdventetComponent implements OnInit {
       libelle: '',
       clientId: '',
       devise: '',
-      modePaiement: ''
+      modePaiement: '',
     });
   }
 
@@ -845,7 +839,7 @@ export class CmdventetComponent implements OnInit {
 
   // Facture printing methods
   toggleCommandeSelection(commande: any): void {
-    const index = this.selectedCommandes.findIndex(c => c.idCmd === commande.idCmd);
+    const index = this.selectedCommandes.findIndex((c) => c.idCmd === commande.idCmd);
     if (index > -1) {
       this.selectedCommandes.splice(index, 1);
     } else {
@@ -854,24 +848,24 @@ export class CmdventetComponent implements OnInit {
   }
 
   isCommandeSelected(commande: any): boolean {
-    return this.selectedCommandes.some(c => c.idCmd === commande.idCmd);
+    return this.selectedCommandes.some((c) => c.idCmd === commande.idCmd);
   }
 
   toggleSelectAllCommandes(): void {
     const currentPageCommandes = this.getPaginatedCommandes();
-    const selectedOnCurrentPage = currentPageCommandes.filter(c => this.isCommandeSelected(c));
-    
+    const selectedOnCurrentPage = currentPageCommandes.filter((c) => this.isCommandeSelected(c));
+
     if (selectedOnCurrentPage.length === currentPageCommandes.length) {
       // Désélectionner toutes les commandes de la page courante
-      currentPageCommandes.forEach(commande => {
-        const index = this.selectedCommandes.findIndex(c => c.idCmd === commande.idCmd);
+      currentPageCommandes.forEach((commande) => {
+        const index = this.selectedCommandes.findIndex((c) => c.idCmd === commande.idCmd);
         if (index > -1) {
           this.selectedCommandes.splice(index, 1);
         }
       });
     } else {
       // Sélectionner toutes les commandes de la page courante
-      currentPageCommandes.forEach(commande => {
+      currentPageCommandes.forEach((commande) => {
         if (!this.isCommandeSelected(commande)) {
           this.selectedCommandes.push(commande);
         }
@@ -894,16 +888,16 @@ export class CmdventetComponent implements OnInit {
   openFactureForm(): void {
     if (this.selectedCommandes.length === 0) {
       // Afficher une alerte ou un toast pour notifier l'utilisateur
-      alert("Veuillez sélectionner au moins une commande pour générer une facture.");
+      alert('Veuillez sélectionner au moins une commande pour générer une facture.');
       return;
     }
-    
+
     // Vérifier que toutes les commandes sélectionnées appartiennent au même client
     const firstClientId = this.selectedCommandes[0]?.clientId;
-    const allSameClient = this.selectedCommandes.every(cmd => cmd.clientId === firstClientId);
-    
+    const allSameClient = this.selectedCommandes.every((cmd) => cmd.clientId === firstClientId);
+
     if (!allSameClient) {
-      alert("Toutes les commandes sélectionnées doivent appartenir au même client.");
+      alert('Toutes les commandes sélectionnées doivent appartenir au même client.');
       return;
     }
 
@@ -912,7 +906,7 @@ export class CmdventetComponent implements OnInit {
       numFacture: this.nextFactureNumber,
       dateFacture: new Date().toISOString().substring(0, 10),
       clientId: firstClientId, // Set the client ID here
-      commandes: this.selectedCommandes.map(cmd => cmd.idCmd)
+      commandes: this.selectedCommandes.map((cmd) => cmd.idCmd),
     });
 
     this.showFactureForm = true;
@@ -942,13 +936,13 @@ export class CmdventetComponent implements OnInit {
         totalHt: this.calculateFactureTotalHt(),
         totalTva: this.calculateFactureTotalTva(),
         totalTtc: this.calculateFactureTotal(),
-        client: this.clients.find(c => c.idClient === this.factureForm.value.clientId)?.nom,
-        commandes: this.selectedCommandes
+        client: this.clients.find((c) => c.idClient === this.factureForm.value.clientId)?.nom,
+        commandes: this.selectedCommandes,
       };
 
       // Générer le contenu HTML de la facture
       const factureHtml = this.generateFactureHtml(factureData);
-      
+
       // Ouvrir la fenêtre d'impression
       const printWindow = window.open('', '_blank');
       if (printWindow) {
@@ -1020,7 +1014,9 @@ export class CmdventetComponent implements OnInit {
             </tr>
           </thead>
           <tbody>
-            ${factureData.commandes.map((commande: any) => `
+            ${factureData.commandes
+              .map(
+                (commande: any) => `
               <tr>
                 <td>CMD-${commande.idCmd}</td>
                 <td>${new Date(commande.dateCommande).toLocaleDateString('fr-FR')}</td>
@@ -1029,7 +1025,9 @@ export class CmdventetComponent implements OnInit {
                 <td>${commande.montantTva.toFixed(2)} €</td>
                 <td>${commande.montantTtc.toFixed(2)} €</td>
               </tr>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </tbody>
         </table>
 
@@ -1093,15 +1091,15 @@ export class CmdventetComponent implements OnInit {
     const totalPages = this.totalPages;
     const currentPage = this.currentPage;
     const pages: number[] = [];
-    
+
     // Afficher maximum 5 pages autour de la page courante
     const start = Math.max(1, currentPage - 2);
     const end = Math.min(totalPages, currentPage + 2);
-    
+
     for (let i = start; i <= end; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   }
 
@@ -1111,8 +1109,8 @@ export class CmdventetComponent implements OnInit {
     // Si c'est déjà un nom (string sans chiffre), retourne directement
     if (typeof clientId === 'string' && isNaN(Number(clientId))) return clientId;
     // Recherche par idPersonne ou idClient
-    const client = this.clients.find(c => c.idPersonne === clientId || c.idClient === clientId);
-    return client ? (client.nomPersonne || client.nom) : clientId;
+    const client = this.clients.find((c) => c.idPersonne === clientId || c.idClient === clientId);
+    return client ? client.nomPersonne || client.nom : clientId;
   }
 
   getMagasinName(magasinId: any): string {
@@ -1120,14 +1118,14 @@ export class CmdventetComponent implements OnInit {
     // Si c'est déjà un nom (string sans chiffre), retourne directement
     if (typeof magasinId === 'string' && isNaN(Number(magasinId))) return magasinId;
     // Recherche par idMagasin
-    const magasin = this.magasins.find(m => m.idMagasin === magasinId || m.nomMagasin === magasinId);
-    return magasin ? (magasin.nomMagasin || magasin.nom) : magasinId;
+    const magasin = this.magasins.find((m) => m.idMagasin === magasinId || m.nomMagasin === magasinId);
+    return magasin ? magasin.nomMagasin || magasin.nom : magasinId;
   }
 
   getClientDevise(clientId: any): string {
     if (!clientId) return '';
     // Recherche par idPersonne ou idClient
-    const client = this.clients.find(c => c.idPersonne === clientId || c.idClient === clientId);
+    const client = this.clients.find((c) => c.idPersonne === clientId || c.idClient === clientId);
     if (!client) return '-';
     if (client.devise) {
       if (typeof client.devise === 'object' && client.devise !== null) {
@@ -1138,23 +1136,30 @@ export class CmdventetComponent implements OnInit {
     return '-';
   }
 
-    // Affichage de la devise du client sélectionné dans le formulaire (popup)
+  // Affichage de la devise du client sélectionné dans le formulaire (popup)
   get getDevise(): string {
     const clientId = this.commandeForm.get('clientId')?.value;
-    const client = this.clients.find(c => c.idPersonne == clientId || c.idClient == clientId);
-    if (client && client.devise) {
-      if (typeof client.devise === 'object' && client.devise !== null) {
-        return client.devise.code || client.devise.nom || client.devise.libelle || 'N/A';
-      }
-      return client.devise;
-    }
+    const client = this.clients.find((c) => c.idPersonne == clientId || c.idClient == clientId);
+    if (client) return client?.devise?.devise ?? 'N/A';
     return 'N/A';
   }
+
+  get getCofDevise(): number {
+    const clientId = this.commandeForm.get('clientId')?.value;
+    const client = this.clients.find((c) => c.idPersonne == clientId || c.idClient == clientId);
+    const devise = client?.devise;
+    return devise?.tauxChange || 1;
+  }
+
+  toFix(prix: number){
+    return parseFloat(prix.toFixed(2));
+  }
+
 
   // Obtenir le symbole de devise pour l'affichage des montants
   get getDeviseSymbol(): string {
     const clientId = this.commandeForm.get('clientId')?.value;
-    const client = this.clients.find(c => c.idPersonne == clientId || c.idClient == clientId);
+    const client = this.clients.find((c) => c.idPersonne == clientId || c.idClient == clientId);
     if (client && client.devise) {
       if (typeof client.devise === 'object' && client.devise !== null) {
         return client.devise.symbole || client.devise.code || client.devise.nom || '€';
@@ -1167,9 +1172,9 @@ export class CmdventetComponent implements OnInit {
   // Obtenir le symbole de devise pour une commande spécifique (pour la popup de détails)
   getDeviseSymbolForCommande(commande: any): string {
     if (!commande) return '€';
-    
+
     const clientId = commande?.personne?.idPersonne || commande?.clientId || commande?.client;
-    const client = this.clients.find(c => c.idPersonne == clientId || c.idClient == clientId);
+    const client = this.clients.find((c) => c.idPersonne == clientId || c.idClient == clientId);
     if (client && client.devise) {
       if (typeof client.devise === 'object' && client.devise !== null) {
         return client.devise.symbole || client.devise.code || client.devise.nom || '€';
