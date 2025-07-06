@@ -1,56 +1,42 @@
 <!-- Filters Section -->
-<div class="filters-container mb-6 p-6">
-  <div class="filters-header">
-    <div class="filter-icon">
-      <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
-      </svg>
+<div class="mb-6 rounded-lg border bg-white p-6 shadow-sm">
+  <div class="mb-4 flex items-center justify-between">
+    <div>
+      <h3 class="text-lg font-medium text-gray-900">Filtres de recherche</h3>
     </div>
-    <div class="flex items-center gap-4">
-      <h3>Filtres de recherche</h3>
-      @if (hasActiveFilters()) {
-      <span class="rounded-full bg-blue-100 px-2 py-1 text-sm text-blue-600">
-        {{ getFilteredCount() }} résultat(s) trouvé(s)
-      </span>
-      }
-    </div>
+    @if (hasActiveFilters()) {
+    <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+      {{ getFilteredCount() }} résultat(s) trouvé(s)
+    </span>
+    }
   </div>
-
-  <div class="filters-grid">
+  
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <!-- Libellé commande -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
         Libellé commande
       </label>
       <input
         type="text"
         [(ngModel)]="filters.libelle"
-        (ngModelChange)="onFilterChange()"
-        placeholder="Rechercher par libellé..." />
+        (input)="onFilterChange()"
+        placeholder="Rechercher par libellé..."
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
     </div>
 
+    <!-- Client -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
         </svg>
         Client
       </label>
-      <select [(ngModel)]="filters.client" (ngModelChange)="onFilterChange()">
+      <select [(ngModel)]="filters.client" (change)="onFilterChange()" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
         <option value="">Tous les clients</option>
         <option *ngFor="let client of clients" [value]="client.idClient">
           {{ client.nomPersonne }}
@@ -58,18 +44,15 @@
       </select>
     </div>
 
+    <!-- Magasin -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
         </svg>
         Magasin
       </label>
-      <select [(ngModel)]="filters.magasin" (ngModelChange)="onFilterChange()">
+      <select [(ngModel)]="filters.magasin" (change)="onFilterChange()" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
         <option value="">Tous les magasins</option>
         <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
           {{ magasin.nomMagasin }}
@@ -77,57 +60,41 @@
       </select>
     </div>
 
+    <!-- Date de début -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
         Date de début
       </label>
-      <input type="date" [(ngModel)]="filters.dateDebut" (ngModelChange)="onFilterChange()" [max]="filters.dateFin" />
+      <input type="date" [(ngModel)]="filters.dateDebut" (input)="onFilterChange()" [max]="filters.dateFin" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
     </div>
 
+    <!-- Date de fin -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
         Date de fin
       </label>
-      <input type="date" [(ngModel)]="filters.dateFin" (ngModelChange)="onFilterChange()" [min]="filters.dateDebut" />
+      <input type="date" [(ngModel)]="filters.dateFin" (input)="onFilterChange()" [min]="filters.dateDebut" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
     </div>
 
-    <!-- Boutons intégrés dans la grille -->
-    <div class="filter-item button-item">
-      <div class="compact-buttons">
-        <button
-          (click)="applyFiltersWithValidation()"
-          [class]="hasActiveFilters() ? 'action-button apply-button active' : 'action-button apply-button'"
-          class="action-button apply-button">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
-          </svg>
-          Appliquer
-        </button>
-        <button (click)="clearFilters()" [disabled]="!hasActiveFilters()" class="action-button clear-button">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-          Effacer
-        </button>
-      </div>
+    <!-- Actions -->
+    <div class="flex items-end gap-2">
+      <button
+        (click)="applyFiltersWithValidation()"
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+        🔍 Appliquer
+      </button>
+      <button 
+        (click)="clearFilters()" 
+        [disabled]="!hasActiveFilters()"
+        class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
+        🗑️ Effacer
+      </button>
     </div>
   </div>
 </div>

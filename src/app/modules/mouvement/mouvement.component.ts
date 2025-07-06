@@ -492,7 +492,6 @@ export class MouvementComponent implements OnInit {
   // Type filter change handler
   onTypeFilterChange(event: any, type: string): void {
     const currentTypes = this.filterForm.get('typeMouvement')?.value || [];
-
     if (event.target.checked) {
       if (!currentTypes.includes(type)) {
         currentTypes.push(type);
@@ -503,7 +502,24 @@ export class MouvementComponent implements OnInit {
         currentTypes.splice(index, 1);
       }
     }
-
     this.filterForm.patchValue({ typeMouvement: currentTypes });
+  }
+
+  // Méthode pour vérifier s'il y a des filtres actifs
+  hasActiveFilters(): boolean {
+    const filterValues = this.filterForm.value;
+    return !!(
+      filterValues.dateDebut || 
+      filterValues.dateFin || 
+      filterValues.libelle || 
+      (filterValues.typeMouvement && filterValues.typeMouvement.length > 0) ||
+      filterValues.magasinSource ||
+      filterValues.typeCommande
+    );
+  }
+
+  // Méthode pour obtenir le nombre de mouvements filtrés
+  getFilteredCount(): number {
+    return this.filteredMouvements.length;
   }
 }

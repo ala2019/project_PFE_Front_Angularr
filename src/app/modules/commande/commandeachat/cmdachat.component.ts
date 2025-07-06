@@ -720,4 +720,12 @@ export class CmdAchatComponent implements OnInit {
       this.currentPage = page;
     }
   }
+
+  hasActiveFilters(): boolean {
+    return !!(this.filters.libelle || this.filters.statut || this.filters.fournisseur || this.filters.dateDebut || this.filters.dateFin);
+  }
+
+  getFilteredCount(): number {
+    return this.commandes.length;
+  }
 }

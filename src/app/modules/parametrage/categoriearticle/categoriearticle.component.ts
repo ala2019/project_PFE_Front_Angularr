@@ -21,8 +21,14 @@ export class CategoriearticleComponent implements OnInit {
   selectedCategorie: any = null;
 
   categories: any[] = [];
+  filteredCategories: any[] = [];
   formData: any = this.resetForm();
   isEditing = false;
+
+  // Filters
+  filters = {
+    nomCategorie: ''
+  };
 
   constructor(private service: CategorieArticleService) {}
 
@@ -33,6 +39,7 @@ export class CategoriearticleComponent implements OnInit {
   getCategories(): void {
     this.service.getcategorie().subscribe(data => {
       this.categories = data;
+      this.filteredCategories = [...data];
     });
   }
 
@@ -84,5 +91,36 @@ export class CategoriearticleComponent implements OnInit {
   private afterSave(): void {
     this.getCategories();
     this.closeModal();
+  }
+
+  // Filter methods
+  hasActiveFilters(): boolean {
+    return !!(this.filters.nomCategorie?.trim());
+  }
+
+  getFilteredCount(): number {
+    return this.filteredCategories.length;
+  }
+
+  onFilterChange(): void {
+    // Cette méthode peut être appelée pour des actions en temps réel si nécessaire
+  }
+
+  applyFilters(): void {
+    this.filteredCategories = this.categories.filter((categorie) => {
+      // Filtre par nom de catégorie
+      if (this.filters.nomCategorie && this.filters.nomCategorie.trim()) {
+        const searchTerm = this.filters.nomCategorie.toLowerCase().trim();
+        return categorie.nomCategorie && categorie.nomCategorie.toLowerCase().includes(searchTerm);
+      }
+      return true;
+    });
+  }
+
+  clearFilters(): void {
+    this.filters = {
+      nomCategorie: ''
+    };
+    this.filteredCategories = [...this.categories];
   }
 }

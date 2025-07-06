@@ -15,7 +15,7 @@
     class="bg-background shadow-custom border-muted absolute z-20 mt-2 w-60 origin-top-right transform rounded-md border border-dashed py-4 ring-1 ring-transparent ring-opacity-5 transition focus:outline-hidden ltr:right-0 rtl:left-0">
     <div class="flext-row flex items-center px-4 pb-4">
       <div class="w-10 shrink-0">
-        <img class="rounded-md" src="https://avatars.githubusercontent.com/u/12519008?v=4" alt="" />
+        <img class="rounded-md" src="https://avatars.githubusercontent.com/u/12519008?v=4" alt="" /> <!-- TODO -->
       </div>
       <div class="text-foreground overflow-hidden px-2 text-sm font-semibold">
         Luciano Oliveira
@@ -74,7 +74,7 @@
         }
       </div>
     </div>
-    <div class="mx-4 my-2">
+    <div class="mx-4 my-2" *ngIf="false">
       <span class="text-foreground text-xs font-semibold">Direction</span>
       <div class="mt-2 grid grid-cols-2 gap-2">
         @for (item of themeDirection; track $index) {

@@ -664,4 +664,14 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
     this.detailPopUp = false;
     this.selectedArticleForDetail = null;
   }
+
+  // Méthode pour vérifier s'il y a des filtres actifs
+  hasActiveFilters(): boolean {
+    return !!(this.filters.code || this.filters.reference || this.filters.description || this.filters.categorie);
+  }
+
+  // Méthode pour obtenir le nombre d'articles filtrés
+  getFilteredCount(): number {
+    return this.filteredArticles.length;
+  }
 }

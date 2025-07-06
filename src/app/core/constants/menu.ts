@@ -3,7 +3,7 @@ import { MenuItem } from '../models/menu.model';
 export class Menu {
   public static pages: MenuItem[] = [
     {
-      group: 'Base',
+      group: 'Menu',
       separator: false,
       items: [
         {
@@ -73,9 +73,9 @@ export class Menu {
             { label: 'Categorie Article ', route: '/parametrage/categoriearticle' },
             { label: 'Extra ', route: '/parametrage/extra' },
             { label: 'Devises ', route: '/parametrage/devise' },
-            { label: 'Fournisseur / Client ', route: '/fournisseur-client' },
-            { label: 'Region / Magasin ', route: '/region-magasin' },
-            { label: 'Gestion Utilisateurs ', route: '/gestionusers' },
+            { label: 'Fournisseur / Client ', route: '/parametrage/fournisseur-client' },
+            { label: 'Region / Magasin ', route: '/parametrage/region-magasin' },
+            { label: 'Gestion Utilisateurs ', route: '/parametrage/gestionusers' },
               // { label: 'List des fournisseurs ', route: '/parametrage/fouenisseur' },
             //{ label: 'List des clients ', route: '/parametrage/client' },
             //{ label: 'List des regions ', route: '/parametrage/regions' },

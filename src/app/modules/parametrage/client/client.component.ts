@@ -29,6 +29,15 @@ export class ClientComponent implements OnInit {
   formData: any = this.resetForm();
   isEditing = false;
 
+  // Filtres
+  filters = {
+    codeClient: '',
+    nom: '',
+    email: '',
+    devise: ''
+  };
+  filteredClients: any[] = [];
+
   constructor(
     private service: PersonneService,
     private deviseService: DeviseService
@@ -44,6 +53,7 @@ export class ClientComponent implements OnInit {
       next: (data) => {
         console.log('Données brutes reçues du backend:', data);
         this.clients = data.filter((p: any) => p.type === 'CLIENT');
+        this.filteredClients = [...this.clients];
         console.log('Clients filtrés:', this.clients);
         if (this.clients.length > 0) {
           console.log('Premier client:', this.clients[0]);
@@ -180,5 +190,42 @@ export class ClientComponent implements OnInit {
     if (client.code_personne) return client.code_personne;
     
     return `CLI-${client.idPersonne || 'N/A'}`;
+  }
+
+  // Méthodes pour les filtres
+  applyFilters(): void {
+    this.filteredClients = this.clients.filter(client => {
+      const codeMatch = !this.filters.codeClient || 
+        this.getClientCode(client).toLowerCase().includes(this.filters.codeClient.toLowerCase());
+      
+      const nomMatch = !this.filters.nom || 
+        client.nomPersonne?.toLowerCase().includes(this.filters.nom.toLowerCase());
+      
+      const emailMatch = !this.filters.email || 
+        client.email?.toLowerCase().includes(this.filters.email.toLowerCase());
+      
+      const deviseMatch = !this.filters.devise || 
+        client.devise?.idDevise == this.filters.devise;
+      
+      return codeMatch && nomMatch && emailMatch && deviseMatch;
+    });
+  }
+
+  clearFilters(): void {
+    this.filters = {
+      codeClient: '',
+      nom: '',
+      email: '',
+      devise: ''
+    };
+    this.filteredClients = [...this.clients];
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.filters.codeClient || this.filters.nom || this.filters.email || this.filters.devise);
+  }
+
+  getFilteredCount(): number {
+    return this.filteredClients.length;
   }
 }

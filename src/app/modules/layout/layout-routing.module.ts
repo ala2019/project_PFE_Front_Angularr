@@ -88,15 +88,15 @@ const routes: Routes = [
         component: CategoriearticleComponent,
       },
        {
-        path: 'region-magasin',
+        path: 'parametrage/region-magasin',
         component: RegionMagasinComponent,
       },
       {
-        path: 'fournisseur-client',
+        path: 'parametrage/fournisseur-client',
         component: FournisseurClientComponent,
       },
       {
-        path: 'gestionusers',
+        path: 'parametrage/gestionusers',
         component: GestionusersComponent,
       },
     ],
