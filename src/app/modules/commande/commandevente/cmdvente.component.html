@@ -6,7 +6,14 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
       </svg>
     </div>
-    <h3>Filtres de recherche</h3>
+    <div class="flex items-center gap-4">
+      <h3>Filtres de recherche</h3>
+      @if (hasActiveFilters()) {
+      <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+        {{ getFilteredCount() }} résultat(s) trouvé(s)
+      </span>
+      }
+    </div>
   </div>
   
   <div class="filters-grid">
@@ -20,6 +27,7 @@
       <input 
         type="text"
         [(ngModel)]="filters.libelle"
+        (ngModelChange)="onFilterChange()"
         placeholder="Rechercher par libellé...">
     </div>
     
@@ -30,9 +38,9 @@
         </svg>
         Client
       </label>
-      <select [(ngModel)]="filters.client">
+      <select [(ngModel)]="filters.client" (ngModelChange)="onFilterChange()">
         <option value="">Tous les clients</option>
-        <option *ngFor="let client of clients" [value]="client.idPersonne">
+        <option *ngFor="let client of clients" [value]="client.idClient">
           {{ client.nomPersonne }}
         </option>
       </select>
@@ -45,10 +53,10 @@
         </svg>
         Magasin
       </label>
-      <select [(ngModel)]="filters.magasin">
+      <select [(ngModel)]="filters.magasin" (ngModelChange)="onFilterChange()">
         <option value="">Tous les magasins</option>
         <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
-          {{ magasin.nom || magasin.nomMagasin }}
+          {{ magasin.nomMagasin }}
         </option>
       </select>
     </div>
@@ -62,7 +70,9 @@
       </label>
       <input 
         type="date" 
-        [(ngModel)]="filters.dateDebut">
+        [(ngModel)]="filters.dateDebut"
+        (ngModelChange)="onFilterChange()"
+        [max]="filters.dateFin">
     </div>
     
     <div class="filter-item">
@@ -74,14 +84,17 @@
       </label>
       <input 
         type="date" 
-        [(ngModel)]="filters.dateFin">
+        [(ngModel)]="filters.dateFin"
+        (ngModelChange)="onFilterChange()"
+        [min]="filters.dateDebut">
     </div>
 
     <!-- Boutons intégrés dans la grille -->
     <div class="filter-item button-item">
       <div class="compact-buttons">
         <button 
-          (click)="applyFilters()"
+          (click)="applyFiltersWithValidation()"
+          [class]="hasActiveFilters() ? 'action-button apply-button active' : 'action-button apply-button'"
           class="action-button apply-button">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
@@ -90,6 +103,7 @@
         </button>
         <button 
           (click)="clearFilters()"
+          [disabled]="!hasActiveFilters()"
           class="action-button clear-button">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -201,7 +215,7 @@
           <td class="px-6 py-4 font-medium text-gray-800">{{commande?.personne?.devise?.devise }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande?.magasin?.nomMagasin }}</td>
           <td class="px-6 py-4 font-medium text-gray-800">{{ commande.modePaiement || '-' }}</td>
-          <td class="px-6 py-4 font-medium text-gray-800">{{ commande.montantTtc || commande.montantTotal }}</td>
+          <td class="px-6 py-4 font-medium text-gray-800">{{ (commande.montantTtc || commande.montantTotal) | currency:getDeviseSymbolForCommande(commande):'symbol':'1.2-2' }}</td>
         </tr>
         } @empty {
         <tr>
@@ -305,13 +319,24 @@
 
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
+            Devise
+          </label>
+          <p
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-gray-50 focus:border-blue-500 focus:ring focus:ring-blue-200">
+            {{ getDevise }}
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
             Magasin <span class="text-red-500">*</span>
           </label>
           <select 
             formControlName="magasinId"
+            (change)="onMagasinChange()"
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
             <option value="">Sélectionner un magasin</option>
-            <option *ngFor="let magasin of magasins" [value]="magasin.nomMagasin">
+            <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
               {{ magasin.nomMagasin }}
             </option>
           </select>
@@ -421,6 +446,7 @@
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Description</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">TVA %</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Prix</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Stock disponible</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Quantité</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Sous-total</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
@@ -435,17 +461,18 @@
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.reference }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.description }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.tauxTva || 19 }}%</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:getDeviseSymbol:'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.stockDisponible }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">
                   <input 
                     type="number"
                     [value]="line.quantite"
                     (input)="updateLineQuantity(i, $event)"
-                    class="w-16 rounded border border-gray-300 px-2 py-1 text-sm"
+                    class="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-center focus:border-blue-500 focus:ring focus:ring-blue-200"
                     min="1"
-                    [max]="getArticleStockByCode(line.code)">
+                    [max]="line.stockDisponible">
                 </td>
-                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:getDeviseSymbol:'symbol':'1.2-2' }}</td>
                 <td class="px-3 py-2 text-sm">
                   <div class="flex items-center gap-2">
                     <button 
@@ -476,15 +503,15 @@
           <div class="w-64 space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Montant HT:</span>
-              <span class="font-medium">{{ calculateMontantHt() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{ calculateMontantHt() | currency:getDeviseSymbol:'symbol':'1.2-2' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total TVA:</span>
-              <span class="font-medium">{{ calculateMontantTva() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{ calculateMontantTva() | currency:getDeviseSymbol:'symbol':'1.2-2' }}</span>
             </div>
             <div class="flex justify-between border-t pt-2">
               <span class="text-sm font-semibold">Montant TTC:</span>
-              <span class="font-bold text-lg">{{ calculateMontantTtc() | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-bold text-lg">{{ calculateMontantTtc() | currency:getDeviseSymbol:'symbol':'1.2-2' }}</span>
             </div>
           </div>
         </div>
@@ -579,9 +606,9 @@
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.reference }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.description }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.tauxTva || 19 }}%</td>
-                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm text-gray-900">{{ line.prixUnitaire | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</td>
                 <td class="px-3 py-2 text-sm text-gray-900">{{ line.quantite }}</td>
-                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:'EUR':'symbol':'1.2-2' }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-gray-900">{{ line.sousTotal | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</td>
               </tr>
             </tbody>
           </table>
@@ -592,15 +619,15 @@
           <div class="w-64 space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Montant HT:</span>
-              <span class="font-medium">{{ selectedCommande?.montantHt | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{ selectedCommande?.montantHt | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total TVA:</span>
-              <span class="font-medium">{{ selectedCommande?.montantTva | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-medium">{{ selectedCommande?.montantTva | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</span>
             </div>
             <div class="flex justify-between border-t pt-2">
               <span class="text-sm font-semibold">Montant TTC:</span>
-              <span class="font-bold text-lg">{{ selectedCommande?.montantTtc | currency:'EUR':'symbol':'1.2-2' }}</span>
+              <span class="font-bold text-lg">{{ selectedCommande?.montantTtc | currency:getDeviseSymbolForCommande(selectedCommande):'symbol':'1.2-2' }}</span>
             </div>
           </div>
         </div>
@@ -649,20 +676,10 @@
       </button>
     </div>
 
-    <!-- Magasin Selection -->
-    @if (!selectedMagasin) {
-    <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-      <p class="text-sm text-yellow-800">
-        <strong>Attention :</strong> Veuillez d'abord sélectionner un magasin dans la commande pour voir les stocks disponibles.
-      </p>
+    <!-- Magasin source sélectionné -->
+    <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+      <p class="text-sm text-blue-800"><strong>Magasin sélectionné :</strong> {{ getSelectedMagasinName() }}</p>
     </div>
-    } @else {
-    <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-      <p class="text-sm text-blue-800">
-        <strong>Magasin sélectionné :</strong> {{ getSelectedMagasinName() }}
-      </p>
-    </div>
-    }
 
     <!-- Search Filter -->
     <div class="mb-4">
@@ -721,12 +738,18 @@
             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ article.code }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.reference }}</td>
             <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.description }}</td>
-            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.prix | currency:'EUR':'symbol':'1.2-2' }}</td>
-            <td class="px-4 py-3 whitespace-nowrap">
-              <span 
-                [class]="getStockStatusClass(getArticleStock(article))"
-                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
-                {{ getArticleStock(article) }} unités
+            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ article.prix | currency:getDeviseSymbol:'symbol':'1.2-2' }}</td>
+            <td class="whitespace-nowrap px-4 py-3">
+              <span
+                [class]="
+                  article.stockDisponible > 10
+                    ? 'bg-green-100 text-green-800'
+                    : article.stockDisponible > 5
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                "
+                class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">
+                {{ article.stockDisponible }} unités
               </span>
             </td>
           </tr>
@@ -736,15 +759,13 @@
 
     <!-- No results message -->
     @if (getFilteredArticles().length === 0) {
-    <div class="text-center py-8">
-      <p class="text-gray-500 text-sm">
-        @if (!selectedMagasin) {
-          Veuillez sélectionner un magasin pour voir les stocks disponibles
-        } @else if (articleSearchFilter) {
-          Aucun article trouvé pour cette recherche dans le magasin sélectionné
-        } @else {
-          Aucun article disponible en stock dans le magasin sélectionné
-        }
+    <div class="py-8 text-center">
+      <p class="text-sm text-gray-500">
+        {{
+          articleSearchFilter
+            ? 'Aucun article trouvé pour cette recherche'
+            : 'Aucun article disponible en stock dans ce magasin'
+        }}
       </p>
     </div>
     }

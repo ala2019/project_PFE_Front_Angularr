@@ -14,15 +14,14 @@ import { FormsModule } from '@angular/forms';
 export class RegionComponent implements OnInit {
   protected regionList: any[] = [];
   protected selectdID!: any;
-
   protected deletedPopUp = false;
   protected createPopUp = false;
   protected updatePopUp = false;
 
   formData = {
     nomregion: '',
+    codeRegion: '',
     idRegion: null, // Ajout de l'ID pour la mise à jour
-
   };
   
 
@@ -65,7 +64,7 @@ export class RegionComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.formData.nomregion.trim()) {
+    if (this.formData.nomregion.trim() && this.formData.codeRegion.trim()) {
       this.regionService.create(this.formData).subscribe({
         next: (response: any) => {
           console.log('Région créée:', response);
@@ -73,6 +72,7 @@ export class RegionComponent implements OnInit {
           this.formData = {
             idRegion: null,
             nomregion: '',
+            codeRegion: '',
           };
           this.createPopUp = false;
         },
@@ -87,6 +87,7 @@ export class RegionComponent implements OnInit {
     this.formData = {
       idRegion: item.idRegion,
       nomregion: item.nomregion,
+      codeRegion: item.codeRegion,
     };
     this.updatePopUp = true;
   }
@@ -99,11 +100,11 @@ export class RegionComponent implements OnInit {
   }
 
   onSubmitUpdate() {
-    if (this.formData.nomregion.trim() && this.formData.idRegion !== null) {
+    if (this.formData.nomregion.trim() && this.formData.codeRegion.trim() && this.formData.idRegion !== null) {
       this.regionService.update(this.formData.idRegion, this.formData).subscribe({
         next: (response: any) => {
           this.getAll();
-          this.formData = { nomregion: '', idRegion: null };
+          this.formData = { nomregion: '', idRegion: null, codeRegion: '' };
           this.updatePopUp = false;
         },
         error: (err) => {

@@ -15,6 +15,22 @@
   <div popup-content>
     <form #nameForm="ngForm" (ngSubmit)="onSubmit()" class="w-[400px] max-w-sm space-y-4" novalidate>
       <div>
+        <label for="codeRegion" class="mb-1 block text-sm font-medium text-gray-700">
+          Code <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="codeRegion"
+          name="codeRegion"
+          [(ngModel)]="formData.codeRegion"
+          required
+          #codeInput="ngModel"
+          placeholder="Enter code"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="codeInput.invalid && codeInput.touched" class="mt-1 text-xs text-red-500">Code is required.</div>
+      </div>
+
+      <div>
         <label for="nomregion" class="mb-1 block text-sm font-medium text-gray-700">
           Name <span class="text-red-500">*</span>
         </label>
@@ -47,6 +63,22 @@
   <app-popup>
     <div popup-content>
       <form #nameForm="ngForm" (ngSubmit)="onSubmitUpdate()" class="w-[400px] max-w-sm space-y-4" novalidate>
+        <div>
+          <label for="codeRegion" class="mb-1 block text-sm font-medium text-gray-700">
+            Code <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="codeRegion"
+            name="codeRegion"
+            [(ngModel)]="formData.codeRegion"
+            required
+            #codeInput="ngModel"
+            placeholder="Enter code"
+            class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+          <div *ngIf="codeInput.invalid && codeInput.touched" class="mt-1 text-xs text-red-500">Code is required.</div>
+        </div>
+
         <div>
           <label for="nomregion" class="mb-1 block text-sm font-medium text-gray-700">
             Name <span class="text-red-500">*</span>
@@ -107,7 +139,8 @@
     </div>
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
-        <th class="px-6 py-3 text-center">Nom de region</th>
+        <th class="px-6 py-3">Code</th>
+        <th class="px-6 py-3">Nom de region</th>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
         @for (item of regionList; track $index) {
@@ -115,13 +148,16 @@
           class="cursor-pointer hover:bg-green-50"
           [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idRegion }"
           (click)="selectdID = item?.idRegion">
-          <td class="px-6 py-4 font-medium text-gray-800 text-center">
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.codeRegion }}
+          </td>
+          <td class="px-6 py-4 font-medium text-gray-800">
             {{ getRegionName(item) }}
           </td>
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="1">Aucune région trouvée</td>
+          <td class="py-4 text-center text-sm" colspan="2">Aucune région trouvée</td>
         </tr>
         }
       </tbody>

@@ -5,6 +5,7 @@ import { CommandeService } from 'src/app/core/services/commande.service';
 import { PopupComponent } from '../../shared/popup/popup.component';
 import { FournisseurClientService } from 'src/app/core/services/fourisseur-client.service';
 import { MagasinService } from 'src/app/core/services/magasin.service';
+import { StockService } from 'src/app/core/services/stock.service';
 
 @Component({
   selector: 'app-cmdvente',
@@ -31,6 +32,7 @@ export class CmdventetComponent implements OnInit {
   allCommandes: any[] = [];
   clients: any[] = [];
   magasins: any[] = [];
+  stocksByMagasin: { [key: number]: any[] } = {};
   articles: any[] = [];
   articlesWithStock: any[] = [];
   modesPaiement: any[] = [];
@@ -78,13 +80,15 @@ export class CmdventetComponent implements OnInit {
     private fb: FormBuilder, 
     private service: CommandeService,
     private fournisseurClientService: FournisseurClientService,
-    private magasinService: MagasinService
+    private magasinService: MagasinService,
+    private stockService: StockService
   ) {
     this.initForms();
   }
 
   ngOnInit(): void {
     this.loadCommandes();
+    this.loadMagasins();
   }
 
   initForms(): void {
@@ -92,6 +96,7 @@ export class CmdventetComponent implements OnInit {
       libelle: ['', Validators.required],
       dateCommande: [new Date().toISOString().substring(0, 10), Validators.required],
       clientId: ['', Validators.required],
+      devise: ['', Validators.required],
       modePaiement: ['', Validators.required],
       lignes: [[]],
       magasinId: [null, Validators.required]
@@ -131,19 +136,6 @@ export class CmdventetComponent implements OnInit {
     this.fournisseurClientService.getAll().subscribe((data: any[]) => {
       this.clients = (data || []).filter((p: any) => p.type === 'CLIENT');
     });
-    // Charger dynamiquement les magasins
-    this.magasinService.getAll().subscribe((data: any[]) => {
-      this.magasins = data || [];
-    });
-
-    this.articles = [
-      
-    ];
-
-    // Articles avec stock (prix de vente) - stocks par magasin
-    this.articlesWithStock = [
-      
-    ];
 
     this.modesPaiement = [
       { idModePaiement: 1, nom: 'Espèces' },
@@ -153,32 +145,114 @@ export class CmdventetComponent implements OnInit {
     ];
   }
 
+  loadMagasins(): void {
+    console.log('Chargement des magasins...');
+    this.magasinService.getAll().subscribe({
+      next: (data) => {
+        this.magasins = data || [];
+        console.log('Magasins chargés:', this.magasins);
+        
+        // Charger les stocks pour chaque magasin
+        this.magasins.forEach(magasin => {
+          this.loadStocksForMagasin(magasin.idMagasin);
+        });
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des magasins:', error);
+        this.magasins = [];
+      },
+    });
+  }
+
+  // Charger les stocks pour un magasin spécifique
+  loadStocksForMagasin(magasinId: number): void {
+    console.log('Chargement des stocks pour le magasin:', magasinId);
+    this.stockService.getStockByMagasin(magasinId).subscribe({
+      next: (stocks) => {
+        console.log(`Stocks chargés pour le magasin ${magasinId}:`, stocks);
+        this.stocksByMagasin[magasinId] = stocks || [];
+      },
+      error: (error) => {
+        console.error(`Erreur lors du chargement des stocks pour le magasin ${magasinId}:`, error);
+        this.stocksByMagasin[magasinId] = [];
+      }
+    });
+  }
+
+  // Méthode pour extraire les articles avec stocks d'un magasin sélectionné
+  getArticlesFromMagasin(magasinId: number): any[] {
+    console.log('Recherche d\'articles pour le magasin ID:', magasinId);
+    console.log('Stocks disponibles par magasin:', this.stocksByMagasin);
+    
+    const stocks = this.stocksByMagasin[magasinId];
+    console.log('Stocks pour ce magasin:', stocks);
+    
+    if (!stocks || stocks.length === 0) {
+      console.log('Aucun stock trouvé pour le magasin:', magasinId);
+      return [];
+    }
+
+    // Transformer les stocks en articles avec quantité
+    const articlesWithStock = stocks.map((stock: any) => ({
+      ...stock.article,
+      stockDisponible: stock.qteStock || stock.quantite || 0,
+      idStock: stock.idStock,
+      qteStock: stock.qteStock || stock.quantite || 0,
+      prix: stock.article?.prixVente || stock.article?.prix || stock.prix || 0, // Prix de vente
+    }));
+
+    console.log('Articles extraits du magasin:', articlesWithStock);
+    return articlesWithStock;
+  }
+
+  // Méthode pour obtenir le stock d'un article dans un magasin spécifique
+  getArticleStockInMagasin(articleId: number, magasinId: number): number {
+    const stocks = this.stocksByMagasin[magasinId];
+    if (!stocks) return 0;
+
+    const stock = stocks.find((s: any) => s.article?.idArticle === articleId);
+    return stock ? (stock.qteStock || stock.quantite || 0) : 0;
+  }
+
   // Filter methods
   applyFilters(): void {
     this.filteredCommandes = this.commandes.filter(commande => {
       // Filtre par libellé
-      if (this.filters.libelle && !commande.libelle.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
+      if (this.filters.libelle && !commande.libelle?.toLowerCase().includes(this.filters.libelle.toLowerCase()) && 
+          !commande.libCmd?.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
         return false;
       }
       
       // Filtre par client
-      if (this.filters.client && commande.client !== this.filters.client) {
-        return false;
+      if (this.filters.client) {
+        const clientId = commande?.personne?.idPersonne || commande?.clientId || commande?.client;
+        if (clientId !== this.filters.client) {
+          return false;
+        }
       }
       
       // Filtre par magasin
-      if (this.filters.magasin && commande.magasin !== this.filters.magasin) {
-        return false;
+      if (this.filters.magasin) {
+        const magasinId = commande?.magasin?.idMagasin || commande?.magasinId;
+        if (magasinId !== parseInt(this.filters.magasin)) {
+          return false;
+        }
       }
       
       // Filtre par date de début
-      if (this.filters.dateDebut && commande.dateCommande < this.filters.dateDebut) {
-        return false;
+      if (this.filters.dateDebut) {
+        const commandeDate = commande.dateCommande || commande.dateCmd;
+        if (commandeDate && new Date(commandeDate) < new Date(this.filters.dateDebut)) {
+          return false;
+        }
       }
       
       // Filtre par date de fin
-      if (this.filters.dateFin && commande.dateCommande > this.filters.dateFin) {
-        return false;
+      if (this.filters.dateFin) {
+        const commandeDate = commande.dateCommande || commande.dateCmd;
+        if (commandeDate && new Date(commandeDate) > new Date(this.filters.dateFin)) {
+          return false;
+        }
       }
       
       return true;
@@ -205,33 +279,57 @@ export class CmdventetComponent implements OnInit {
     this.filteredCommandes = [...this.commandes];
     this.totalItems = this.filteredCommandes.length;
     this.currentPage = 1;
+    
+    console.log('Filtres effacés, affichage de toutes les commandes');
   }
 
-  // Get filtered articles based on search
+  // Vérifier si des filtres sont actifs
+  hasActiveFilters(): boolean {
+    return this.filters.libelle !== '' || 
+           this.filters.client !== '' || 
+           this.filters.magasin !== '' || 
+           this.filters.dateDebut !== '' || 
+           this.filters.dateFin !== '';
+  }
+
+  // Obtenir le nombre de résultats filtrés
+  getFilteredCount(): number {
+    return this.filteredCommandes.length;
+  }
+
+  // Get filtered articles based on search (comme dans transfert)
   getFilteredArticles(): any[] {
-    return this.articlesWithStock
+    const magasinId = this.commandeForm.get('magasinId')?.value;
+    if (!magasinId) return [];
+
+    // Récupérer les articles du magasin sélectionné
+    const articlesFromMagasin = this.getArticlesFromMagasin(parseInt(magasinId));
+
+    return articlesFromMagasin
       .filter(article => {
         const searchTerm = this.articleSearchFilter.toLowerCase().trim();
-        if (!searchTerm) return true;
-        
-        return article.code.toLowerCase().includes(searchTerm) ||
-               article.reference.toLowerCase().includes(searchTerm) ||
-               article.description.toLowerCase().includes(searchTerm);
+        if (!searchTerm) return true; // Si pas de recherche, afficher tous les articles
+
+        // Recherche par code, référence ou description (critère "contient")
+        return (
+          article.code.toLowerCase().includes(searchTerm) ||
+          article.reference.toLowerCase().includes(searchTerm) ||
+          article.description.toLowerCase().includes(searchTerm)
+        );
       })
-      .filter(article => this.getArticleStock(article) > 0);
+      .filter(article => article.stockDisponible > 0); // Seulement les articles en stock
   }
 
   // Get stock for selected magasin
   getArticleStock(article: any): number {
-    if (!this.selectedMagasin) return 0;
-    return article.stocks[this.selectedMagasin] || 0;
+    return article.stockDisponible || 0;
   }
 
   // Get stock for article by code
   getArticleStockByCode(code: string): number {
     if (!this.selectedMagasin) return 0;
-    const article = this.articlesWithStock.find(a => a.code === code);
-    return article ? (article.stocks[this.selectedMagasin] || 0) : 0;
+    const article = this.getFilteredArticles().find(a => a.code === code);
+    return article ? (article.stockDisponible || 0) : 0;
   }
 
   // Get current stock for the line being edited
@@ -272,12 +370,19 @@ export class CmdventetComponent implements OnInit {
     
     if (index >= 0 && index < lignes.length) {
       const line = lignes[index];
-      const stock = this.getArticleStockByCode(line.code);
+      const stockDisponible = line.stockDisponible || 0;
       
-      // Vérifier que la quantité ne dépasse pas le stock
-      if (newQuantity > stock) {
-        alert(`La quantité ne peut pas dépasser le stock disponible (${stock} unités)`);
-        event.target.value = Math.min(newQuantity, stock);
+      // Vérifier que la quantité ne dépasse pas le stock disponible
+      if (newQuantity > stockDisponible) {
+        alert(`La quantité ne peut pas dépasser le stock disponible (${stockDisponible} unités)`);
+        event.target.value = Math.min(newQuantity, stockDisponible);
+        return;
+      }
+      
+      // Vérifier que la quantité est au moins égale à 1
+      if (newQuantity < 1) {
+        alert('La quantité doit être au moins égale à 1');
+        event.target.value = 1;
         return;
       }
       
@@ -299,9 +404,10 @@ export class CmdventetComponent implements OnInit {
 
   // Get selected magasin name
   getSelectedMagasinName(): string {
-    if (!this.selectedMagasin) return '';
-    const magasin = this.magasins.find(m => m.idMagasin === this.selectedMagasin);
-    return magasin ? magasin.nom : '';
+    const magasinId = this.commandeForm.get('magasinId')?.value;
+    if (!magasinId) return '';
+    const magasin = this.magasins.find(m => m.idMagasin === parseInt(magasinId));
+    return magasin ? magasin.nomMagasin : '';
   }
 
   // Get facture client name
@@ -336,13 +442,30 @@ export class CmdventetComponent implements OnInit {
       return;
     }
     
+    const magasinIdNum = parseInt(magasinId);
+    
+    // Vérifier si les stocks sont chargés pour ce magasin
+    if (!this.stocksByMagasin[magasinIdNum]) {
+      console.log('Stocks non encore chargés pour le magasin, chargement en cours...');
+      this.loadStocksForMagasin(magasinIdNum);
+      alert('Chargement des stocks en cours. Veuillez réessayer dans quelques secondes.');
+      return;
+    }
+    
+    // Vérifier que le magasin a des articles en stock
+    const articlesFromMagasin = this.getArticlesFromMagasin(magasinIdNum);
+    if (articlesFromMagasin.length === 0) {
+      alert('Aucun article disponible en stock dans ce magasin');
+      return;
+    }
+    
     this.articleSelectionPopUp = true;
     this.articleSearchFilter = '';
     this.selectedArticles = [];
-    this.selectedMagasin = magasinId;
+    this.selectedMagasin = magasinIdNum;
   }
 
-  // Toggle article selection
+  // Toggle article selection (comme dans transfert)
   toggleArticleSelection(article: any): void {
     const index = this.selectedArticles.findIndex(a => a.idArticle === article.idArticle);
     if (index > -1) {
@@ -352,12 +475,12 @@ export class CmdventetComponent implements OnInit {
     }
   }
 
-  // Check if article is selected
+  // Check if article is selected (comme dans transfert)
   isArticleSelected(article: any): boolean {
     return this.selectedArticles.some(a => a.idArticle === article.idArticle);
   }
 
-  // Toggle select all articles
+  // Toggle select all articles (comme dans transfert)
   toggleSelectAll(): void {
     const filteredArticles = this.getFilteredArticles();
     if (this.selectedArticles.length === filteredArticles.length) {
@@ -367,23 +490,26 @@ export class CmdventetComponent implements OnInit {
     }
   }
 
-  // Check if all articles are selected
+  // Check if all articles are selected (comme dans transfert)
   isAllSelected(): boolean {
     const filteredArticles = this.getFilteredArticles();
     return filteredArticles.length > 0 && this.selectedArticles.length === filteredArticles.length;
   }
 
-  // Add selected articles to commande
+  // Add selected articles to commande (comme dans transfert)
   addSelectedArticles(): void {
     this.selectedArticles.forEach(article => {
       const newLine = {
         code: article.code,
         reference: article.reference,
         description: article.description,
-        prixUnitaire: article.prix,
+        prixUnitaire: article.prix || 0,
         quantite: 1,
         tauxTva: 19, // Taux TVA par défaut, peut être modifié par ligne
-        sousTotal: article.prix
+        sousTotal: article.prix || 0,
+        stockDisponible: article.stockDisponible,
+        idArticle: article.idArticle,
+        idStock: article.idStock
       };
       
       const lignes = this.commandeForm.get('lignes')?.value || [];
@@ -395,14 +521,14 @@ export class CmdventetComponent implements OnInit {
     this.updateTotals();
   }
 
-  // Close article selection popup
+  // Close article selection popup (comme dans transfert)
   closeArticleSelection(): void {
     this.articleSelectionPopUp = false;
     this.articleSearchFilter = '';
     this.selectedArticles = [];
   }
 
-  // Update client TVA rate when client changes
+  // Update client TVA rate and devise when client changes
   onClientChange(): void {
     const clientId = this.commandeForm.get('clientId')?.value;
     if (clientId) {
@@ -410,6 +536,36 @@ export class CmdventetComponent implements OnInit {
       if (client) {
         // Mettre à jour le taux TVA par défaut pour les nouvelles lignes
         this.lineForm.patchValue({ tauxTva: client.tauxTva });
+        
+        // Récupérer et mettre à jour la devise du client
+        let devise = '';
+        if (client.devise) {
+          if (typeof client.devise === 'object' && client.devise !== null) {
+            devise = client.devise.code || client.devise.nom || client.devise.libelle || '';
+          } else {
+            devise = client.devise;
+          }
+        }
+        
+        // Mettre à jour le champ devise dans le formulaire
+        this.commandeForm.patchValue({ devise: devise });
+        
+        console.log('Client sélectionné:', client.nomPersonne, 'Devise:', devise);
+      }
+    } else {
+      // Si aucun client n'est sélectionné, vider le champ devise
+      this.commandeForm.patchValue({ devise: '' });
+    }
+  }
+
+  // Handle magasin change
+  onMagasinChange(): void {
+    const magasinId = this.commandeForm.get('magasinId')?.value;
+    if (magasinId) {
+      const magasinIdNum = parseInt(magasinId);
+      if (!this.stocksByMagasin[magasinIdNum]) {
+        console.log('Changement de magasin, chargement des stocks...');
+        this.loadStocksForMagasin(magasinIdNum);
       }
     }
   }
@@ -419,52 +575,66 @@ export class CmdventetComponent implements OnInit {
     if (this.commandeForm.valid) {
       const formData = this.commandeForm.value;
       
+      // Préparer les données selon le format de l'API
+      const commandeData = {
+        dateCmd: formData.dateCommande,
+        montantTotal: this.calculateMontantTtc(),
+        modePaiement: formData.modePaiement,
+        dateLivraison: formData.dateCommande,
+        type: 'VENTE',
+        statut: 'LANCE',
+        devise: formData.devise,
+        detailCmds: this.prepareDetailCmds(formData.lignes),
+        client: { idPersonne: formData.clientId },
+        magasin: { idMagasin: parseInt(formData.magasinId) }
+      };
+
       if (this.isEditing) {
-        // Update existing commande locally only
-        const index = this.commandes.findIndex(c => c.idCmd === this.selectdID);
-        if (index !== -1) {
-          const client = this.clients.find(c => c.idClient === formData.clientId);
-          
-          this.commandes[index] = {
-            ...this.commandes[index],
-            ...formData,
-            type: 'vente', // Set type to 'vente' for update
-            client: client?.nom,
-            montantHt: this.calculateMontantHt(),
-            montantTva: this.calculateMontantTva(),
-            montantTtc: this.calculateMontantTtc()
-          };
-        }
-      } else {
-        // Add new commande via API
-        const client = this.clients.find(c => c.idClient === formData.clientId);
-        
-        const newCommande = {
-          ...formData,
-          type: 'vente', // Set type to 'vente' for new
-          client: client?.nom,
-          montantHt: this.calculateMontantHt(),
-          montantTva: this.calculateMontantTva(),
-          montantTtc: this.calculateMontantTtc()
-        };
-        
-        this.service.create(newCommande).subscribe({
-          next: (createdCommande) => {
-            // Optionally, you can push createdCommande or newCommande
-            this.commandes.push(createdCommande);
-            this.filteredCommandes = [...this.commandes];
-            this.totalItems = this.filteredCommandes.length;
+        // Update existing commande via API
+        this.service.update(this.selectdID, commandeData).subscribe({
+          next: (updatedCommande) => {
+            // Mettre à jour la liste locale
+            const index = this.commandes.findIndex(c => c.idCmd === this.selectdID);
+            if (index !== -1) {
+              this.commandes[index] = updatedCommande;
+              this.filteredCommandes = [...this.commandes];
+              this.totalItems = this.commandes.length;
+            }
             this.closeModal();
           },
-          error: (err) => {
+          error: (error) => {
+            console.error('Erreur lors de la mise à jour de la commande:', error);
+            alert('Erreur lors de la mise à jour de la commande');
+          }
+        });
+      } else {
+        // Add new commande via API
+        this.service.create(commandeData).subscribe({
+          next: (createdCommande) => {
+            // Ajouter à la liste locale
+            this.commandes.push(createdCommande);
+            this.filteredCommandes = [...this.commandes];
+            this.totalItems = this.commandes.length;
+            this.closeModal();
+          },
+          error: (error) => {
+            console.error('Erreur lors de la création de la commande:', error);
             alert('Erreur lors de la création de la commande');
           }
         });
-        return; // Prevent closing modal immediately
       }
-      
-      this.closeModal();
     }
+  }
+
+  // Méthode pour préparer les détails de commande (comme dans transfert)
+  prepareDetailCmds(lignes: any[]): any[] {
+    return lignes.map((ligne: any) => ({
+      article: { idArticle: ligne.idArticle },
+      quantite: ligne.quantite,
+      prixUnitaire: ligne.prixUnitaire,
+      tauxTva: ligne.tauxTva || 19,
+      stock: { idStock: ligne.idStock }
+    }));
   }
 
   editCommande(commande: any): void {
@@ -472,33 +642,67 @@ export class CmdventetComponent implements OnInit {
     this.selectedCommande = commande;
     this.isEditing = true;
 
-    // Normaliser les lignes pour garantir la présence de 'reference'
+    // Normaliser les lignes pour garantir la présence de toutes les propriétés
     let lignes = commande.lignes || commande.detailCmds || [];
     lignes = lignes.map((l: any) => ({
       ...l,
       code: l.code || l.article?.code || '',
       reference: l.reference || l.ref || l.article?.reference || '',
       description: l.description || l.article?.description || '',
-      prixUnitaire: l.prixUnitaire || l.prix || l.article?.prix ||'',
-      tauxTva: l.tauxTva || l.tva || l.article?.tva || '',
+      prixUnitaire: l.prixUnitaire || l.prix || l.article?.prix || 0,
+      tauxTva: l.tauxTva || l.tva || l.article?.tva || 19,
+      stockDisponible: l.stockDisponible || 0,
+      idArticle: l.idArticle || l.article?.idArticle,
+      idStock: l.idStock
     }));
+
+    // Récupérer la devise du client
+    let devise = '';
+    const clientId = commande?.personne?.idPersonne || commande?.clientId || '';
+    if (clientId) {
+      const client = this.clients.find(c => c.idClient === clientId);
+      if (client && client.devise) {
+        if (typeof client.devise === 'object' && client.devise !== null) {
+          devise = client.devise.code || client.devise.nom || client.devise.libelle || '';
+        } else {
+          devise = client.devise;
+        }
+      }
+    }
 
     this.commandeForm.patchValue({
       libelle: commande.libelle || commande.libCmd,
       dateCommande: commande.dateCommande || (commande.dateCmd ? new Date(commande.dateCmd).toISOString().substring(0, 10) : ''),
-      clientId: commande?.personne?.nomPersonne || '',
+      clientId: clientId,
+      devise: devise,
       modePaiement: commande?.modePaiement || '',
       lignes,
-      magasinId: commande?.magasin?.nomMagasin || '',
-      
+      magasinId: commande?.magasin?.idMagasin || commande?.magasinId || '',
     });
+    
+    // Charger les stocks pour ce magasin si nécessaire
+    const magasinId = commande?.magasin?.idMagasin || commande?.magasinId;
+    if (magasinId && !this.stocksByMagasin[magasinId]) {
+      this.loadStocksForMagasin(magasinId);
+    }
     this.createPopUp = true;
   }
 
   deleteCommande(id: number): void {
-    this.commandes = this.commandes.filter(c => c.idCmd !== id);
-    this.selectdID = null;
-    this.selectedCommande = null;
+    this.service.delete(id).subscribe({
+      next: () => {
+        // Mettre à jour la liste locale
+        this.commandes = this.commandes.filter(c => c.idCmd !== id);
+        this.filteredCommandes = this.filteredCommandes.filter(c => c.idCmd !== id);
+        this.totalItems = this.commandes.length;
+        this.selectdID = null;
+        this.selectedCommande = null;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression de la commande:', error);
+        alert('Erreur lors de la suppression de la commande');
+      }
+    });
   }
 
   viewDetails(commande: any): void {
@@ -598,9 +802,9 @@ export class CmdventetComponent implements OnInit {
       code: '',
       reference: '',
       description: '',
-      prix: '',
-      quantite: '',
-      tauxTva: ''
+      prixUnitaire: 0,
+      quantite: 1,
+      tauxTva: 19
     });
     this.currentLineIndex = null;
     this.showLineForm = false;
@@ -615,7 +819,11 @@ export class CmdventetComponent implements OnInit {
     this.commandeForm.reset({
       dateCommande: new Date().toISOString().substring(0, 10),
       lignes: [],
-      magasinId: null
+      magasinId: null,
+      libelle: '',
+      clientId: '',
+      devise: '',
+      modePaiement: ''
     });
   }
 
@@ -930,7 +1138,7 @@ export class CmdventetComponent implements OnInit {
     return '-';
   }
 
-  // Affichage de la devise du client sélectionné dans le formulaire (popup)
+    // Affichage de la devise du client sélectionné dans le formulaire (popup)
   get getDevise(): string {
     const clientId = this.commandeForm.get('clientId')?.value;
     const client = this.clients.find(c => c.idPersonne == clientId || c.idClient == clientId);
@@ -941,5 +1149,60 @@ export class CmdventetComponent implements OnInit {
       return client.devise;
     }
     return 'N/A';
+  }
+
+  // Obtenir le symbole de devise pour l'affichage des montants
+  get getDeviseSymbol(): string {
+    const clientId = this.commandeForm.get('clientId')?.value;
+    const client = this.clients.find(c => c.idPersonne == clientId || c.idClient == clientId);
+    if (client && client.devise) {
+      if (typeof client.devise === 'object' && client.devise !== null) {
+        return client.devise.symbole || client.devise.code || client.devise.nom || '€';
+      }
+      return client.devise;
+    }
+    return '€';
+  }
+
+  // Obtenir le symbole de devise pour une commande spécifique (pour la popup de détails)
+  getDeviseSymbolForCommande(commande: any): string {
+    if (!commande) return '€';
+    
+    const clientId = commande?.personne?.idPersonne || commande?.clientId || commande?.client;
+    const client = this.clients.find(c => c.idPersonne == clientId || c.idClient == clientId);
+    if (client && client.devise) {
+      if (typeof client.devise === 'object' && client.devise !== null) {
+        return client.devise.symbole || client.devise.code || client.devise.nom || '€';
+      }
+      return client.devise;
+    }
+    return '€';
+  }
+
+  // Appliquer les filtres automatiquement quand les valeurs changent
+  onFilterChange(): void {
+    // Appliquer les filtres avec un délai pour éviter trop d'appels
+    setTimeout(() => {
+      this.applyFilters();
+    }, 300);
+  }
+
+  // Validation des dates
+  validateDateRange(): boolean {
+    if (this.filters.dateDebut && this.filters.dateFin) {
+      const dateDebut = new Date(this.filters.dateDebut);
+      const dateFin = new Date(this.filters.dateFin);
+      return dateDebut <= dateFin;
+    }
+    return true;
+  }
+
+  // Appliquer les filtres avec validation
+  applyFiltersWithValidation(): void {
+    if (!this.validateDateRange()) {
+      alert('La date de début doit être antérieure ou égale à la date de fin');
+      return;
+    }
+    this.applyFilters();
   }
 }

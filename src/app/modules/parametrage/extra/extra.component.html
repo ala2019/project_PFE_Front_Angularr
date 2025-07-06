@@ -4,7 +4,7 @@
     <h3 class="text-lg font-semibold">Êtes-vous sûr de vouloir supprimer cet extra ?</h3>
     <div class="flex w-full justify-between p-3 py-5">
       <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
-      <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="selectdID && delete(selectdID); deletedPopUp = false">
+      <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="delete(); deletedPopUp = false">
         Supprimer
       </button>
     </div>
@@ -13,32 +13,66 @@
 } @if (createPopUp) {
 <app-popup>
   <div popup-content>
-    <form #extraForm="ngForm" (ngSubmit)="save()" class="w-[400px] max-w-sm space-y-4" novalidate>
+    <form #extraForm="ngForm" (ngSubmit)="onSubmit()" class="w-[400px] max-w-sm space-y-4" novalidate>
       <div>
-        <label for="nomExtra" class="mb-1 block text-sm font-medium text-gray-700">
+        <label for="libelle" class="mb-1 block text-sm font-medium text-gray-700">
           Nom de l'extra <span class="text-red-500">*</span>
         </label>
         <input 
           type="text"
-          id="nomExtra"
-          name="nomExtra"
-          [(ngModel)]="formData.nomExtra"
+          id="libelle"
+          name="libelle"
+          [(ngModel)]="formData.libelle"
           required
-          #nomExtraInput="ngModel"
+          #libelleInput="ngModel"
           placeholder="Saisir le nom de l'extra"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="nomExtraInput.invalid && nomExtraInput.touched" class="mt-1 text-xs text-red-500">
+        <div *ngIf="libelleInput.invalid && libelleInput.touched" class="mt-1 text-xs text-red-500">
           Le nom de l'extra est requis.
         </div>
       </div>
 
       <div class="flex justify-end gap-5">
-        <button type="button" class="mt-3 cursor-pointer text-sm hover:underline" (click)="closeModal()">Annuler</button>
+        <button type="button" class="mt-3 cursor-pointer text-sm hover:underline" (click)="createPopUp = false">Annuler</button>
         <button
           type="submit"
           [disabled]="extraForm.invalid"
           class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-          {{ isEditing ? 'Modifier' : 'Enregistrer' }}
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</app-popup>
+} @if (updatePopUp) {
+<app-popup>
+  <div popup-content>
+    <form #extraForm="ngForm" (ngSubmit)="onSubmitUpdate()" class="w-[400px] max-w-sm space-y-4" novalidate>
+      <div>
+        <label for="libelle" class="mb-1 block text-sm font-medium text-gray-700">
+          Nom de l'extra <span class="text-red-500">*</span>
+        </label>
+        <input 
+          type="text"
+          id="libelle"
+          name="libelle"
+          [(ngModel)]="formData.libelle"
+          required
+          #libelleInput="ngModel"
+          placeholder="Saisir le nom de l'extra"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="libelleInput.invalid && libelleInput.touched" class="mt-1 text-xs text-red-500">
+          Le nom de l'extra est requis.
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-5">
+        <button type="button" class="mt-3 cursor-pointer text-sm hover:underline" (click)="updatePopUp = false">Annuler</button>
+        <button
+          type="submit"
+          [disabled]="extraForm.invalid"
+          class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          Modifier
         </button>
       </div>
     </form>
@@ -56,13 +90,13 @@
     class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
     <div class="flex flex-row justify-end gap-2 py-6">
       <button
-        (click)="openModal()"
+        (click)="createPopUp = true"
         class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
         Nouvel Extra
       </button>
       <button
         *ngIf="selectdID"
-        (click)="edit(selectedExtra)"
+        (click)="openUpdatePopupForSelected()"
         class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
         Modifier
       </button>
@@ -79,16 +113,16 @@
         <th class="px-6 py-3">Nom de l'extra</th>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
-        @for (item of extras; track $index) {
+        @for (item of extraList; track $index) {
         <tr
           class="cursor-pointer hover:bg-green-50"
           [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idExtra }"
-          (click)="selectdID = item?.idExtra; selectedExtra = item">
+          (click)="selectdID = item?.idExtra || 0">
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.idExtra }}
           </td>
           <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.nomExtra }}
+            {{ getExtraName(item) }}
           </td>
         </tr>
         } @empty {

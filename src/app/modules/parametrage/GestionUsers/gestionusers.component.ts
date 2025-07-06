@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PopupComponent } from '../../shared/popup/popup.component';
 import { UserService } from 'src/app/core/services/user.service';
+import { MagasinService } from 'src/app/core/services/magasin.service';
+import { RegionService } from 'src/app/core/services/region.service';
 
 @Component({
   selector: 'app-gestionusers',
@@ -20,7 +22,7 @@ export class GestionusersComponent implements OnInit {
   selectedUser: any = null;
 
   users: any[] = [];
-  stores: any[] = [];
+  magasins: any[] = [];
   regions: any[] = [];
   formData: any = this.resetForm();
   isEditing = false;
@@ -28,16 +30,70 @@ export class GestionusersComponent implements OnInit {
 
   // Role options
   roles = [
-    { value: 'ADMIN', label: 'Administrateur' },
-    { value: 'SALES', label: 'Commercial' },
+    { idRole: 1, value: 'administrateur', label: 'Administrateur' },
+    { idRole: 2, value: 'commercial', label: 'Commercial' },
   ];
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private magasinService: MagasinService,
+    private regionService: RegionService
+  ) {}
 
   ngOnInit(): void {
     this.getUsers();
-    this.getStores();
-    this.getRegions();
+    this.loadMagasins();
+    this.loadRegions();
+    this.testBackendConnection();
+  }
+
+  testBackendConnection(): void {
+    console.log('Test de connexion au backend...');
+    this.userService.getAll().subscribe({
+      next: (data) => {
+        console.log('✅ Connexion au backend réussie');
+      },
+      error: (error) => {
+        console.error('❌ Erreur de connexion au backend:', error);
+        alert('Erreur de connexion au backend. Vérifiez que le serveur est démarré.');
+      }
+    });
+  }
+
+  loadMagasins() {
+    console.log('Chargement des magasins...');
+    this.magasinService.getAll().subscribe({
+      next: (data) => {
+        console.log('Liste des magasins:', data);
+        if (Array.isArray(data) && data.length > 0) {
+          console.log('Premier magasin:', data[0]);
+          console.log('Propriétés du premier magasin:', Object.keys(data[0]));
+        }
+        this.magasins = data;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des magasins:', error);
+        this.magasins = [];
+      }
+    });
+  }
+
+  loadRegions() {
+    console.log('Chargement des régions...');
+    this.regionService.getAll().subscribe({
+      next: (data) => {
+        console.log('Régions reçues:', data);
+        if (Array.isArray(data) && data.length > 0) {
+          console.log('Première région:', data[0]);
+          console.log('Propriétés de la première région:', Object.keys(data[0]));
+        }
+        this.regions = data;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des régions:', error);
+        this.regions = [];
+      }
+    });
   }
 
   getUsers(): void {
@@ -45,109 +101,172 @@ export class GestionusersComponent implements OnInit {
       next: (value) => {
         this.users = value;
       },
-      error: (err) => {},
+      error: (err) => {
+        console.error('Erreur lors du chargement des utilisateurs:', err);
+      },
     });
   }
 
-  getStores(): void {
-    // Mock data - replace with actual service call
-    this.stores = [
-      { idStore: 1, nomStore: 'Magasin Central' },
-      { idStore: 2, nomStore: 'Magasin Nord' },
-      { idStore: 3, nomStore: 'Magasin Sud' },
-      { idStore: 4, nomStore: 'Magasin Est' },
-      { idStore: 5, nomStore: 'Magasin Ouest' },
-    ];
-  }
-
-  getRegions(): void {
-    // Mock data - replace with actual service call
-    this.regions = [
-      { idRegion: 1, nomRegion: 'Sousse' },
-      { idRegion: 2, nomRegion: 'Monastir' },
-      { idRegion: 3, nomRegion: 'Tunis' },
-      { idRegion: 4, nomRegion: 'Nabeul' },
-    ];
-  }
-
   save(): void {
+    console.log('=== DÉBUT DE LA MÉTHODE SAVE ===');
+    console.log('formData complet:', this.formData);
+    console.log('Propriétés de formData:', Object.keys(this.formData));
+    console.log('Email:', this.formData.email);
+    console.log('Login:', this.formData.login);
+    console.log('Password:', this.formData.password);
+    console.log('Role:', this.formData.role);
+    console.log('Magasin ID:', this.formData.magasin);
+    console.log('Region ID:', this.formData.region);
+    console.log('isEditing:', this.isEditing);
+    
     // Validation de base pour les champs communs
     if (!this.formData.email || !this.formData.login || !this.formData.role) {
-      return; // Don't save if any required field is missing
+      console.error('Champs requis manquants');
+      alert('Veuillez remplir tous les champs obligatoires');
+      return;
     }
 
     // Validation conditionnelle selon le rôle
-    if (this.formData.role === 'ADMIN') {
+    if (this.formData.role === 'administrateur') {
       // Pour ADMIN : région obligatoire, magasin non obligatoire
       if (!this.formData.region) {
-        return; // Don't save if region is missing for ADMIN
+        console.error('Région requise pour un administrateur');
+        alert('Une région est requise pour un administrateur');
+        return;
       }
-    } else if (this.formData.role === 'SALES') {
-      // Pour SALES : magasin obligatoire, région non obligatoire
-      if (!this.formData.store) {
-        return; // Don't save if store is missing for SALES
+    } else if (this.formData.role === 'commercial') {
+      // Pour Commercial : magasin obligatoire, région non obligatoire
+      if (!this.formData.magasin) {
+        console.error('Magasin requis pour un commercial');
+        alert('Un magasin est requis pour un commercial');
+        return;
       }
     }
 
     // Check if passwords match for new users
     if (!this.isEditing && this.formData.password !== this.formData.confirmPassword) {
-      return; // Don't save if passwords don't match
+      console.error('Les mots de passe ne correspondent pas');
+      alert('Les mots de passe ne correspondent pas');
+      return;
     }
 
     // Check if password is provided for new users
     if (!this.isEditing && !this.formData.password) {
-      return; // Don't save if password is missing for new users
+      console.error('Mot de passe requis pour un nouvel utilisateur');
+      alert('Un mot de passe est requis pour un nouvel utilisateur');
+      return;
     }
+
+    // For editing, if password is provided, it should match confirmPassword
+    if (this.isEditing && this.formData.password && this.formData.password !== this.formData.confirmPassword) {
+      console.error('Les mots de passe ne correspondent pas');
+      alert('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    const selectedRole = this.roles.find((r: any) => r.value === this.formData.role);
+
+    const userData = {
+      email: this.formData.email,
+      login: this.formData.login,
+      motDePasse: this.formData.password, // Changement du nom du champ
+      role: selectedRole ? {
+        idRole: selectedRole.idRole,
+        role: selectedRole.value
+      } : null,
+      magasin: this.formData.magasin ? { idMagasin: Number(this.formData.magasin) } : null,
+      region: this.formData.region ? { idRegion: Number(this.formData.region) } : null,
+    };
+
+    // For editing, remove password if it's empty
+    if (this.isEditing && !this.formData.password) {
+      delete userData.motDePasse;
+    }
+
+    // Log des données avant envoi
+    console.log('=== DONNÉES À ENVOYER AU BACKEND ===');
+    console.log('userData complet:', userData);
+    console.log('Propriétés de userData:', Object.keys(userData));
+    console.log('Email:', userData.email);
+    console.log('Login:', userData.login);
+    console.log('MotDePasse:', userData.motDePasse);
+    console.log('Role:', userData.role);
+    console.log('Magasin ID:', userData.magasin);
+    console.log('Region ID:', userData.region);
+    console.log('JSON stringifié:', JSON.stringify(userData, null, 2));
+    console.log('=====================================');
 
     if (this.isEditing) {
       // Update existing user
-      const index = this.users.findIndex((u) => u.idUser === this.formData.idUser);
-      if (index !== -1) {
-        const selectedStore = this.stores.find((s) => s.idStore === this.formData.store);
-        const selectedRegion = this.regions.find((r) => r.idRegion === this.formData.region);
-        const selectedRole = this.roles.find((r) => r.value === this.formData.role);
-        this.users[index] = {
-          ...this.formData,
-          store: selectedStore?.nomStore || '',
-          region: selectedRegion?.nomRegion || '',
-          roleLabel: selectedRole?.label,
-        };
-      }
-      this.afterSave();
+      this.userService.update(this.formData.idUser, userData).subscribe({
+        next: (response) => {
+          console.log('Utilisateur mis à jour:', response);
+          alert('Utilisateur mis à jour avec succès');
+          this.getUsers(); // Refresh the list
+          this.afterSave();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la mise à jour:', error);
+          alert('Erreur lors de la mise à jour: ' + (error.error?.message || error.message || 'Erreur inconnue'));
+        }
+      });
     } else {
       // Add new user
-      const selectedStore = this.stores.find((s) => s.idStore === this.formData.store);
-      const selectedRegion = this.regions.find((r) => r.idRegion === this.formData.region);
-      const selectedRole = this.roles.find((r) => r.value === this.formData.role);
-      const newUser = {
-        ...this.formData,
-        idUser: Math.max(...this.users.map((u) => u.idUser), 0) + 1,
-        store: selectedStore?.nomStore || '',
-        region: selectedRegion?.nomRegion || '',
-        roleLabel: selectedRole?.label,
-      };
-      // Remove confirmPassword from the user object before saving
-      delete newUser.confirmPassword;
-      this.users.push(newUser);
-      this.afterSave();
+      this.userService.create(userData).subscribe({
+        next: (response) => {
+          console.log('Utilisateur créé:', response);
+          alert('Utilisateur créé avec succès');
+          this.getUsers(); // Refresh the list
+          this.afterSave();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la création:', error);
+          alert('Erreur lors de la création: ' + (error.error?.message || error.message || 'Erreur inconnue'));
+        }
+      });
     }
   }
 
   edit(user: any): void {
+    console.log('=== DÉBUT DE LA MÉTHODE EDIT ===');
+    console.log('User reçu:', user);
+    console.log('User role:', user.role);
+    console.log('User magasin:', user.magasin);
+    console.log('User region:', user.region);
+    
+    this.selectedUser = user;
     this.formData = {
-      ...user,
-      store: this.stores.find((s) => s.nomStore === user.store)?.idStore,
-      region: this.regions.find((r) => r.nomRegion === user.region)?.idRegion,
+      idUser: user.idUser,
+      email: user.email,
+      login: user.login,
+      password: '', // Clear password when editing
       confirmPassword: '', // Clear confirm password when editing
+      magasin: user.magasin?.idMagasin || '',
+      region: user.region?.idRegion || '',
+      role: user.role?.role || '',
     };
+    
+    console.log('formData après initialisation:', this.formData);
+    console.log('=== FIN DE LA MÉTHODE EDIT ===');
+    
     this.isEditing = true;
     this.createPopUp = true;
   }
 
   delete(id: number): void {
-    this.users = this.users.filter((u) => u.idUser !== id);
-    this.selectdID = null;
-    this.selectedUser = null;
+    this.userService.delete(id).subscribe({
+      next: (response) => {
+        console.log('Utilisateur supprimé avec succès:', response);
+        alert('Utilisateur supprimé avec succès');
+        this.users = this.users.filter((u) => u.idUser !== id);
+        this.selectdID = null;
+        this.selectedUser = null;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
+        alert('Erreur lors de la suppression: ' + (error.error?.message || error.message || 'Erreur inconnue'));
+      }
+    });
   }
 
   resetForm(): any {
@@ -156,9 +275,9 @@ export class GestionusersComponent implements OnInit {
       login: '',
       password: '',
       confirmPassword: '',
-      store: '',
+      magasin: '',
       region: '',
-      role: 'SALES',
+      role: 'commercial',
     };
   }
 
@@ -184,7 +303,27 @@ export class GestionusersComponent implements OnInit {
     this.showPassword = !this.showPassword;
   }
 
+  onRoleChange(): void {
+    console.log('Rôle changé vers:', this.formData.role);
+    
+    // Réinitialiser les champs selon le rôle
+    if (this.formData.role === 'administrateur') {
+      // Pour administrateur : vider le magasin, garder la région
+      this.formData.magasin = '';
+    } else if (this.formData.role === 'commercial') {
+      // Pour commercial : vider la région, garder le magasin
+      this.formData.region = '';
+    }
+    
+    console.log('formData après changement de rôle:', this.formData);
+  }
+
   private afterSave(): void {
     this.closeModal();
+  }
+
+  selectUser(user: any): void {
+    this.selectdID = user?.idUser;
+    this.selectedUser = user;
   }
 }

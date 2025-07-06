@@ -205,7 +205,7 @@ export class StockComponent implements OnInit {
     });
 
     this.filteredArticles = [...this.articles];
-    this.totalItems = this.filteredArticles.filter(f => f.quantite > 0).length;
+    this.totalItems = this.filteredArticles.filter((f) => f.quantite > 0).length;
 
     // Afficher le résultat final
     console.log(
@@ -260,7 +260,7 @@ export class StockComponent implements OnInit {
               stockMin: article ? article.stockMin || 0 : 0,
             };
           });
-          this.totalItems = this.filteredArticles.filter(f => f.quantite > 0).length;
+          this.totalItems = this.filteredArticles.filter((f) => f.quantite > 0).length;
           this.currentPage = 1;
           this.isLoading = false;
         },
@@ -289,7 +289,7 @@ export class StockComponent implements OnInit {
         return true;
       });
 
-      this.totalItems = this.filteredArticles.filter(f => f.quantite > 0).length;
+      this.totalItems = this.filteredArticles.filter((f) => f.quantite > 0).length;
       this.currentPage = 1;
     }
   }
@@ -321,9 +321,15 @@ export class StockComponent implements OnInit {
   }
 
   getTotalStockValue(): number {
-    return this.filteredArticles.reduce((total, article) => {
+    const total = this.filteredArticles.reduce((total, article) => {
       return total + this.getStockValue(article);
     }, 0);
+  
+    return parseFloat(total.toFixed(2));
+  }
+
+  toFix(prix: number){
+    return parseFloat(prix.toFixed(2));
   }
 
   getTotalStockQuantity(): number {
@@ -430,6 +436,11 @@ export class StockComponent implements OnInit {
     return devise ? devise.symbole || devise.symbole : 'DT';
   }
 
+  get getCofDevise(): number {
+    if (!this.filters.devise) return 1;
+    const devise = this.devises.find((m) => m.idDevise == this.filters.devise);
+    return devise?.tauxChange || 1;
+  }
 
   onMagasinChange(): void {
     this.selectedMagasin = this.filters.magasin;

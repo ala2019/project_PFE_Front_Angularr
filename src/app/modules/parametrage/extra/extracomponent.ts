@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PopupComponent } from '../../shared/popup/popup.component';
+import { ExtraService, Extra } from '../../../core/services/extra.service';
 
 @Component({
   selector: 'app-extra',
@@ -10,89 +11,116 @@ import { PopupComponent } from '../../shared/popup/popup.component';
   imports: [CommonModule, FormsModule, PopupComponent],
 })
 export class ExtraComponent implements OnInit {
+  protected extraList: Extra[] = [];
+  protected selectdID!: number;
+  protected deletedPopUp = false;
+  protected createPopUp = false;
+  protected updatePopUp = false;
 
-  // Popup management
-  createPopUp = false;
-  deletedPopUp = false;
-  
-  // Selection tracking
-  selectdID: number | null = null;
-  selectedExtra: any = null;
+  formData: Partial<Extra> = {
+    libelle: '',
+    idExtra: undefined,
+  };
 
-  extras: any[] = [];
-  formData: any = this.resetForm();
-  isEditing = false;
-
-  constructor() {}
+  constructor(private readonly extraService: ExtraService) {}
 
   ngOnInit(): void {
-    this.getExtras();
+    this.getAll();
   }
 
-  getExtras(): void {
-    // Mock data - replace with actual service call
-    this.extras = [
-      { idExtra: 1, nomExtra: 'Frais de livraison', montant: 10.50, description: 'Frais de livraison standard' },
-      { idExtra: 2, nomExtra: 'Assurance', montant: 5.00, description: 'Assurance supplémentaire' },
-      { idExtra: 3, nomExtra: 'Emballage spécial', montant: 3.50, description: 'Emballage de protection' }
-    ];
+  getAll() {
+    this.extraService.getAll().subscribe({
+      next: (response: Extra[]) => {
+        if (Array.isArray(response) && response.length > 0) {
+          console.log('Premier extra:', response[0]);
+          console.log('Propriétés du premier extra:', Object.keys(response[0]));
+        }
+        this.extraList = response;
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération des extras:', error);
+        console.error('Status:', error.status);
+        console.error('Message:', error.message);
+        this.extraList = [];
+      },
+    });
   }
 
-  save(): void {
-    if (this.isEditing) {
-      // Update existing extra
-      const index = this.extras.findIndex(e => e.idExtra === this.formData.idExtra);
-      if (index !== -1) {
-        this.extras[index] = { ...this.formData };
-      }
-      this.afterSave();
-    } else {
-      // Add new extra
-      const newExtra = {
-        ...this.formData,
-        idExtra: Math.max(...this.extras.map(e => e.idExtra), 0) + 1
+  delete() {
+    this.extraService.delete(this.selectdID).subscribe({
+      next: (response: void) => {
+        this.getAll();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression:', error);
+        this.getAll();
+      },
+    });
+    this.selectdID = 0;
+  }
+
+  onSubmit() {
+    if (this.formData.libelle?.trim()) {
+      const extraData: Extra = {
+        idExtra: 0, // Sera ignoré par le backend pour la création
+        libelle: this.formData.libelle
       };
-      this.extras.push(newExtra);
-      this.afterSave();
+      
+      this.extraService.create(extraData).subscribe({
+        next: (response: Extra) => {
+          console.log('Extra créé:', response);
+          this.getAll();
+          this.formData = {
+            idExtra: undefined,
+            libelle: '',
+          };
+          this.createPopUp = false;
+        },
+        error: (error) => {
+          console.error('Erreur lors de la création:', error);
+        },
+      });
     }
   }
 
-  edit(extra: any): void {
-    this.formData = { ...extra };
-    this.isEditing = true;
-    this.createPopUp = true;
-  }
-
-  delete(id: number): void {
-    this.extras = this.extras.filter(e => e.idExtra !== id);
-    this.selectdID = null;
-    this.selectedExtra = null;
-  }
-
-  resetForm(): any {
-    return {
-      nomExtra: ''
+  openUpdatePopup(item: Extra) {
+    this.formData = {
+      idExtra: item.idExtra,
+      libelle: item.libelle,
     };
+    this.updatePopUp = true;
   }
 
-  cancel(): void {
-    this.formData = this.resetForm();
-    this.isEditing = false;
+  openUpdatePopupForSelected() {
+    const selectedItem = this.extraList.find(item => item.idExtra === this.selectdID);
+    if (selectedItem) {
+      this.openUpdatePopup(selectedItem);
+    }
   }
 
-  // Modal management methods
-  openModal(): void {
-    this.createPopUp = true;
-    this.isEditing = false;
-    this.formData = this.resetForm();
+  onSubmitUpdate() {
+    if (this.formData.libelle?.trim() && this.formData.idExtra !== undefined) {
+      const extraData: Extra = {
+        idExtra: this.formData.idExtra,
+        libelle: this.formData.libelle
+      };
+      
+      this.extraService.update(this.formData.idExtra, extraData).subscribe({
+        next: (response: Extra) => {
+          this.getAll();
+          this.formData = { libelle: '', idExtra: undefined };
+          this.updatePopUp = false;
+        },
+        error: (err) => {
+          console.error('Update error', err);
+        }
+      });
+    }
   }
 
-  closeModal(): void {
-    this.createPopUp = false;
-    this.cancel();
-  }
-
-  private afterSave(): void {
-    this.closeModal();
+  getExtraName(item: Extra): string {
+    // Débogage: afficher toutes les propriétés disponibles
+    console.log('Structure de l\'objet extra:', item);
+    return item?.libelle || 'Nom non trouvé';
   }
 }

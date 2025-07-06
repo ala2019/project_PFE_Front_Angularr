@@ -58,7 +58,7 @@
           <option>Chargement des devises...</option>
           } @else {
           <option *ngFor="let devise of devises" [value]="devise.idDevise">
-            {{ devise.nom }} ({{ devise.symbole }})
+            {{ devise.devise }} - ({{ devise.symbole }})
           </option>
           }
         </select>
@@ -185,7 +185,7 @@
           @if (isLoading) {
           <span class="inline-block h-6 w-6 animate-spin text-gray-400">⏳</span>
           } @else {
-          {{ getTotalStockValue() }} {{ getSelectedDeviseName }}
+          {{ toFix(getTotalStockValue() * getCofDevise) }} {{ getSelectedDeviseName }}
           }
         </p>
       </div>
@@ -306,7 +306,7 @@
             {{ article.description }}
           </td>
           <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-            {{ article.prix }}
+            {{ article.prix  * getCofDevise | currency : getSelectedDeviseName : 'symbol' : '1.2-2'}}
           </td>
           <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
             <span class="font-medium">{{ article.stockMin || 0 }}</span>
@@ -319,7 +319,7 @@
             </span>
           </td>
           <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-            {{ getStockValue(article) | currency : getSelectedDeviseName : 'symbol' : '1.2-2' }}
+            {{ getStockValue(article) * getCofDevise | currency : getSelectedDeviseName : 'symbol' : '1.2-2' }}
           </td>
         </tr>
 
