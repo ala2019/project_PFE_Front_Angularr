@@ -121,11 +121,19 @@ export class MouvementComponent implements OnInit {
     // Charger les mouvements
     this.mouvementService.getAll().subscribe({
       next: (data) => {
-        console.log(data);
+        console.log('Données brutes reçues:', data);
+        
+        // Trier les mouvements par date de mouvement (du plus récent au plus ancien)
+        data.sort((a: any, b: any) => {
+          const dateA = new Date(a.dateMvt || a.dateMouvement);
+          const dateB = new Date(b.dateMvt || b.dateMouvement);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
         this.mouvements = data;
-
         this.filteredMouvements = [...this.mouvements];
         this.totalItems = this.mouvements.length;
+        console.log('Mouvements triés par date:', data);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des mouvements:', error);
@@ -185,8 +193,17 @@ export class MouvementComponent implements OnInit {
     this.filteredMouvements = this.mouvements.filter((mouvement) => {
       let match = true;
 
-      if (this.filters.libelle && !mouvement.libelle.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
-        match = false;
+      // Filtre par libellé
+      if (this.filters.libelle) {
+        const libelleMatch = mouvement.libMouvement?.toLowerCase().includes(this.filters.libelle.toLowerCase());
+        console.log('Libelle filter check:', {
+          mouvementLibelle: mouvement.libMouvement,
+          filterLibelle: this.filters.libelle,
+          isMatch: libelleMatch
+        });
+        if (!libelleMatch) {
+          match = false;
+        }
       }
 
       if (
@@ -194,38 +211,111 @@ export class MouvementComponent implements OnInit {
         Array.isArray(this.filters.typeMouvement) &&
         this.filters.typeMouvement.length > 0
       ) {
-        const type =
-          mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT' ? 'ENTREE' : 'SORTIE';
-        if (!this.filters.typeMouvement.includes(type)) {
+        // Déterminer le type de mouvement (ENTREE ou SORTIE) basé sur le typeMouvement
+        let mouvementType = 'SORTIE'; // Par défaut
+        if (mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT') {
+          mouvementType = 'ENTREE';
+        }
+        
+        console.log('Type filter check:', {
+          mouvementTypeMouvement: mouvement.typeMouvement,
+          determinedType: mouvementType,
+          filterTypes: this.filters.typeMouvement,
+          isMatch: this.filters.typeMouvement.includes(mouvementType)
+        });
+        
+        if (!this.filters.typeMouvement.includes(mouvementType)) {
           match = false;
         }
       }
 
-      if (this.filters.dateDebut && mouvement.dateMouvement < this.filters.dateDebut) {
-        match = false;
+      // Filtre par date
+      if (this.filters.dateDebut || this.filters.dateFin) {
+        const mouvementDate = new Date(mouvement.dateMvt || mouvement.dateMouvement);
+
+        if (this.filters.dateDebut) {
+          const filterDateDebut = new Date(this.filters.dateDebut);
+          const dateDebutMatch = mouvementDate >= filterDateDebut;
+          console.log('Date début filter check:', {
+            mouvementDate: mouvementDate.toISOString(),
+            filterDateDebut: filterDateDebut.toISOString(),
+            isMatch: dateDebutMatch
+          });
+          if (!dateDebutMatch) {
+            match = false;
+          }
+        }
+
+        if (this.filters.dateFin) {
+          const filterDateFin = new Date(this.filters.dateFin);
+          const dateFinMatch = mouvementDate <= filterDateFin;
+          console.log('Date fin filter check:', {
+            mouvementDate: mouvementDate.toISOString(),
+            filterDateFin: filterDateFin.toISOString(),
+            isMatch: dateFinMatch
+          });
+          if (!dateFinMatch) {
+            match = false;
+          }
+        }
       }
-      if (this.filters.dateFin && mouvement.dateMouvement > this.filters.dateFin) {
-        match = false;
+
+      // Filtre par magasin
+      if (this.filters.magasinSource) {
+        const magasinMatch = mouvement.magasin?.idMagasin == this.filters.magasinSource;
+        console.log('Magasin filter check:', {
+          mouvementMagasinId: mouvement.magasin?.idMagasin,
+          filterMagasinId: this.filters.magasinSource,
+          isMatch: magasinMatch
+        });
+        if (!magasinMatch) {
+          match = false;
+        }
       }
-      if (this.filters.magasinSource && mouvement.magasinSourceId !== this.filters.magasinSource) {
-        match = false;
+
+      // Filtre par type de commande
+      if (this.filters.typeCommande) {
+        const typeCommandeMatch = mouvement.type === this.filters.typeCommande;
+        console.log('Type commande filter check:', {
+          mouvementType: mouvement.type,
+          filterTypeCommande: this.filters.typeCommande,
+          isMatch: typeCommandeMatch
+        });
+        if (!typeCommandeMatch) {
+          match = false;
+        }
       }
-      if (this.filters.typeCommande && mouvement.typeCommande !== this.filters.typeCommande) {
-        match = false;
-      }
+
       return match;
     });
 
+    // Appliquer le tri après le filtrage
+    this.sortMouvementsByDate();
+
+    // Mettre à jour le total et revenir à la première page
     this.totalItems = this.filteredMouvements.length;
     this.currentPage = 1;
+
+    console.log('Résultat du filtrage des mouvements:', {
+      total: this.totalItems,
+      filtered: this.filteredMouvements.length,
+    });
   }
 
   clearFilters(): void {
+    console.log('Effacement des filtres...');
     this.filterForm.reset();
     this.filters = {};
+
+    // Restaurer tous les mouvements
     this.filteredMouvements = [...this.mouvements];
-    this.totalItems = this.mouvements.length;
+    
+    // Appliquer le tri après avoir restauré les données
+    this.sortMouvementsByDate();
+    
+    this.totalItems = this.filteredMouvements.length;
     this.currentPage = 1;
+    console.log('Filtres effacés, affichage de tous les mouvements:', this.filteredMouvements.length);
   }
 
   // Pagination methods
@@ -521,5 +611,14 @@ export class MouvementComponent implements OnInit {
   // Méthode pour obtenir le nombre de mouvements filtrés
   getFilteredCount(): number {
     return this.filteredMouvements.length;
+  }
+
+  // Méthode pour trier les mouvements par date (du plus récent au plus ancien)
+  sortMouvementsByDate(): void {
+    this.filteredMouvements.sort((a: any, b: any) => {
+      const dateA = new Date(a.dateMvt || a.dateMouvement);
+      const dateB = new Date(b.dateMvt || b.dateMouvement);
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 }

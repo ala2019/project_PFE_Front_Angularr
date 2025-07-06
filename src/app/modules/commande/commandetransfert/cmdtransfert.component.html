@@ -28,6 +28,28 @@
         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
     </div>
 
+    <!-- Date de début -->
+    <div class="filter-item">
+      <label>
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        Date de début
+      </label>
+      <input type="date" [(ngModel)]="filters.dateDebut" (input)="onFilterChange()" [max]="filters.dateFin" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+    </div>
+
+    <!-- Date de fin -->
+    <div class="filter-item">
+      <label>
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        Date de fin
+      </label>
+      <input type="date" [(ngModel)]="filters.dateFin" (input)="onFilterChange()" [min]="filters.dateDebut" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+    </div>
+
     <!-- Magasin source -->
     <div class="filter-item">
       <label>
@@ -58,28 +80,6 @@
           {{ magasin.nomMagasin }}
         </option>
       </select>
-    </div>
-
-    <!-- Date de début -->
-    <div class="filter-item">
-      <label>
-        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        Date de début
-      </label>
-      <input type="date" [(ngModel)]="filters.dateDebut" (input)="onFilterChange()" [max]="filters.dateFin" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
-    </div>
-
-    <!-- Date de fin -->
-    <div class="filter-item">
-      <label>
-        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        Date de fin
-      </label>
-      <input type="date" [(ngModel)]="filters.dateFin" (input)="onFilterChange()" [min]="filters.dateDebut" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
     </div>
 
     <!-- Actions -->
@@ -116,7 +116,7 @@
           </svg>
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Commandes de transfert</h1>
+          <h1 class="text-2xl font-bold text-gray-800">Liste des Commandes de transfert</h1>
           <p class="mt-1 text-sm text-gray-600">Total: {{ totalItems }} commande(s)</p>
         </div>
       </div>

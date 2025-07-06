@@ -24,6 +24,11 @@ export class RegionComponent implements OnInit {
     idRegion: null, // Ajout de l'ID pour la mise à jour
   };
   
+  filters = {
+    code: '',
+    nom: ''
+  };
+  filteredRegions: any[] = [];
 
   constructor(private readonly regionService: RegionService) {}
 
@@ -40,12 +45,14 @@ export class RegionComponent implements OnInit {
           console.log('Propriétés de la première région:', Object.keys(response[0]));
         }
         this.regionList = response;
+        this.filteredRegions = [...this.regionList];
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des régions:', error);
         console.error('Status:', error.status);
         console.error('Message:', error.message);
         this.regionList = [];
+        this.filteredRegions = [];
       },
     });
   }
@@ -118,6 +125,29 @@ export class RegionComponent implements OnInit {
     // Débogage: afficher toutes les propriétés disponibles
     console.log('Structure de l\'objet région:', item);
     return item?.nomregion || item?.nomRegion || item?.name || item?.nom || 'Nom non trouvé';
+  }
+
+  applyFilters(): void {
+    this.filteredRegions = this.regionList.filter(region => {
+      const codeMatch = !this.filters.code ||
+        region.codeRegion?.toLowerCase().includes(this.filters.code.toLowerCase());
+      const nomMatch = !this.filters.nom ||
+        this.getRegionName(region).toLowerCase().includes(this.filters.nom.toLowerCase());
+      return codeMatch && nomMatch;
+    });
+  }
+
+  clearFilters(): void {
+    this.filters = { code: '', nom: '' };
+    this.filteredRegions = [...this.regionList];
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.filters.code || this.filters.nom);
+  }
+
+  getFilteredCount(): number {
+    return this.filteredRegions.length;
   }
 
 }

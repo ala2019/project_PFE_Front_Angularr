@@ -58,10 +58,26 @@ export class CategoriearticleComponent implements OnInit {
   }
 
   delete(id: number): void {
-    this.service.deleteCategorie(id).subscribe(() => {
-      this.getCategories();
-      this.selectdID = null;
-      this.selectedCategorie = null;
+    console.log('Tentative de suppression de la catégorie ID:', id);
+    
+    this.service.deleteCategorie(id).subscribe({
+      next: () => {
+        console.log('Catégorie supprimée avec succès, ID:', id);
+        
+        // Mettre à jour les listes locales
+        this.categories = this.categories.filter(cat => cat.idCategorie !== id);
+        this.filteredCategories = this.filteredCategories.filter(cat => cat.idCategorie !== id);
+        
+        // Réinitialiser la sélection
+        this.selectdID = null;
+        this.selectedCategorie = null;
+        
+        console.log('Listes mises à jour après suppression');
+      },
+      error: (error) => {
+        console.error('Erreur lors de la suppression de la catégorie:', error);
+        alert('Erreur lors de la suppression de la catégorie. Veuillez réessayer.');
+      }
     });
   }
 

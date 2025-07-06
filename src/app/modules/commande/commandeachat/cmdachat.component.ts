@@ -62,7 +62,7 @@ export class CmdAchatComponent implements OnInit {
   // Status options
   statuts = [
     { value: 'LANCE', label: 'Lancé' },
-    { value: 'LIVRE_PARTIEL', label: 'Livré partiellement' },
+    { value: 'LIVRE_PARTIELLEMENT', label: 'Livré partiellement' },
     { value: 'LIVRE_TOTAL', label: 'Livré totalement' },
   ];
 
@@ -123,10 +123,21 @@ export class CmdAchatComponent implements OnInit {
     this.commandeService.getAll().subscribe({
       next: (data) => {
         data = data.filter((commande: any) => commande.type == 'ACHAT');
+        
+        // Trier les commandes par date de commande (du plus récent au plus ancien)
+        data.sort((a: any, b: any) => {
+          const dateA = new Date(a.dateCmd || a.dateCommande);
+          const dateB = new Date(b.dateCmd || b.dateCommande);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
         this.allCommandes = data;
         this.commandes = data;
         this.totalItems = this.commandes.length;
-        console.log(data);
+        console.log('Commandes d\'achat triées par date:', data);
+        
+        // Déboguer les statuts disponibles
+        this.debugStatuts();
       },
       error: (error) => {
         console.error('Error loading commandes:', error);
@@ -160,6 +171,15 @@ export class CmdAchatComponent implements OnInit {
     });
   }
 
+  // Méthode pour trier les commandes par date (du plus récent au plus ancien)
+  sortCommandesByDate(): void {
+    this.commandes.sort((a: any, b: any) => {
+      const dateA = new Date(a.dateCmd || a.dateCommande);
+      const dateB = new Date(b.dateCmd || b.dateCommande);
+      return dateB.getTime() - dateA.getTime();
+    });
+  }
+
   // Filter methods
   applyFilters(): void {
     console.log('Applying filters:', this.filters);
@@ -170,15 +190,28 @@ export class CmdAchatComponent implements OnInit {
       console.log('Checking commande:', commande);
 
       // Filtre par libellé
-      if (this.filters.libelle && !commande.libelle.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
-        console.log('Filtered out by libelle:', commande.libelle);
+      if (this.filters.libelle && !commande.libCmd.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
+        console.log('Filtered out by libelle:', commande.libCmd);
         return false;
       }
 
       // Filtre par statut
-      if (this.filters.statut && commande.statut !== this.filters.statut) {
-        console.log('Filtered out by statut:', commande.statut, 'expected:', this.filters.statut);
-        return false;
+      if (this.filters.statut) {
+        const normalizedCommandeStatut = this.normalizeStatut(commande.statut);
+        const normalizedFilterStatut = this.normalizeStatut(this.filters.statut);
+        
+        console.log('Statut filter check:', {
+          commandeStatut: commande.statut,
+          normalizedCommandeStatut: normalizedCommandeStatut,
+          filterStatut: this.filters.statut,
+          normalizedFilterStatut: normalizedFilterStatut,
+          isMatch: normalizedCommandeStatut === normalizedFilterStatut
+        });
+        
+        if (normalizedCommandeStatut !== normalizedFilterStatut) {
+          console.log('Filtered out by statut:', commande.statut, 'expected:', this.filters.statut);
+          return false;
+        }
       }
 
       // Filtre par fournisseur
@@ -189,18 +222,18 @@ export class CmdAchatComponent implements OnInit {
           filterValue: this.filters.fournisseur,
           fournisseurId,
           foundFournisseur: fournisseur,
-          commandeFournisseur: commande.fournisseur,
+          commandeFournisseur: commande.personne?.nomPersonne,
         });
 
-        if (!fournisseur || commande.fournisseur !== fournisseur.nom) {
-          console.log('Filtered out by fournisseur:', commande.fournisseur, 'expected:', fournisseur?.nom);
+        if (!fournisseur || commande.personne?.nomPersonne !== fournisseur.nomPersonne) {
+          console.log('Filtered out by fournisseur:', commande.personne?.nomPersonne, 'expected:', fournisseur?.nomPersonne);
           return false;
         }
       }
 
       // Filtre par date de début et fin (bornes)
       if (this.filters.dateDebut || this.filters.dateFin) {
-        const commandeDate = new Date(commande.dateCommande);
+        const commandeDate = new Date(commande.dateCmd);
 
         // Filtre par date de début
         if (this.filters.dateDebut) {
@@ -237,6 +270,9 @@ export class CmdAchatComponent implements OnInit {
       return true;
     });
 
+    // Appliquer le tri après le filtrage
+    this.sortCommandesByDate();
+
     // Mettre à jour le total et revenir à la première page
     this.totalItems = this.commandes.length;
     this.currentPage = 1;
@@ -256,6 +292,10 @@ export class CmdAchatComponent implements OnInit {
 
     // Restaurer toutes les commandes
     this.commandes = [...this.allCommandes];
+    
+    // Appliquer le tri après avoir restauré les données
+    this.sortCommandesByDate();
+    
     this.totalItems = this.commandes.length;
     this.currentPage = 1;
     console.log('Filters cleared, showing all commandes:', this.commandes.length);
@@ -658,7 +698,7 @@ export class CmdAchatComponent implements OnInit {
     switch (statut) {
       case 'LANCE':
         return 'bg-blue-50 hover:bg-blue-100 text-blue-800';
-      case 'LIVRE_PARTIEL':
+      case 'LIVRE_PARTIELLEMENT':
         return 'bg-yellow-50 hover:bg-yellow-100 text-yellow-800';
       case 'LIVRE_TOTAL':
         return 'bg-green-50 hover:bg-green-100 text-green-800';
@@ -727,5 +767,32 @@ export class CmdAchatComponent implements OnInit {
 
   getFilteredCount(): number {
     return this.commandes.length;
+  }
+
+  // Méthode pour obtenir le label d'un statut
+  getStatutLabel(statutValue: string): string {
+    const statut = this.statuts.find(s => s.value === statutValue);
+    return statut ? statut.label : statutValue;
+  }
+
+  // Méthode pour normaliser les valeurs de statut
+  normalizeStatut(statut: string): string {
+    if (!statut) return '';
+    return statut.trim().toUpperCase();
+  }
+
+  // Méthode pour déboguer les statuts disponibles
+  debugStatuts(): void {
+    console.log('=== DEBUG STATUTS ===');
+    console.log('Statuts définis:', this.statuts);
+    
+    const uniqueStatuts = [...new Set(this.allCommandes.map(c => c.statut))];
+    console.log('Statuts trouvés dans les données:', uniqueStatuts);
+    
+    uniqueStatuts.forEach(statut => {
+      const normalized = this.normalizeStatut(statut);
+      const found = this.statuts.find(s => s.value === normalized);
+      console.log(`Statut: "${statut}" -> Normalisé: "${normalized}" -> Trouvé: ${found ? 'OUI' : 'NON'}`);
+    });
   }
 }

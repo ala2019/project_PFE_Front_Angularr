@@ -30,6 +30,12 @@ export class MagasinComponent implements OnInit{
     idRegion:  '' ,
     nomregion:''};
 
+  filters = {
+    nomMagasin: '',
+    nomRegion: ''
+  };
+  filteredMagasins: any[] = [];
+
   constructor(
     private readonly magasinService: MagasinService,
      private regionService: RegionService) {}
@@ -68,10 +74,12 @@ export class MagasinComponent implements OnInit{
           console.log('Propriétés du premier magasin:', Object.keys(response[0]));
         }
         this.magasinList = response;
+        this.filteredMagasins = [...this.magasinList];
       },
       error: (error) => {
         console.error('Erreur lors du chargement des magasins:', error);
         this.magasinList = [];
+        this.filteredMagasins = [];
       }
     });
   }
@@ -153,6 +161,30 @@ export class MagasinComponent implements OnInit{
         }
       });
     }
+  }
+
+  // Logique de filtre harmonisée
+  applyFilters(): void {
+    this.filteredMagasins = this.magasinList.filter(magasin => {
+      const nomMagasinMatch = !this.filters.nomMagasin ||
+        magasin.nomMagasin?.toLowerCase().includes(this.filters.nomMagasin.toLowerCase());
+      const nomRegionMatch = !this.filters.nomRegion ||
+        this.getMagasinRegionName(magasin).toLowerCase().includes(this.filters.nomRegion.toLowerCase());
+      return nomMagasinMatch && nomRegionMatch;
+    });
+  }
+
+  clearFilters(): void {
+    this.filters = { nomMagasin: '', nomRegion: '' };
+    this.filteredMagasins = [...this.magasinList];
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.filters.nomMagasin || this.filters.nomRegion);
+  }
+
+  getFilteredCount(): number {
+    return this.filteredMagasins.length;
   }
 
 }

@@ -28,6 +28,15 @@ export class FounisseurComponent implements OnInit {
   formData: any = this.resetForm();
   isEditing = false;
 
+  // Filtres
+  filters = {
+    codeFournisseur: '',
+    nom: '',
+    email: '',
+    devise: ''
+  };
+  filteredFournisseurs: any[] = [];
+
   constructor(
     private service: PersonneService,
     private deviseService: DeviseService
@@ -42,6 +51,7 @@ export class FounisseurComponent implements OnInit {
     this.service.getAll().subscribe({
       next: (data) => {
         this.fournisseurs = data.filter((p: any) => p.type === 'FOURNISSEUR');
+        this.filteredFournisseurs = [...this.fournisseurs];
       },
       error: (error) => {
         console.error('Erreur lors du chargement des fournisseurs:', error);
@@ -166,5 +176,38 @@ export class FounisseurComponent implements OnInit {
     if (fournisseur.code_personne) return fournisseur.code_personne;
     
     return `FOUR-${fournisseur.idPersonne || 'N/A'}`;
+  }
+
+  // Logique de filtre harmonisée
+  applyFilters(): void {
+    this.filteredFournisseurs = this.fournisseurs.filter(fournisseur => {
+      const codeMatch = !this.filters.codeFournisseur ||
+        this.getFournisseurCode(fournisseur).toLowerCase().includes(this.filters.codeFournisseur.toLowerCase());
+      const nomMatch = !this.filters.nom ||
+        fournisseur.nomPersonne?.toLowerCase().includes(this.filters.nom.toLowerCase());
+      const emailMatch = !this.filters.email ||
+        fournisseur.email?.toLowerCase().includes(this.filters.email.toLowerCase());
+      const deviseMatch = !this.filters.devise ||
+        fournisseur.devise?.idDevise == this.filters.devise;
+      return codeMatch && nomMatch && emailMatch && deviseMatch;
+    });
+  }
+
+  clearFilters(): void {
+    this.filters = {
+      codeFournisseur: '',
+      nom: '',
+      email: '',
+      devise: ''
+    };
+    this.filteredFournisseurs = [...this.fournisseurs];
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.filters.codeFournisseur || this.filters.nom || this.filters.email || this.filters.devise);
+  }
+
+  getFilteredCount(): number {
+    return this.filteredFournisseurs.length;
   }
 }

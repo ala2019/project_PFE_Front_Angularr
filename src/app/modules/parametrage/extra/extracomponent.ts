@@ -12,6 +12,10 @@ import { ExtraService, Extra } from '../../../core/services/extra.service';
 })
 export class ExtraComponent implements OnInit {
   protected extraList: Extra[] = [];
+  filters = {
+    nom: ''
+  };
+  filteredExtras: Extra[] = [];
   protected selectdID!: number;
   protected deletedPopUp = false;
   protected createPopUp = false;
@@ -36,12 +40,14 @@ export class ExtraComponent implements OnInit {
           console.log('Propriétés du premier extra:', Object.keys(response[0]));
         }
         this.extraList = response;
+        this.filteredExtras = [...this.extraList];
       },
       error: (error) => {
         console.error('Erreur lors de la récupération des extras:', error);
         console.error('Status:', error.status);
         console.error('Message:', error.message);
         this.extraList = [];
+        this.filteredExtras = [];
       },
     });
   }
@@ -122,5 +128,27 @@ export class ExtraComponent implements OnInit {
     // Débogage: afficher toutes les propriétés disponibles
     console.log('Structure de l\'objet extra:', item);
     return item?.libelle || 'Nom non trouvé';
+  }
+
+  // Logique de filtre harmonisée
+  applyFilters(): void {
+    this.filteredExtras = this.extraList.filter(extra => {
+      const nomMatch = !this.filters.nom ||
+        extra.libelle?.toLowerCase().includes(this.filters.nom.toLowerCase());
+      return nomMatch;
+    });
+  }
+
+  clearFilters(): void {
+    this.filters = { nom: '' };
+    this.filteredExtras = [...this.extraList];
+  }
+
+  hasActiveFilters(): boolean {
+    return !!this.filters.nom;
+  }
+
+  getFilteredCount(): number {
+    return this.filteredExtras.length;
   }
 }

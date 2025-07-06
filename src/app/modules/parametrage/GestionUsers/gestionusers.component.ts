@@ -22,6 +22,12 @@ export class GestionusersComponent implements OnInit {
   selectedUser: any = null;
 
   users: any[] = [];
+  filters = {
+    email: '',
+    login: '',
+    role: ''
+  };
+  filteredUsers: any[] = [];
   magasins: any[] = [];
   regions: any[] = [];
   formData: any = this.resetForm();
@@ -100,6 +106,7 @@ export class GestionusersComponent implements OnInit {
     this.userService.getAll().subscribe({
       next: (value) => {
         this.users = value;
+        this.filteredUsers = [...this.users];
       },
       error: (err) => {
         console.error('Erreur lors du chargement des utilisateurs:', err);
@@ -325,5 +332,35 @@ export class GestionusersComponent implements OnInit {
   selectUser(user: any): void {
     this.selectdID = user?.idUser;
     this.selectedUser = user;
+  }
+
+  // Logique de filtre harmonisée
+  applyFilters(): void {
+    this.filteredUsers = this.users.filter(user => {
+      const emailMatch = !this.filters.email ||
+        user.email?.toLowerCase().includes(this.filters.email.toLowerCase());
+      const loginMatch = !this.filters.login ||
+        user.login?.toLowerCase().includes(this.filters.login.toLowerCase());
+      const roleMatch = !this.filters.role ||
+        user.role?.role === this.filters.role;
+      return emailMatch && loginMatch && roleMatch;
+    });
+  }
+
+  clearFilters(): void {
+    this.filters = {
+      email: '',
+      login: '',
+      role: ''
+    };
+    this.filteredUsers = [...this.users];
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.filters.email || this.filters.login || this.filters.role);
+  }
+
+  getFilteredCount(): number {
+    return this.filteredUsers.length;
   }
 }

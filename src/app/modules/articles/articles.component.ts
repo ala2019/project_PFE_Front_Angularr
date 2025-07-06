@@ -3,6 +3,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ArticleService } from '../../core/services/article.service';
 import { CategorieArticleService } from '../../core/services/categorie.service'; // Fixed import path
+import { ExtraService, Extra } from '../../core/services/extra.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { take } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -21,6 +22,7 @@ declare var $: any;
 export class ArticlesComponent implements OnInit, AfterViewInit {
   articles: any[] = [];
   categories: any[] = [];
+  extras: Extra[] = [];
   articleForm: FormGroup;
   selectedArticle: any = null;
   image: string | ArrayBuffer | null = null;
@@ -29,6 +31,11 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   createPopUp = false;
   detailPopUp = false;
   selectedArticleForDetail: any = null;
+
+  // Gestion des valeurs extra
+  extraValeurs: Array<{extra: Extra, valeur: string}> = [];
+  selectedExtra: Extra | null = null;
+  extraValeurInput: string = '';
 
   // Variables pour la pagination
   currentPage = 1;
@@ -61,6 +68,7 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private articleService: ArticleService,
     private categoriearticleService: CategorieArticleService,
+    private extraService: ExtraService,
     private sanitizer: DomSanitizer,
   ) {
     this.articleForm = this.fb.group({
@@ -76,8 +84,9 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     console.log('Initialisation du composant articles...');
-    // Charger d'abord les catégories, puis les articles
+    // Charger d'abord les catégories et les extras, puis les articles
     this.fetchDataCategorie();
+    this.fetchDataExtras();
     // Charger les articles après un délai pour s'assurer que les catégories sont chargées
     setTimeout(() => {
       this.fetchData();
@@ -205,6 +214,15 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
       }
     }
     
+    // Ajouter les valeurs extra si elles existent
+    if (this.extraValeurs.length > 0) {
+      articleData.extraValeurs = this.extraValeurs.map(ev => ({
+        extra: ev.extra,
+        valeur: ev.valeur
+      }));
+      console.log('Valeurs extra ajoutées:', articleData.extraValeurs);
+    }
+    
     // Nettoyer les valeurs null
     Object.keys(articleData).forEach(key => {
       if (articleData[key] === null || articleData[key] === undefined || articleData[key] === '') {
@@ -314,6 +332,11 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
       categorie: ''
     };
     
+    // Réinitialiser les valeurs extra
+    this.extraValeurs = [];
+    this.selectedExtra = null;
+    this.extraValeurInput = '';
+    
     // Réinitialiser aussi le FormGroup
     this.articleForm.reset();
   }
@@ -334,6 +357,15 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
           code: selectedArticle.code || '',
           categorie: selectedArticle.categorie?.idCategorie || selectedArticle.idCategorie || ''
         };
+        
+        // Charger les valeurs extra existantes
+        this.extraValeurs = [];
+        if (selectedArticle.extraValeurs && selectedArticle.extraValeurs.length > 0) {
+          this.extraValeurs = selectedArticle.extraValeurs.map((ev: any) => ({
+            extra: ev.extra,
+            valeur: ev.valeur
+          }));
+        }
         
         // Synchroniser le FormGroup avec formData
         this.articleForm.patchValue(this.formData);
@@ -673,5 +705,51 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   // Méthode pour obtenir le nombre d'articles filtrés
   getFilteredCount(): number {
     return this.filteredArticles.length;
+  }
+
+  // Méthodes pour la gestion des extras
+  fetchDataExtras() {
+    console.log('Chargement des extras...');
+    this.extraService.getAll().subscribe({
+      next: (extras) => {
+        console.log('Extras chargés:', extras);
+        this.extras = extras;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des extras:', error);
+        this.extras = [];
+      }
+    });
+  }
+
+  addExtraValeur() {
+    if (this.selectedExtra && this.extraValeurInput.trim()) {
+      // Vérifier si cet extra n'est pas déjà ajouté
+      const existingIndex = this.extraValeurs.findIndex(ev => ev.extra.idExtra === this.selectedExtra!.idExtra);
+      
+      if (existingIndex >= 0) {
+        // Mettre à jour la valeur existante
+        this.extraValeurs[existingIndex].valeur = this.extraValeurInput.trim();
+      } else {
+        // Ajouter une nouvelle valeur extra
+        this.extraValeurs.push({
+          extra: this.selectedExtra,
+          valeur: this.extraValeurInput.trim()
+        });
+      }
+      
+      // Réinitialiser les champs
+      this.selectedExtra = null;
+      this.extraValeurInput = '';
+    }
+  }
+
+  removeExtraValeur(index: number) {
+    this.extraValeurs.splice(index, 1);
+  }
+
+  getExtraValeur(extraId: number): string {
+    const extraValeur = this.extraValeurs.find(ev => ev.extra.idExtra === extraId);
+    return extraValeur ? extraValeur.valeur : '';
   }
 }

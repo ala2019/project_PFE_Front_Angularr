@@ -83,23 +83,23 @@
      <button
   (click)="createPopUp = true"
   class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-  Create
+  + Nouvelle devise	
 </button>
     <button
   *ngIf="selectdID"
   class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-  Edit
+  Modifier
 </button>
       <button
   *ngIf="selectdID"
   class="bg-red-600 hover:bg-red-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold"
   (click)="deletedPopUp = true">
-  Delete
+  Supprimer
 </button>
     </div>
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
-        <th class="px-6 py-3">#</th>
+       
         <th class="px-6 py-3">Devise </th>
         <th class="px-6 py-3">Symbole</th>
         <th class="px-6 py-3">Taux Change </th>
@@ -111,9 +111,7 @@
           class="cursor-pointer hover:bg-green-50"
           [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idDevise }"
           (click)="selectdID = item?.idDevise">
-          <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.idDevise }}
-          </td>
+         
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.devise }}
           </td>

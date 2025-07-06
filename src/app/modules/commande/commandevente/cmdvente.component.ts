@@ -121,10 +121,19 @@ export class CmdventetComponent implements OnInit {
     this.service.getAll().subscribe({
       next: (data) => {
         data = (data || []).filter((commande: any) => commande.type === 'VENTE');
+        
+        // Trier les commandes par date de commande (du plus récent au plus ancien)
+        data.sort((a: any, b: any) => {
+          const dateA = new Date(a.dateCmd || a.dateCommande);
+          const dateB = new Date(b.dateCmd || b.dateCommande);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
         this.allCommandes = data;
         this.commandes = data;
         this.filteredCommandes = [...data];
         this.totalItems = data.length;
+        console.log('Commandes de vente triées par date:', data);
       },
       error: (error) => {
         console.error('Erreur lors du chargement des commandes de vente:', error);
@@ -214,60 +223,63 @@ export class CmdventetComponent implements OnInit {
 
   // Filter methods
   applyFilters(): void {
-    this.filteredCommandes = this.commandes.filter((commande) => {
+    console.log('Application des filtres...');
+    console.log('Filtres actuels:', this.filters);
+
+    // Filtrer les commandes selon les critères
+    this.filteredCommandes = this.allCommandes.filter((commande) => {
       // Filtre par libellé
-      if (
-        this.filters.libelle &&
-        !commande.libelle?.toLowerCase().includes(this.filters.libelle.toLowerCase()) &&
-        !commande.libCmd?.toLowerCase().includes(this.filters.libelle.toLowerCase())
-      ) {
+      if (this.filters.libelle && !commande.libelle?.toLowerCase().includes(this.filters.libelle.toLowerCase())) {
         return false;
       }
 
       // Filtre par client
-      if (this.filters.client) {
-        const clientId = commande?.personne?.idPersonne || commande?.clientId || commande?.client;
-        if (clientId !== this.filters.client) {
-          return false;
-        }
+      if (this.filters.client && commande.client?.idPersonne != this.filters.client) {
+        return false;
       }
 
       // Filtre par magasin
-      if (this.filters.magasin) {
-        const magasinId = commande?.magasin?.idMagasin || commande?.magasinId;
-        if (magasinId !== parseInt(this.filters.magasin)) {
-          return false;
-        }
+      if (this.filters.magasin && commande.magasin?.idMagasin != this.filters.magasin) {
+        return false;
       }
 
-      // Filtre par date de début
-      if (this.filters.dateDebut) {
-        const commandeDate = commande.dateCommande || commande.dateCmd;
-        if (commandeDate && new Date(commandeDate) < new Date(this.filters.dateDebut)) {
-          return false;
-        }
-      }
+      // Filtre par date de début et fin
+      if (this.filters.dateDebut || this.filters.dateFin) {
+        const commandeDate = new Date(commande.dateCmd || commande.dateCommande);
 
-      // Filtre par date de fin
-      if (this.filters.dateFin) {
-        const commandeDate = commande.dateCommande || commande.dateCmd;
-        if (commandeDate && new Date(commandeDate) > new Date(this.filters.dateFin)) {
-          return false;
+        if (this.filters.dateDebut) {
+          const filterDateDebut = new Date(this.filters.dateDebut);
+          if (commandeDate < filterDateDebut) {
+            return false;
+          }
+        }
+
+        if (this.filters.dateFin) {
+          const filterDateFin = new Date(this.filters.dateFin);
+          if (commandeDate > filterDateFin) {
+            return false;
+          }
         }
       }
 
       return true;
     });
 
+    // Appliquer le tri après le filtrage
+    this.sortCommandesByDate();
+
     // Mettre à jour le total et revenir à la première page
     this.totalItems = this.filteredCommandes.length;
     this.currentPage = 1;
 
-    console.log('Filtres appliqués:', this.filters);
-    console.log('Commandes filtrées:', this.filteredCommandes.length);
+    console.log('Résultat du filtrage:', {
+      total: this.totalItems,
+      filtered: this.filteredCommandes.length,
+    });
   }
 
   clearFilters(): void {
+    console.log('Effacement des filtres...');
     this.filters = {
       libelle: '',
       client: '',
@@ -276,12 +288,15 @@ export class CmdventetComponent implements OnInit {
       dateFin: '',
     };
 
-    // Réinitialiser les commandes filtrées
-    this.filteredCommandes = [...this.commandes];
+    // Restaurer toutes les commandes
+    this.filteredCommandes = [...this.allCommandes];
+    
+    // Appliquer le tri après avoir restauré les données
+    this.sortCommandesByDate();
+    
     this.totalItems = this.filteredCommandes.length;
     this.currentPage = 1;
-
-    console.log('Filtres effacés, affichage de toutes les commandes');
+    console.log('Filtres effacés, affichage de toutes les commandes:', this.filteredCommandes.length);
   }
 
   // Vérifier si des filtres sont actifs
@@ -1209,5 +1224,14 @@ export class CmdventetComponent implements OnInit {
       return;
     }
     this.applyFilters();
+  }
+
+  // Méthode pour trier les commandes par date (du plus récent au plus ancien)
+  sortCommandesByDate(): void {
+    this.filteredCommandes.sort((a: any, b: any) => {
+      const dateA = new Date(a.dateCmd || a.dateCommande);
+      const dateB = new Date(b.dateCmd || b.dateCommande);
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 }

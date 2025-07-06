@@ -135,11 +135,52 @@
   </div>
 </app-popup>
 }
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Liste des fournisseurs</h1>
+</div>
+<!-- Filtres de recherche (harmonisé) -->
+<div class="mb-6 rounded-lg border bg-white p-6 shadow-sm">
+  <div class="mb-4 flex items-center justify-between">
+    <div>
+      <h3 class="text-lg font-medium text-gray-900">Filtres de recherche</h3>
+    </div>
+    @if (hasActiveFilters()) {
+    <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+      {{ getFilteredCount() }} résultat(s) trouvé(s)
+    </span>
+    }
+  </div>
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <!-- Code Fournisseur -->
+    <div class="filter-item">
+      <label>
+        
+        Code Fournisseur
+      </label>
+      <input type="text" [(ngModel)]="filters.codeFournisseur" (input)="applyFilters()" placeholder="Rechercher par code..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+    </div>
+    <!-- Nom -->
+    <div class="filter-item">
+      <label>
+       
+        Nom
+      </label>
+      <input type="text" [(ngModel)]="filters.nom" (input)="applyFilters()" placeholder="Rechercher par nom..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+    </div>
+    <!-- Email -->
+   
+    <!-- Devise -->
+    
+    <!-- Actions -->
+    <div class="flex items-end gap-2">
+      <button (click)="applyFilters()" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">🔍 Appliquer</button>
+      <button (click)="clearFilters()" [disabled]="!hasActiveFilters()" class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">🗑️ Effacer</button>
+    </div>
+  </div>
+</div>
 
 <!-- Titre de l'interface -->
-<div class="mb-6">
-  <h1 class="text-2xl font-bold text-gray-900">Gestion des fournisseurs</h1>
-</div>
+
 
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
   <div
@@ -148,7 +189,7 @@
       <button
         (click)="openModal()"
         class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-        Nouveau Fournisseur
+        + Nouveau Fournisseur
       </button>
       <button
         *ngIf="selectdID"
@@ -175,7 +216,7 @@
         <th class="px-6 py-3">Devise</th>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white">
-        @for (item of fournisseurs; track $index) {
+        @for (item of filteredFournisseurs; track $index) {
         <tr
           class="cursor-pointer hover:bg-green-50"
           [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idPersonne }"
