@@ -66,6 +66,18 @@ export class CmdventetComponent implements OnInit {
   nextFactureNumber = 'FACT-2024-001';
   factureCounter = 1;
   expandedCommandes = new Set<number>();
+  
+  // Popups d'alerte
+  showMagasinAlert = false;
+  showLoadingAlert = false;
+  showNoStockAlert = false;
+  showQuantityAlert = false;
+  showUpdateErrorAlert = false;
+  showCreateErrorAlert = false;
+  showDeleteErrorAlert = false;
+  showNoCommandeAlert = false;
+  showDifferentClientAlert = false;
+  showDateRangeAlert = false;
 
   // Pagination
   currentPage = 1;
@@ -394,7 +406,7 @@ export class CmdventetComponent implements OnInit {
 
       // Vérifier que la quantité est au moins égale à 1
       if (newQuantity < 1) {
-        alert('La quantité doit être au moins égale à 1');
+        this.showQuantityAlert = true;
         event.target.value = 1;
         return;
       }
@@ -451,7 +463,7 @@ export class CmdventetComponent implements OnInit {
     // Vérifier si un magasin est sélectionné
     const magasinId = this.commandeForm.get('magasinId')?.value;
     if (!magasinId) {
-      alert("Veuillez d'abord sélectionner un magasin avant d'ajouter des articles.");
+      this.showMagasinAlert = true;
       return;
     }
 
@@ -461,14 +473,14 @@ export class CmdventetComponent implements OnInit {
     if (!this.stocksByMagasin[magasinIdNum]) {
       console.log('Stocks non encore chargés pour le magasin, chargement en cours...');
       this.loadStocksForMagasin(magasinIdNum);
-      alert('Chargement des stocks en cours. Veuillez réessayer dans quelques secondes.');
+      this.showLoadingAlert = true;
       return;
     }
 
     // Vérifier que le magasin a des articles en stock
     const articlesFromMagasin = this.getArticlesFromMagasin(magasinIdNum);
     if (articlesFromMagasin.length === 0) {
-      alert('Aucun article disponible en stock dans ce magasin');
+      this.showNoStockAlert = true;
       return;
     }
 
@@ -539,6 +551,19 @@ export class CmdventetComponent implements OnInit {
     this.articleSelectionPopUp = false;
     this.articleSearchFilter = '';
     this.selectedArticles = [];
+  }
+
+  // Méthodes pour fermer les popups d'alerte
+  closeMagasinAlert(): void {
+    this.showMagasinAlert = false;
+  }
+
+  closeLoadingAlert(): void {
+    this.showLoadingAlert = false;
+  }
+
+  closeNoStockAlert(): void {
+    this.showNoStockAlert = false;
   }
 
   // Update client TVA rate and devise when client changes
@@ -614,7 +639,7 @@ export class CmdventetComponent implements OnInit {
           },
           error: (error) => {
             console.error('Erreur lors de la mise à jour de la commande:', error);
-            alert('Erreur lors de la mise à jour de la commande');
+            this.showUpdateErrorAlert = true;
           },
         });
       } else {
@@ -629,7 +654,7 @@ export class CmdventetComponent implements OnInit {
           },
           error: (error) => {
             console.error('Erreur lors de la création de la commande:', error);
-            alert('Erreur lors de la création de la commande');
+            this.showCreateErrorAlert = true;
           },
         });
       }
@@ -709,7 +734,7 @@ export class CmdventetComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erreur lors de la suppression de la commande:', error);
-        alert('Erreur lors de la suppression de la commande');
+        this.showDeleteErrorAlert = true;
       },
     });
   }

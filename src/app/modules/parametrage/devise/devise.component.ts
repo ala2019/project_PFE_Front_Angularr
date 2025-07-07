@@ -22,11 +22,13 @@ export class DeviseComponent {
   
     protected deletedPopUp = false;
     protected createPopUp = false;
+    protected updatePopUp = false;
   
      formData = {
       devise: '',
       symbole:'',
       tauxChange:'',
+      idDevise: null,
     };
   
     constructor(private readonly deviseService: DeviseService) {}
@@ -61,9 +63,45 @@ export class DeviseComponent {
               devise: '',
               symbole:'',
               tauxChange:'',
+              idDevise: null,
             };
             this.createPopUp = false;
           },
+        });
+      }
+    }
+
+    openUpdatePopup() {
+      const selected = this.deviseList.find(item => item.idDevise === this.selectdID);
+      if (selected) {
+        this.formData = {
+          devise: selected.devise,
+          symbole: selected.symbole,
+          tauxChange: selected.tauxChange,
+          idDevise: selected.idDevise
+        };
+        this.updatePopUp = true;
+      }
+    }
+
+    onSubmitUpdate() {
+      if (this.formData.devise.trim() && this.formData.idDevise) {
+        this.deviseService.update(this.formData.idDevise, this.formData).subscribe({
+          next: (response: any) => {
+            this.getAll();
+            this.formData = {
+              devise: '',
+              symbole: '',
+              tauxChange: '',
+              idDevise: null
+            };
+            this.updatePopUp = false;
+            this.selectdID = null;
+          },
+          error: () => {
+            this.getAll();
+            this.updatePopUp = false;
+          }
         });
       }
     }

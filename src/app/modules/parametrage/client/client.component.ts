@@ -32,9 +32,7 @@ export class ClientComponent implements OnInit {
   // Filtres
   filters = {
     codeClient: '',
-    nom: '',
-    email: '',
-    devise: ''
+    nom: ''
   };
   filteredClients: any[] = [];
 
@@ -126,23 +124,38 @@ export class ClientComponent implements OnInit {
   }
 
   delete(id: number): void {
+    console.log('Tentative de suppression du client ID:', id);
+    
     this.service.delete(id).subscribe({
       next: (response) => {
-        console.log('Client supprimé avec succès:', response);
-        this.getClients();
+        console.log('Client supprimé avec succès, ID:', id, 'Response:', response);
+        
+        // Mettre à jour les listes locales
+        this.clients = this.clients.filter(client => client.idPersonne !== id);
+        this.filteredClients = this.filteredClients.filter(client => client.idPersonne !== id);
+        
+        // Réinitialiser la sélection
         this.selectdID = null;
         this.selectedClient = null;
+        
+        console.log('Listes mises à jour après suppression');
       },
       error: (error) => {
-        console.error('Erreur lors de la suppression:', error);
+        console.error('Erreur lors de la suppression du client:', error);
+        
         // Si le statut est 200, considérer comme succès malgré l'erreur
         if (error.status === 200) {
           console.log('Suppression réussie (statut 200)');
-          this.getClients();
+          
+          // Mettre à jour les listes locales
+          this.clients = this.clients.filter(client => client.idPersonne !== id);
+          this.filteredClients = this.filteredClients.filter(client => client.idPersonne !== id);
+          
+          // Réinitialiser la sélection
           this.selectdID = null;
           this.selectedClient = null;
         } else {
-          alert('Erreur lors de la suppression: ' + error.message);
+          alert('Erreur lors de la suppression du client. Veuillez réessayer.');
         }
       }
     });
@@ -201,28 +214,20 @@ export class ClientComponent implements OnInit {
       const nomMatch = !this.filters.nom || 
         client.nomPersonne?.toLowerCase().includes(this.filters.nom.toLowerCase());
       
-      const emailMatch = !this.filters.email || 
-        client.email?.toLowerCase().includes(this.filters.email.toLowerCase());
-      
-      const deviseMatch = !this.filters.devise || 
-        client.devise?.idDevise == this.filters.devise;
-      
-      return codeMatch && nomMatch && emailMatch && deviseMatch;
+      return codeMatch && nomMatch;
     });
   }
 
   clearFilters(): void {
     this.filters = {
       codeClient: '',
-      nom: '',
-      email: '',
-      devise: ''
+      nom: ''
     };
     this.filteredClients = [...this.clients];
   }
 
   hasActiveFilters(): boolean {
-    return !!(this.filters.codeClient || this.filters.nom || this.filters.email || this.filters.devise);
+    return !!(this.filters.codeClient || this.filters.nom);
   }
 
   getFilteredCount(): number {

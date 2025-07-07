@@ -58,7 +58,7 @@ export class MouvementComponent implements OnInit {
 
   // Pagination
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 5;
   totalItems = 0;
 
   // Math object for template
@@ -193,11 +193,13 @@ export class MouvementComponent implements OnInit {
     this.filteredMouvements = this.mouvements.filter((mouvement) => {
       let match = true;
 
-      // Filtre par libellé
+      // Filtre par libellé commande (corrigé pour chercher dans libCmd)
       if (this.filters.libelle) {
-        const libelleMatch = mouvement.libMouvement?.toLowerCase().includes(this.filters.libelle.toLowerCase());
+        const libelleMatch = mouvement.libCmd?.toLowerCase().includes(this.filters.libelle.toLowerCase()) ||
+                            mouvement.libMouvement?.toLowerCase().includes(this.filters.libelle.toLowerCase());
         console.log('Libelle filter check:', {
-          mouvementLibelle: mouvement.libMouvement,
+          mouvementLibCmd: mouvement.libCmd,
+          mouvementLibMouvement: mouvement.libMouvement,
           filterLibelle: this.filters.libelle,
           isMatch: libelleMatch
         });
@@ -211,14 +213,14 @@ export class MouvementComponent implements OnInit {
         Array.isArray(this.filters.typeMouvement) &&
         this.filters.typeMouvement.length > 0
       ) {
-        // Déterminer le type de mouvement (ENTREE ou SORTIE) basé sur le typeMouvement
+        // Déterminer le type de mouvement (ENTREE ou SORTIE) basé sur le signe
         let mouvementType = 'SORTIE'; // Par défaut
-        if (mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT') {
+        if (mouvement.signe === '+') {
           mouvementType = 'ENTREE';
         }
         
         console.log('Type filter check:', {
-          mouvementTypeMouvement: mouvement.typeMouvement,
+          mouvementSigne: mouvement.signe,
           determinedType: mouvementType,
           filterTypes: this.filters.typeMouvement,
           isMatch: this.filters.typeMouvement.includes(mouvementType)
@@ -262,9 +264,12 @@ export class MouvementComponent implements OnInit {
 
       // Filtre par magasin
       if (this.filters.magasinSource) {
-        const magasinMatch = mouvement.magasin?.idMagasin == this.filters.magasinSource;
+        // Trouver le magasin sélectionné pour obtenir son nom
+        const selectedMagasin = this.magasins.find(m => m.idMagasin == this.filters.magasinSource);
+        const magasinMatch = mouvement.libMag === selectedMagasin?.nomMagasin;
         console.log('Magasin filter check:', {
-          mouvementMagasinId: mouvement.magasin?.idMagasin,
+          mouvementLibMag: mouvement.libMag,
+          selectedMagasinName: selectedMagasin?.nomMagasin,
           filterMagasinId: this.filters.magasinSource,
           isMatch: magasinMatch
         });
@@ -306,6 +311,18 @@ export class MouvementComponent implements OnInit {
     console.log('Effacement des filtres...');
     this.filterForm.reset();
     this.filters = {};
+
+    // Réinitialiser les checkboxes de type de mouvement
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][value="ENTREE"], input[type="checkbox"][value="SORTIE"]') as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = false;
+    });
+
+    // Réinitialiser le select du magasin
+    const magasinSelect = document.querySelector('select[formControlName="magasinSource"]') as HTMLSelectElement;
+    if (magasinSelect) {
+      magasinSelect.value = '';
+    }
 
     // Restaurer tous les mouvements
     this.filteredMouvements = [...this.mouvements];
@@ -353,35 +370,105 @@ export class MouvementComponent implements OnInit {
     this.selectedId = mouvement.idMouvement;
     this.mouvementService.getOneById(this.selectedMouvement.idMouvement).subscribe({
       next: (value: any) => {
-        this.selectedMouvement = { ...value, libCmd: this.selectedMouvement.libCmd };
-        mouvement = this.selectedMouvement;
-        console.log(mouvement);
+        // Le service retourne un tableau, on prend le premier élément
+        const mouvementDetails = Array.isArray(value) ? value[0] : value;
+        this.selectedMouvement = { 
+          ...mouvement, // Garder les données de la liste
+          ...mouvementDetails // Ajouter les détails du service
+        };
+        console.log('Détails du mouvement pour édition:', this.selectedMouvement);
+        
+        // Trouver l'ID du magasin basé sur le nom du magasin
+        const magasinId = this.magasins.find(m => m.nomMagasin === this.selectedMouvement.libMag)?.idMagasin;
+        
+        this.mouvementForm.patchValue({
+          libelle: this.selectedMouvement.libMouvement,
+          commandeLibelle: this.selectedMouvement.libCmd,
+          typeMouvement: this.selectedMouvement.signe,
+          dateMouvement: new Date(this.selectedMouvement.dateMvt).toISOString().substring(0, 10),
+          magasinSourceId: magasinId,
+          lignes: this.selectedMouvement.detailMvts || [],
+        });
+        this.createPopUp = true;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des détails pour édition:', err);
+        // En cas d'erreur, utiliser les données de base
+        const magasinId = this.magasins.find(m => m.nomMagasin === mouvement.libMag)?.idMagasin;
+        
         this.mouvementForm.patchValue({
           libelle: mouvement.libMouvement,
           commandeLibelle: mouvement.libCmd,
           typeMouvement: mouvement.signe,
           dateMouvement: new Date(mouvement.dateMvt).toISOString().substring(0, 10),
-          magasinSourceId: mouvement.magasin?.idMagasin,
-          lignes: mouvement.detailMvts || [],
+          magasinSourceId: magasinId,
+          lignes: [],
         });
         this.createPopUp = true;
       },
-      error: (err) => {},
     });
   }
 
-  openDetailsPopup(mouvement: Mouvement): void {
+  openDetailsPopup(mouvement: any): void {
     this.selectedMouvement = mouvement;
+    
+    // Vérifier d'abord si les données de base contiennent déjà des lignes
+    const possibleLineFields = ['detailMvts', 'lignes', 'lignesMouvement', 'details', 'detailMvt', 'ligneMouvement'];
+    let baseLignesFound = null;
+    
+    for (const field of possibleLineFields) {
+      if (mouvement[field] && Array.isArray(mouvement[field])) {
+        baseLignesFound = mouvement[field];
+        break;
+      }
+    }
+    
+    if (baseLignesFound) {
+      this.selectedMouvement.detailMvts = baseLignesFound;
+      this.detailsPopUp = true;
+      return;
+    }
+    
     this.mouvementService.getOneById(this.selectedMouvement.idMouvement).subscribe({
       next: (value: any) => {
-        this.selectedMouvement = { ...value, libCmd: this.selectedMouvement.libCmd };
+        // Le service retourne un tableau, on prend le premier élément
+        const mouvementDetails = Array.isArray(value) ? value[0] : value;
+        
+        if (!mouvementDetails) {
+          this.selectedMouvement = mouvement;
+          this.detailsPopUp = true;
+          return;
+        }
+        
+        this.selectedMouvement = { 
+          ...mouvement, // Garder les données de la liste
+          ...mouvementDetails // Ajouter les détails du service
+        };
+        
+        // Vérifier tous les noms de champs possibles pour les lignes
+        let lignesFound = null;
+        
+        for (const field of possibleLineFields) {
+          if (this.selectedMouvement[field] && Array.isArray(this.selectedMouvement[field])) {
+            lignesFound = this.selectedMouvement[field];
+            break;
+          }
+        }
+        
+        if (lignesFound) {
+          this.selectedMouvement.detailMvts = lignesFound;
+        }
+        
         this.detailsPopUp = true;
       },
-      error: (err) => {},
+      error: (err) => {
+        console.error('Erreur lors du chargement des détails:', err);
+        this.detailsPopUp = true;
+      },
     });
   }
 
-  openDeletePopup(mouvement: Mouvement): void {
+  openDeletePopup(mouvement: any): void {
     this.selectedMouvement = mouvement;
     this.selectedId = mouvement.idMouvement;
     this.deletePopUp = true;
@@ -560,11 +647,11 @@ export class MouvementComponent implements OnInit {
     }
   }
 
-  canEdit(mouvement: Mouvement): boolean {
-    return mouvement.typeMouvement === 'POINTAGE' || mouvement.typeMouvement === 'TRANSFERT';
+  canEdit(mouvement: any): boolean {
+    return mouvement.signe === '+'; // Seuls les mouvements d'entrée peuvent être édités
   }
 
-  canDelete(mouvement: Mouvement): boolean {
+  canDelete(mouvement: any): boolean {
     return mouvement.statut === 'EN_COURS' && this.canEdit(mouvement);
   }
 
@@ -620,5 +707,151 @@ export class MouvementComponent implements OnInit {
       const dateB = new Date(b.dateMvt || b.dateMouvement);
       return dateB.getTime() - dateA.getTime();
     });
+  }
+
+  // Méthode utilitaire pour vérifier si les détails sont disponibles
+  hasDetails(mouvement: any): boolean {
+    if (!mouvement) return false;
+    
+    // Vérifier tous les noms de champs possibles pour les lignes
+    const possibleLineFields = ['detailMvts', 'lignes', 'lignesMouvement', 'details', 'detailMvt', 'ligneMouvement'];
+    
+    for (const field of possibleLineFields) {
+      if (mouvement[field] && Array.isArray(mouvement[field]) && mouvement[field].length > 0) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  // Méthode pour obtenir le nombre de lignes de détail
+  getDetailCount(mouvement: any): number {
+    if (!mouvement) return 0;
+    
+    // Vérifier tous les noms de champs possibles pour les lignes
+    const possibleLineFields = ['detailMvts', 'lignes', 'lignesMouvement', 'details', 'detailMvt', 'ligneMouvement'];
+    
+    for (const field of possibleLineFields) {
+      if (mouvement[field] && Array.isArray(mouvement[field])) {
+        return mouvement[field].length;
+      }
+    }
+    
+    return 0;
+  }
+
+  // Méthodes utilitaires pour extraire les données des lignes
+  getLigneCode(ligne: any): string {
+    if (!ligne) return '-';
+    
+    // Essayer différents chemins possibles pour le code
+    return ligne?.detailCmd?.article?.code || 
+           ligne?.article?.code || 
+           ligne?.codeArticle || 
+           ligne?.code ||
+           ligne?.detailCmd?.code ||
+           ligne?.detailMvt?.article?.code ||
+           ligne?.detailMvt?.code ||
+           '-';
+  }
+
+  getLigneReference(ligne: any): string {
+    if (!ligne) return '-';
+    
+    // Essayer différents chemins possibles pour la référence
+    return ligne?.detailCmd?.article?.reference || 
+           ligne?.article?.reference || 
+           ligne?.referenceArticle || 
+           ligne?.reference ||
+           ligne?.detailCmd?.reference ||
+           ligne?.detailMvt?.article?.reference ||
+           ligne?.detailMvt?.reference ||
+           '-';
+  }
+
+  getLigneDescription(ligne: any): string {
+    if (!ligne) return '-';
+    
+    // Essayer différents chemins possibles pour la description
+    return ligne?.detailCmd?.article?.description || 
+           ligne?.article?.description || 
+           ligne?.descriptionArticle || 
+           ligne?.description ||
+           ligne?.detailCmd?.description ||
+           ligne?.detailMvt?.article?.description ||
+           ligne?.detailMvt?.description ||
+           '-';
+  }
+
+  getLigneQuantite(ligne: any): string {
+    if (!ligne) return '-';
+    
+    // Essayer différents chemins possibles pour la quantité
+    const quantite = ligne?.detailCmd?.quantite || 
+                     ligne?.quantite || 
+                     ligne?.qte ||
+                     ligne?.detailMvt?.quantite ||
+                     ligne?.detailMvt?.qte ||
+                     null;
+    
+    return quantite !== null ? quantite.toString() : '-';
+  }
+
+  // Méthode pour obtenir la quantité sous forme numérique (pour les inputs)
+  getLigneQuantiteNumber(ligne: any): number {
+    if (!ligne) return 0;
+    
+    // Essayer différents chemins possibles pour la quantité
+    const quantite = ligne?.detailCmd?.quantite || 
+                     ligne?.quantite || 
+                     ligne?.qte ||
+                     ligne?.detailMvt?.quantite ||
+                     ligne?.detailMvt?.qte ||
+                     0;
+    
+    return typeof quantite === 'number' ? quantite : parseInt(quantite, 10) || 0;
+  }
+
+  // Méthode pour afficher les détails de débogage d'une ligne
+  debugLigne(ligne: any, index: number): void {
+    // Méthode supprimée - plus de débogage nécessaire
+  }
+
+  // Méthode pour mettre à jour la quantité d'une ligne directement
+  updateLigneQuantite(index: number, event: any): void {
+    const newQuantite = parseInt(event.target.value, 10);
+    
+    if (isNaN(newQuantite) || newQuantite < 1) {
+      return; // Valeur invalide, ignorer
+    }
+    
+    const lignes = this.mouvementForm.get('lignes')?.value || [];
+    
+    if (lignes[index]) {
+      // Mettre à jour la quantité dans la ligne
+      if (lignes[index].detailCmd) {
+        lignes[index].detailCmd.quantite = newQuantite;
+      } else {
+        lignes[index].quantite = newQuantite;
+      }
+      
+      // Mettre à jour le formulaire
+      this.mouvementForm.patchValue({ lignes });
+      
+      // Optionnel : Sauvegarder automatiquement via l'API
+      if (lignes[index]?.detailCmd?.idDetailCmd) {
+        this.commandeService.updateDetail(lignes[index].detailCmd.idDetailCmd, {
+          quantite: newQuantite
+        }).subscribe({
+          next: (response) => {
+            console.log('Quantité mise à jour avec succès:', response);
+          },
+          error: (err) => {
+            console.error('Erreur lors de la mise à jour de la quantité:', err);
+          }
+        });
+      }
+    }
   }
 }

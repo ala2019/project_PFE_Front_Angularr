@@ -38,7 +38,7 @@ export class ProfileMenuComponent implements OnInit {
   public isOpen = false;
   public profileMenu = [
     {
-      title: 'Log out',
+      title: 'Déconnexion',
       icon: './assets/icons/heroicons/outline/logout.svg',
       link: '/auth',
     },
@@ -75,7 +75,7 @@ export class ProfileMenuComponent implements OnInit {
     },
   ];
 
-  public themeMode = ['light', 'dark'];
+  public themeMode = ['clair', 'sombre'];
   public themeDirection = ['ltr', 'rtl'];
 
   constructor(public themeService: ThemeService) {}

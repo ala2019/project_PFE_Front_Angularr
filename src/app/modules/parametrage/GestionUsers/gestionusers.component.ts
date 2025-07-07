@@ -36,8 +36,8 @@ export class GestionusersComponent implements OnInit {
 
   // Role options
   roles = [
-    { idRole: 1, value: 'administrateur', label: 'Administrateur' },
-    { idRole: 2, value: 'commercial', label: 'Commercial' },
+    { idRole: 1, value: 'administrateur', label: 'administrateur' },
+    { idRole: 2, value: 'commercial', label: 'commercial' },
   ];
 
   constructor(

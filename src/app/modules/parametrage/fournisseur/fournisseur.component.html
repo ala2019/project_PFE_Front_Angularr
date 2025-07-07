@@ -206,7 +206,6 @@
     </div>
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
-        <th class="px-6 py-3">#</th>
         <th class="px-6 py-3">Code</th>
         <th class="px-6 py-3">Nom</th>
         <th class="px-6 py-3">Téléphone</th>
@@ -221,9 +220,6 @@
           class="cursor-pointer hover:bg-green-50"
           [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idPersonne }"
           (click)="selectdID = item?.idPersonne; selectedFournisseur = item">
-          <td class="px-6 py-4 font-medium text-gray-800">
-            {{ item?.idPersonne }}
-          </td>
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ getFournisseurCode(item) }}
           </td>
@@ -248,7 +244,7 @@
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="8">Aucun fournisseur trouvé</td>
+          <td class="py-4 text-center text-sm" colspan="7">Aucun fournisseur trouvé</td>
         </tr>
         }
       </tbody>

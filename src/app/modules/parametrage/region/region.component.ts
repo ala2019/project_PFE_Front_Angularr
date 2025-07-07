@@ -19,7 +19,7 @@ export class RegionComponent implements OnInit {
   protected updatePopUp = false;
 
   formData = {
-    nomregion: '',
+    nomRegion: '',
     codeRegion: '',
     idRegion: null, // Ajout de l'ID pour la mise à jour
   };
@@ -71,14 +71,14 @@ export class RegionComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.formData.nomregion.trim() && this.formData.codeRegion.trim()) {
+    if (this.formData.nomRegion.trim() && this.formData.codeRegion.trim()) {
       this.regionService.create(this.formData).subscribe({
         next: (response: any) => {
           console.log('Région créée:', response);
           this.getAll();
           this.formData = {
             idRegion: null,
-            nomregion: '',
+            nomRegion: '',
             codeRegion: '',
           };
           this.createPopUp = false;
@@ -93,7 +93,7 @@ export class RegionComponent implements OnInit {
   openUpdatePopup(item: any) {
     this.formData = {
       idRegion: item.idRegion,
-      nomregion: item.nomregion,
+      nomRegion: item.nomRegion,
       codeRegion: item.codeRegion,
     };
     this.updatePopUp = true;
@@ -107,11 +107,11 @@ export class RegionComponent implements OnInit {
   }
 
   onSubmitUpdate() {
-    if (this.formData.nomregion.trim() && this.formData.codeRegion.trim() && this.formData.idRegion !== null) {
+    if (this.formData.nomRegion.trim() && this.formData.codeRegion.trim() && this.formData.idRegion !== null) {
       this.regionService.update(this.formData.idRegion, this.formData).subscribe({
         next: (response: any) => {
           this.getAll();
-          this.formData = { nomregion: '', idRegion: null, codeRegion: '' };
+          this.formData = { nomRegion: '', idRegion: null, codeRegion: '' };
           this.updatePopUp = false;
         },
         error: (err) => {
@@ -124,7 +124,7 @@ export class RegionComponent implements OnInit {
   getRegionName(item: any): string {
     // Débogage: afficher toutes les propriétés disponibles
     console.log('Structure de l\'objet région:', item);
-    return item?.nomregion || item?.nomRegion || item?.name || item?.nom || 'Nom non trouvé';
+    return item?.nomRegion;
   }
 
   applyFilters(): void {

@@ -1,11 +1,11 @@
 @if (deletedPopUp) {
 <app-popup>
   <div popup-content>
-    <h3 class="text-lg font-semibold">Did you want to delete it</h3>
+    <h3 class="text-lg font-semibold">Souhaitez-vous le supprimer ?</h3>
     <div class="flex w-full justify-between p-3 py-5">
-      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Close</button>
+      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
       <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="delete(); deletedPopUp = false">
-        Delete
+        Supprimer
       </button>
     </div>
   </div>
@@ -25,9 +25,9 @@
           [(ngModel)]="formData.nomMagasin"
           required
           #nameInput="ngModel"
-          placeholder="Enter name"
+          placeholder="Entrer le nom"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="nameInput.invalid && nameInput.touched" class="mt-1 text-xs text-red-500">Name is required.</div>
+        <div *ngIf="nameInput.invalid && nameInput.touched" class="mt-1 text-xs text-red-500">Le nom est requis.</div>
       </div>
       <div>
         <label for="region" class="mb-1 block text-sm font-medium text-gray-700">
@@ -75,9 +75,9 @@
           [(ngModel)]="formData.nomMagasin"
           required
           #nameInput="ngModel"
-          placeholder="Enter name"
+          placeholder="Entrer le nom"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-        <div *ngIf="nameInput.invalid && nameInput.touched" class="mt-1 text-xs text-red-500">Name is required.</div>
+        <div *ngIf="nameInput.invalid && nameInput.touched" class="mt-1 text-xs text-red-500">Le nom est requis.</div>
       </div>
       <div>
         <label for="region" class="mb-1 block text-sm font-medium text-gray-700">
@@ -111,7 +111,10 @@
   </div>
 </app-popup>
 }
-
+<!-- Titre de l'interface -->
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Liste des magasins</h1>
+</div>
 <!-- Filtres de recherche (harmonisé) -->
 <div class="mb-6 rounded-lg border bg-white p-6 shadow-sm">
   <div class="mb-4 flex items-center justify-between">
@@ -128,9 +131,7 @@
     <!-- Nom de magasin -->
     <div class="filter-item">
       <label>
-        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-        </svg>
+       
         Nom de magasin
       </label>
       <input type="text" [(ngModel)]="filters.nomMagasin" (input)="applyFilters()" placeholder="Rechercher par nom..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
@@ -138,12 +139,15 @@
     <!-- Nom de région -->
     <div class="filter-item">
       <label>
-        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-        </svg>
         Région
       </label>
-      <input type="text" [(ngModel)]="filters.nomRegion" (input)="applyFilters()" placeholder="Rechercher par région..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+      <select 
+        [(ngModel)]="filters.nomRegion" 
+        (change)="applyFilters()" 
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+        <option value="">Toutes les régions</option>
+        <option *ngFor="let region of regionList" [value]="getRegionName(region)">{{ getRegionName(region) }}</option>
+      </select>
     </div>
     <!-- Actions -->
     <div class="flex items-end gap-2">
@@ -153,10 +157,7 @@
   </div>
 </div>
 
-<!-- Titre de l'interface -->
-<div class="mb-6">
-  <h1 class="text-2xl font-bold text-gray-900">Gestion des magasins</h1>
-</div>
+
 
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
   <div

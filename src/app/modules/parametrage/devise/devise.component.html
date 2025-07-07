@@ -1,11 +1,11 @@
 @if (deletedPopUp) {
 <app-popup>
   <div popup-content>
-    <h3 class="text-lg font-semibold">Did you want to delete it</h3>
+    <h3 class="text-lg font-semibold">Souhaitez-vous le supprimer ?</h3>
     <div class="flex w-full justify-between p-3 py-5">
-      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Close</button>
+      <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="deletedPopUp = false">Annuler</button>
       <button class="mt-3 cursor-pointer text-sm text-red-500 hover:underline" (click)="delete(); deletedPopUp = false">
-        Delete
+                  Supprimer
       </button>
     </div>
   </div>
@@ -27,7 +27,7 @@
             placeholder="Saisie devise"
             class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
             <div *ngIf="deviseInput.invalid && deviseInput.touched" class="mt-1 text-xs text-red-500">
-            Devise is required.
+            La devise est requise.
             </div>
   
             <input
@@ -40,7 +40,7 @@
               placeholder="Symbole"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
             <div *ngIf="symboleInput.invalid && symboleInput.touched" class="mt-1 text-xs text-red-500">
-            Symbole is required.
+            Le symbole est requis.
             </div>
             <input
               type="text"
@@ -52,16 +52,75 @@
               placeholder="Taux de Change"
               class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
             <div *ngIf="tauxChangeInput.invalid && tauxChangeInput.touched" class="mt-1 text-xs text-red-500">
-              Taux de change is required.
+              Le taux de change est requis.
             </div>
 
       <div class="flex justify-end gap-5">
-        <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="createPopUp = false">Close</button>
+        <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="createPopUp = false">Annuler</button>
         <button
           type="submit"
           [disabled]="nameForm.invalid"
           class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-          Save
+          Enregistrer
+        </button>
+              </div>
+
+      </div>
+    </form>
+  </div>
+</app-popup>
+} @if (updatePopUp) {
+<app-popup>
+  <div popup-content>
+    <form #nameForm="ngForm" (ngSubmit)="onSubmitUpdate()" class="w-[400px] max-w-sm space-y-4" novalidate>
+      <div>
+        <label for="devise" class="mb-1 block text-sm font-medium text-gray-700">
+          Devise <span class="text-red-500">*</span>
+        </label>
+            <input  type="text"
+            id="devise"
+            name="devise"
+            [(ngModel)]="formData.devise"
+            required
+            #deviseInput="ngModel"
+            placeholder="Saisie devise"
+            class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+            <div *ngIf="deviseInput.invalid && deviseInput.touched" class="mt-1 text-xs text-red-500">
+            La devise est requise.
+            </div>
+  
+            <input
+              type="text"
+              id="symbole"
+              name="symbole"
+              [(ngModel)]="formData.symbole"
+              required
+              #symboleInput="ngModel"
+              placeholder="Symbole"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+            <div *ngIf="symboleInput.invalid && symboleInput.touched" class="mt-1 text-xs text-red-500">
+            Le symbole est requis.
+            </div>
+            <input
+              type="text"
+              id="tauxChange"
+              name="tauxChange"
+              [(ngModel)]="formData.tauxChange"
+              required
+              #tauxChangeInput="ngModel"
+              placeholder="Taux de Change"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+            <div *ngIf="tauxChangeInput.invalid && tauxChangeInput.touched" class="mt-1 text-xs text-red-500">
+              Le taux de change est requis.
+            </div>
+
+      <div class="flex justify-end gap-5">
+        <button class="mt-3 cursor-pointer text-sm hover:underline" (click)="updatePopUp = false">Annuler</button>
+        <button
+          type="submit"
+          [disabled]="nameForm.invalid"
+          class="bg-primary text-primary-foreground flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+          Enregistrer
         </button>
               </div>
 
@@ -73,7 +132,7 @@
 
 <!-- Titre de l'interface -->
 <div class="mb-6">
-  <h1 class="text-2xl font-bold text-gray-900">Gestion des devises</h1>
+  <h1 class="text-2xl font-bold text-gray-900">Liste des devises</h1>
 </div>
 
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
@@ -87,6 +146,7 @@
 </button>
     <button
   *ngIf="selectdID"
+  (click)="openUpdatePopup()"
   class="bg-blue-600 hover:bg-blue-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
   Modifier
 </button>
@@ -124,7 +184,7 @@
         </tr>
         } @empty {
         <tr>
-          <td class="py-4 text-center text-sm" colspan="7">No users found</td>
+          <td class="py-4 text-center text-sm" colspan="7">Aucune devise trouvée</td>
         </tr>
         }
       </tbody>

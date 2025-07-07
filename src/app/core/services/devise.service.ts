@@ -23,6 +23,23 @@ export class DeviseService{
     return this.http.delete(this.api + '/delete/' + id);
   }
 
+  closeMagasinAlert(): void {
+    this.showMagasinAlert = false;
+  }
+
+  closeLoadingAlert(): void {
+    this.showLoadingAlert = false;
+  }
+
+  closeNoStockAlert(): void {
+    this.showNoStockAlert = false;
+  }
+
+  // Popups d'alerte
+  showMagasinAlert = false;
+  showLoadingAlert = false;
+  showNoStockAlert = false;
+
 
 
 

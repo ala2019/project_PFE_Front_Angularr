@@ -47,7 +47,7 @@ export class StockComponent implements OnInit {
 
   // Pagination
   currentPage = 1;
-  itemsPerPage = 15;
+  itemsPerPage = 5;
   totalItems = 0;
 
   // Loading states
@@ -419,6 +419,11 @@ export class StockComponent implements OnInit {
     return this.filteredArticles.filter((article) => article.quantite < 1).length;
   }
 
+  // Nouvelle méthode pour compter les articles en stock (quantité > 0)
+  getArticlesInStockCount(): number {
+    return this.filteredArticles.filter((article) => (article.quantite || 0) > 0).length;
+  }
+
   // Nouvelle méthode pour obtenir les articles en alerte
   getAlertArticles(): any[] {
     return this.filteredArticles.filter((article) => this.isStockAlert(article));
@@ -441,7 +446,7 @@ export class StockComponent implements OnInit {
   get getSelectedDeviseName(): string {
     if (!this.filters.devise) return '';
     const devise = this.devises.find((m) => m.idDevise == this.filters.devise);
-    return devise ? devise.symbole || devise.symbole : 'DT';
+    return devise ? devise.symbole || devise.symbole : 'TND';
   }
 
   get getCofDevise(): number {

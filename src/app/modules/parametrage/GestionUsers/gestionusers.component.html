@@ -194,7 +194,10 @@
   </div>
 </app-popup>
 }
-
+<!-- Titre de l'interface -->
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
+</div>
 <!-- Filtres de recherche (harmonisé) -->
 <div class="mb-6 rounded-lg border bg-white p-6 shadow-sm">
   <div class="mb-4 flex items-center justify-between">
@@ -208,22 +211,12 @@
     }
   </div>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-    <!-- Email -->
-    <div class="filter-item">
-      <label>
-        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-        </svg>
-        Email
-      </label>
-      <input type="text" [(ngModel)]="filters.email" (input)="applyFilters()" placeholder="Rechercher par email..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
-    </div>
+    
+   
     <!-- Login -->
     <div class="filter-item">
       <label>
-        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-        </svg>
+       
         Nom d'utilisateur
       </label>
       <input type="text" [(ngModel)]="filters.login" (input)="applyFilters()" placeholder="Rechercher par login..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
@@ -231,9 +224,7 @@
     <!-- Rôle -->
     <div class="filter-item">
       <label>
-        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-        </svg>
+        
         Rôle
       </label>
       <select [(ngModel)]="filters.role" (change)="applyFilters()" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
@@ -249,10 +240,7 @@
   </div>
 </div>
 
-<!-- Titre de l'interface -->
-<div class="mb-6">
-  <h1 class="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
-</div>
+
 
 <div class="border-muted/20 bg-background flex min-w-full flex-col rounded-xl border p-2">
   <div

@@ -68,7 +68,7 @@ export class CmdAchatComponent implements OnInit {
 
   // Pagination
   currentPage = 1;
-  itemsPerPage = 10;
+  itemsPerPage = 5;
   totalItems = 0;
 
   // Math object for template

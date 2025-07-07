@@ -740,7 +740,7 @@
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">{{ article.reference }}</td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">{{ article.description }}</td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
-              {{ article.prix | currency : getDeviseSymbol : 'symbol' : '1.2-2' }}
+              {{ article.prix | currency : 'TND' : 'symbol' : '1.2-2' }}
             </td>
           </tr>
         </tbody>
@@ -784,6 +784,96 @@
           Ajouter {{ selectedArticles.length }} article(s)
         </button>
       </div>
+    </div>
+  </div>
+</app-popup>
+}
+
+<!-- Magasin Alert Popup -->
+@if (showMagasinAlert) {
+<app-popup>
+  <div popup-content class="w-[400px] max-w-sm">
+    <div class="text-center">
+      <svg class="mx-auto h-12 w-12 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Sélection de magasin requise</h3>
+      <p class="mt-2 text-sm text-gray-500">
+        Veuillez d'abord sélectionner un magasin avant d'ajouter des articles.
+      </p>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button
+        type="button"
+        (click)="closeMagasinAlert()"
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+        Compris
+      </button>
+    </div>
+  </div>
+</app-popup>
+}
+
+<!-- Loading Alert Popup -->
+@if (showLoadingAlert) {
+<app-popup>
+  <div popup-content class="w-[400px] max-w-sm">
+    <div class="text-center">
+      <svg class="mx-auto h-12 w-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Chargement en cours</h3>
+      <p class="mt-2 text-sm text-gray-500">
+        Chargement des stocks en cours. Veuillez réessayer dans quelques secondes.
+      </p>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button
+        type="button"
+        (click)="closeLoadingAlert()"
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+        Compris
+      </button>
+    </div>
+  </div>
+</app-popup>
+}
+
+<!-- No Stock Alert Popup -->
+@if (showNoStockAlert) {
+<app-popup>
+  <div popup-content class="w-[400px] max-w-sm">
+    <div class="text-center">
+      <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun stock disponible</h3>
+      <p class="mt-2 text-sm text-gray-500">
+        Aucun article disponible en stock dans ce magasin.
+      </p>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button
+        type="button"
+        (click)="closeNoStockAlert()"
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+        Compris
+      </button>
     </div>
   </div>
 </app-popup>
