@@ -37,13 +37,16 @@ import { AuthService } from 'src/app/core/services/auth.service';
 })
 export class ProfileMenuComponent implements OnInit {
   public isOpen = false;
+  public userLogin: string = '';
+  public userEmail: string = '';
+  public userRole: string = '';
   public profileMenu = [
     {
       title: 'Déconnexion',
       icon: './assets/icons/heroicons/outline/logout.svg',
       action: () => {
         this.authService.logout();
-        this.router.navigate(['/auth/sign-in'])
+        this.router.navigate(['/auth/sign-in']);
       },
     },
   ];
@@ -84,7 +87,28 @@ export class ProfileMenuComponent implements OnInit {
 
   constructor(public themeService: ThemeService, private authService: AuthService, private router: Router) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = token.split('.')[1];
+        const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map(function (c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join(''),
+        );
+        const decoded = JSON.parse(jsonPayload);
+        // Adapt to your JWT structure
+        this.userLogin = decoded.sub || '';
+        this.userEmail = decoded.email || '';
+        this.userRole = decoded?.role[0]?.role || '';
+      } catch {}
+    }
+  }
 
   public toggleMenu(): void {
     this.isOpen = !this.isOpen;
