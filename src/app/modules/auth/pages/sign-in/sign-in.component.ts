@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AngularSvgIconModule } from 'angular-svg-icon';
-import { LoginService } from 'src/app/core/services/login.service';
+import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -20,7 +20,7 @@ export class SignInComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private loginService: LoginService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -42,26 +42,20 @@ export class SignInComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     if (this.form.invalid) return;
-    
     const { login, password } = this.form.value;
-    console.log('Tentative de connexion avec:', { login, password });
-    
-    this.loginService.login(login, password).subscribe({
+    this.authService.login(login, password).subscribe({
       next: (res) => {
-        console.log('Réponse du serveur:', res);
-        const token = res.token || res;
-        localStorage.setItem('token', token);
-        console.log('Token stocké:', token);
-        console.log('Redirection vers /dashboard...');
-        this.router.navigate(['/dashboard']).then(() => {
-          console.log('Redirection réussie');
-        }).catch(err => {
-          console.error('Erreur de redirection:', err);
-        });
+        if (res && res.tokenValue) {
+          this.authService.setToken(res.tokenValue);
+          alert('Connexion réussie !');
+          this.router.navigate(['/dashboard']);
+        } else {
+          alert('Réponse inattendue du serveur.');
+        }
       },
       error: (error) => {
-        console.error('Erreur de connexion:', error);
-        this.errorMessage = "Login ou mot de passe incorrect";
+        this.errorMessage = 'Login ou mot de passe incorrect';
+        alert('Login ou mot de passe incorrect');
       }
     });
   }

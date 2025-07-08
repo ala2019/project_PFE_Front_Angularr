@@ -1,10 +1,11 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { NgClass, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ThemeService } from '../../../../../core/services/theme.service';
 import { ClickOutsideDirective } from '../../../../../shared/directives/click-outside.directive';
+import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
   selector: 'app-profile-menu',
@@ -40,7 +41,10 @@ export class ProfileMenuComponent implements OnInit {
     {
       title: 'Déconnexion',
       icon: './assets/icons/heroicons/outline/logout.svg',
-      link: '/auth',
+      action: () => {
+        this.authService.logout();
+        this.router.navigate(['/auth/sign-in'])
+      },
     },
   ];
 
@@ -78,7 +82,7 @@ export class ProfileMenuComponent implements OnInit {
   public themeMode = ['clair', 'sombre'];
   public themeDirection = ['ltr', 'rtl'];
 
-  constructor(public themeService: ThemeService) {}
+  constructor(public themeService: ThemeService, private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {}
 

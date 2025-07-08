@@ -8,16 +8,14 @@ export class LoginService {
 
   httpOptions = {
     headers: new HttpHeaders({
-      'Content-Type': 'application/json'
-    })
+      'Content-Type': 'application/json',
+    }),
   };
-  
 
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<any> {
-    const url = `${this.apiUrl}/login/${username}/${password}`;
-    console.log('Appel API login:', url);
-    return this.http.get(url);
+    const url = `${this.apiUrl}/login`;
+    return this.http.post(url, { username, password });
   }
 }
