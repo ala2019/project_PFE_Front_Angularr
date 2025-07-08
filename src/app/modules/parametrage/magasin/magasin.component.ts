@@ -26,6 +26,7 @@ export class MagasinComponent implements OnInit{
   protected updatePopUp = false;
 
    formData = {
+    codeMagasin: '',
     nomMagasin: '',
     idRegion:  '' ,
     nomregion:''};
@@ -70,10 +71,17 @@ export class MagasinComponent implements OnInit{
       next: (response: any) => {
         console.log('Magasins reçus:', response);
         if (Array.isArray(response) && response.length > 0) {
-          console.log('Premier magasin:', response[0]);
-          console.log('Propriétés du premier magasin:', Object.keys(response[0]));
+          // Ensure each magasin has a region object
+          this.magasinList = response.map((magasin: any) => {
+            if (!magasin.region && magasin.idRegion) {
+              const regionObj = this.regionList.find(r => r.idRegion === magasin.idRegion);
+              return { ...magasin, region: regionObj };
+            }
+            return magasin;
+          });
+        } else {
+          this.magasinList = response;
         }
-        this.magasinList = response;
         this.filteredMagasins = [...this.magasinList];
       },
       error: (error) => {
@@ -95,25 +103,31 @@ export class MagasinComponent implements OnInit{
     this.selectdID = null;
   }
     onSubmit() {
-  if (this.formData.nomMagasin.trim() && this.formData.idRegion) {
-    this.magasinService.create(this.formData).subscribe({
-      next: (response: any) => {
-        this.getAll();
-        this.formData = {
-          nomMagasin: '',
-          idRegion: '',
-          nomregion: ''
-        };
-        this.createPopUp = false;
-      },
-      error: (err) => {
-        console.error("Erreur lors de la création du magasin :", err);
-      }
-    });
-  } else {
-    console.warn("Nom du magasin ou région non rempli.");
+    if (this.formData.nomMagasin.trim() && this.formData.idRegion && this.formData.codeMagasin.trim()) {
+      const payload = {
+        nomMagasin: this.formData.nomMagasin,
+        codeMagasin: this.formData.codeMagasin,
+        region: { idRegion: this.formData.idRegion }
+      };
+      this.magasinService.create(payload).subscribe({
+        next: (response: any) => {
+          this.getAll();
+          this.formData = {
+            codeMagasin: '',
+            nomMagasin: '',
+            idRegion: '',
+            nomregion: ''
+          };
+          this.createPopUp = false;
+        },
+        error: (err) => {
+          // handle error
+        }
+      });
+    } else {
+      // handle validation error
+    }
   }
-}
 
   // Méthode pour obtenir le nom de la région dans le select
   getRegionName(region: any): string {
@@ -134,8 +148,9 @@ export class MagasinComponent implements OnInit{
 
   openUpdatePopup(item: any) {
     this.formData = {
+      codeMagasin: item.codeMagasin || '',
       nomMagasin: item.nomMagasin,
-      idRegion: item.idRegion,
+      idRegion: item.region?.idRegion || item.idRegion || '',
       nomregion: ''
     };
     this.updatePopUp = true;
@@ -149,18 +164,33 @@ export class MagasinComponent implements OnInit{
   }
 
   onSubmitUpdate() {
-    if (this.formData.nomMagasin.trim() && this.formData.idRegion) {
-      this.magasinService.update(this.formData.idRegion, this.formData).subscribe({
+    if (this.formData.nomMagasin.trim() && this.formData.idRegion && this.formData.codeMagasin.trim()) {
+      const payload = {
+        nomMagasin: this.formData.nomMagasin,
+        codeMagasin: this.formData.codeMagasin,
+        region: { idRegion: this.formData.idRegion }
+      };
+      this.magasinService.update(this.formData.idRegion, payload).subscribe({
         next: (response: any) => {
           this.getAll();
-          this.formData = { nomMagasin: '', idRegion: '', nomregion: '' };
+          this.formData = { codeMagasin: '', nomMagasin: '', idRegion: '', nomregion: '' };
           this.updatePopUp = false;
         },
         error: (err) => {
-          console.error('Update error', err);
+          // handle error
         }
       });
     }
+  }
+
+  openCreatePopup() {
+    this.formData = {
+      codeMagasin: '',
+      nomMagasin: '',
+      idRegion: '',
+      nomregion: ''
+    };
+    this.createPopUp = true;
   }
 
   // Logique de filtre harmonisée

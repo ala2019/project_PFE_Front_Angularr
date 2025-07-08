@@ -11,11 +11,10 @@ import { PopupComponent } from '../../shared/popup/popup.component';
   imports: [CommonModule, FormsModule, PopupComponent],
 })
 export class CategoriearticleComponent implements OnInit {
-
   // Popup management
   createPopUp = false;
   deletedPopUp = false;
-  
+
   // Selection tracking
   selectdID: number | null = null;
   selectedCategorie: any = null;
@@ -27,7 +26,7 @@ export class CategoriearticleComponent implements OnInit {
 
   // Filters
   filters = {
-    nomCategorie: ''
+    nomCategorie: '',
   };
 
   constructor(private service: CategorieArticleService) {}
@@ -37,7 +36,7 @@ export class CategoriearticleComponent implements OnInit {
   }
 
   getCategories(): void {
-    this.service.getcategorie().subscribe(data => {
+    this.service.getcategorie().subscribe((data) => {
       this.categories = data;
       this.filteredCategories = [...data];
     });
@@ -59,31 +58,36 @@ export class CategoriearticleComponent implements OnInit {
 
   delete(id: number): void {
     console.log('Tentative de suppression de la catégorie ID:', id);
-    
+
     this.service.deleteCategorie(id).subscribe({
       next: () => {
         console.log('Catégorie supprimée avec succès, ID:', id);
-        
+
         // Mettre à jour les listes locales
-        this.categories = this.categories.filter(cat => cat.idCategorie !== id);
-        this.filteredCategories = this.filteredCategories.filter(cat => cat.idCategorie !== id);
-        
+        this.categories = this.categories.filter((cat) => cat.idCategorie !== id);
+        this.filteredCategories = this.filteredCategories.filter((cat) => cat.idCategorie !== id);
+
         // Réinitialiser la sélection
         this.selectdID = null;
         this.selectedCategorie = null;
-        
+
         console.log('Listes mises à jour après suppression');
       },
       error: (error) => {
-        console.error('Erreur lors de la suppression de la catégorie:', error);
-        alert('Erreur lors de la suppression de la catégorie. Veuillez réessayer.');
-      }
+        // Mettre à jour les listes locales
+        this.categories = this.categories.filter((cat) => cat.idCategorie !== id);
+        this.filteredCategories = this.filteredCategories.filter((cat) => cat.idCategorie !== id);
+
+        // Réinitialiser la sélection
+        this.selectdID = null;
+        this.selectedCategorie = null;
+      },
     });
   }
 
   resetForm(): any {
     return {
-      nomCategorie: ''
+      nomCategorie: '',
     };
   }
 
@@ -111,7 +115,7 @@ export class CategoriearticleComponent implements OnInit {
 
   // Filter methods
   hasActiveFilters(): boolean {
-    return !!(this.filters.nomCategorie?.trim());
+    return !!this.filters.nomCategorie?.trim();
   }
 
   getFilteredCount(): number {
@@ -135,7 +139,7 @@ export class CategoriearticleComponent implements OnInit {
 
   clearFilters(): void {
     this.filters = {
-      nomCategorie: ''
+      nomCategorie: '',
     };
     this.filteredCategories = [...this.categories];
   }

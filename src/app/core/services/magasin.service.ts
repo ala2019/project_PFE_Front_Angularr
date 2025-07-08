@@ -17,10 +17,10 @@ export class MagasinService {
   }
 
   update(id: string, body: any): Observable<any> {
-    return this.http.put(this.api + '/update' + id, body);
+    return this.http.put(this.api + '/update/' + id, body);
   }
 
   delete(id: string): Observable<any> {
-    return this.http.delete(this.api + '/delete' + id);
+    return this.http.delete(this.api + '/delete/' + id);
   }
 }

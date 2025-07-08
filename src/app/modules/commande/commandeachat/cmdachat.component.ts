@@ -613,6 +613,7 @@ export class CmdAchatComponent implements OnInit {
       this.commandeService.pointerReception(item?.detailCmd?.idDetailCmd, formValue.magasinId, item).subscribe({
         next(value) {
           console.log(value);
+          
         },
         error(err) {},
       });
@@ -632,6 +633,7 @@ export class CmdAchatComponent implements OnInit {
     // });
 
     this.closeModal(); // Pour la démo sans backend
+    this.loadCommandes();
   }
 
   // Article selection methods

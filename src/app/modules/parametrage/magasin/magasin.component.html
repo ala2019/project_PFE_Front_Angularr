@@ -15,6 +15,21 @@
   <div popup-content>
     <form #nameForm="ngForm" (ngSubmit)="onSubmit()" class="w-[400px] max-w-sm space-y-4" novalidate>
       <div>
+        <label for="codeMagasin" class="mb-1 block text-sm font-medium text-gray-700">
+          Code magasin <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="codeMagasin"
+          name="codeMagasin"
+          [(ngModel)]="formData.codeMagasin"
+          required
+          #codeInput="ngModel"
+          placeholder="Entrer le code"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="codeInput.invalid && codeInput.touched" class="mt-1 text-xs text-red-500">Le code est requis.</div>
+      </div>
+      <div>
         <label for="nomMagasin" class="mb-1 block text-sm font-medium text-gray-700">
           Nom de magasin <span class="text-red-500">*</span>
         </label>
@@ -65,6 +80,21 @@
   <div popup-content>
     <form #nameForm="ngForm" (ngSubmit)="onSubmitUpdate()" class="w-[400px] max-w-sm space-y-4" novalidate>
       <div>
+        <label for="codeMagasin" class="mb-1 block text-sm font-medium text-gray-700">
+          Code magasin <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="codeMagasin"
+          name="codeMagasin"
+          [(ngModel)]="formData.codeMagasin"
+          required
+          #codeInputUpdate="ngModel"
+          placeholder="Entrer le code"
+          class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
+        <div *ngIf="codeInputUpdate.invalid && codeInputUpdate.touched" class="mt-1 text-xs text-red-500">Le code est requis.</div>
+      </div>
+      <div>
         <label for="nomMagasin" class="mb-1 block text-sm font-medium text-gray-700">
           Nom de magasin <span class="text-red-500">*</span>
         </label>
@@ -104,7 +134,7 @@
           type="submit"
           [disabled]="nameForm.invalid"
           class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
-          Enregistrer
+          Modifier
         </button>
       </div>
     </form>
@@ -164,8 +194,11 @@
     class="scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted grow overflow-x-auto px-5">
     <div class="flex flex-row justify-end gap-2 py-6">
       <button
-        (click)="createPopUp = true"
-        class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold">
+        (click)="openCreatePopup()"
+        class="bg-green-600 hover:bg-green-700 text-white flex-none cursor-pointer rounded-md px-4 py-2.5 text-xs font-semibold flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
         Nouveau magasin
       </button>
       <button
@@ -183,6 +216,7 @@
     </div>
     <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
       <thead class="bg-gray-100 text-xs uppercase tracking-wider text-gray-700">
+        <th class="px-6 py-3">Code magasin</th>
         <th class="px-6 py-3">Nom de magasin</th>
         <th class="px-6 py-3">Nom de region</th>
       </thead>
@@ -192,6 +226,9 @@
           class="cursor-pointer hover:bg-green-50"
           [ngClass]="{ 'bg-green-100 border-l-4 border-green-500': selectdID == item?.idMagasin }"
           (click)="selectdID = item?.idMagasin">
+          <td class="px-6 py-4 font-medium text-gray-800">
+            {{ item?.codeMagasin }}
+          </td>
           <td class="px-6 py-4 font-medium text-gray-800">
             {{ item?.nomMagasin }}
           </td>
