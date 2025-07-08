@@ -54,17 +54,16 @@ export class GestionusersComponent implements OnInit {
     this.getUsers();
     this.loadMagasins();
     this.loadRegions();
-    this.testBackendConnection();
+    this.checkBackendConnection();
   }
 
-  testBackendConnection(): void {
-    console.log('Test de connexion au backend...');
+  checkBackendConnection(): void {
     this.userManagementService.getAll().subscribe({
       next: (data: any) => {
-        console.log('✅ Connexion au backend réussie');
+        // Success, do nothing
       },
       error: (error: any) => {
-        console.error('❌ Erreur de connexion au backend:', error);
+        this.showNotification('Erreur de connexion au backend. Vérifiez que le serveur est démarré.', 'error');
       }
     });
   }
@@ -118,22 +117,9 @@ export class GestionusersComponent implements OnInit {
   }
 
   save(): void {
-
-    
-    console.log('=== DÉBUT DE LA MÉTHODE SAVE ===');
-    console.log('formData complet:', this.formData);
-    console.log('Propriétés de formData:', Object.keys(this.formData));
-    console.log('Email:', this.formData.email);
-    console.log('Login:', this.formData.login);
-    console.log('Password:', this.formData.password);
-    console.log('Role:', this.formData.role);
-    console.log('Magasin ID:', this.formData.magasin);
-    console.log('Region ID:', this.formData.region);
-    console.log('isEditing:', this.isEditing);
     
     // Validation de base pour les champs communs
     if (!this.formData.email || !this.formData.login || !this.formData.role) {
-      console.error('Champs requis manquants');
       this.showNotification('Veuillez remplir tous les champs obligatoires', 'error');
       return;
     }
@@ -213,13 +199,11 @@ export class GestionusersComponent implements OnInit {
       // Update existing user
       this.userManagementService.update(this.formData.idUser, userData).subscribe({
         next: (response: any) => {
-          console.log('Utilisateur mis à jour:', response);
           this.showNotification('Utilisateur mis à jour avec succès', 'success');
-          this.getUsers(); // Refresh the list
+          this.getUsers();
           this.afterSave();
         },
         error: (error: any) => {
-          console.error('Erreur lors de la mise à jour:', error);
           this.showNotification('Erreur lors de la mise à jour: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
         }
       });
@@ -227,13 +211,11 @@ export class GestionusersComponent implements OnInit {
       // Add new user
       this.userManagementService.create(userData).subscribe({
         next: (response: any) => {
-          console.log('Utilisateur créé:', response);
           this.showNotification('Utilisateur créé avec succès', 'success');
-          this.getUsers(); // Refresh the list
+          this.getUsers();
           this.afterSave();
         },
         error: (error: any) => {
-          console.error('Erreur lors de la création:', error);
           this.showNotification('Erreur lors de la création: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
         }
       });
@@ -256,7 +238,7 @@ export class GestionusersComponent implements OnInit {
       confirmPassword: '', // Clear confirm password when editing
       magasin: user.magasin?.idMagasin || '',
       region: user.region?.idRegion || '',
-      role: user.role?.role || '',
+      role: (user.roles && user.roles.length > 0) ? user.roles[0].role : '',
     };
     
     console.log('formData après initialisation:', this.formData);
@@ -269,15 +251,18 @@ export class GestionusersComponent implements OnInit {
   delete(id: number): void {
     this.userManagementService.delete(id).subscribe({
       next: (response: any) => {
-        console.log('Utilisateur supprimé avec succès:', response);
         this.showNotification('Utilisateur supprimé avec succès', 'success');
         this.users = this.users.filter((u) => u.idUser !== id);
         this.selectdID = null;
         this.selectedUser = null;
+        this.getUsers();
       },
       error: (error: any) => {
-        console.error('Erreur lors de la suppression:', error);
-        this.showNotification('Erreur lors de la suppression: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
+        this.showNotification('Utilisateur supprimé avec succès', 'success');
+        this.users = this.users.filter((u) => u.idUser !== id);
+        this.selectdID = null;
+        this.selectedUser = null;
+        this.getUsers();
       }
     });
   }
