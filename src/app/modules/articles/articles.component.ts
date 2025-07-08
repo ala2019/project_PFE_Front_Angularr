@@ -1,12 +1,12 @@
 // import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray, FormControl } from '@angular/forms';
 import { ArticleService } from '../../core/services/article.service';
 import { CategorieArticleService } from '../../core/services/categorie.service'; // Fixed import path
 import { ExtraService, Extra } from '../../core/services/extra.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { take } from 'rxjs';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { PopupComponent } from '../shared/popup/popup.component';
 import { FormsModule } from '@angular/forms';
 
@@ -16,7 +16,7 @@ declare var $: any;
   selector: 'app-articles',
   templateUrl: './articles.component.html',
   styleUrls: ['./articles.component.scss'],
-  imports: [CommonModule, PopupComponent, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, PopupComponent, FormsModule, ReactiveFormsModule, NgIf],
   standalone: true
 })
 export class ArticlesComponent implements OnInit, AfterViewInit {
@@ -32,10 +32,9 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
   detailPopUp = false;
   selectedArticleForDetail: any = null;
 
-  // Gestion des valeurs extra
-  extraValeurs: Array<{extra: Extra, valeur: string}> = [];
-  selectedExtra: Extra | null = null;
-  extraValeurInput: string = '';
+  // New controls for extraValeurs
+  selectedExtraControl = new FormControl<Extra | null>(null);
+  extraValeurInputControl = new FormControl('');
 
   // Variables pour la pagination
   currentPage = 1;
@@ -79,7 +78,37 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
       stockMin: ['', Validators.required],
       code: ['', Validators.required],
       categorie: ['', Validators.required],
+      extraValeurs: this.fb.array([]),
     });
+  }
+
+  get extraValeursFormArray(): FormArray {
+    return this.articleForm.get('extraValeurs') as FormArray;
+  }
+
+  addExtraValeurControl(valeur: string, idExtra: number) {
+    this.extraValeursFormArray.push(
+      this.fb.group({
+        valeur: [valeur, Validators.required],
+        extra: this.fb.group({
+          idExtra: [idExtra, Validators.required]
+        })
+      })
+    );
+  }
+
+  removeExtraValeurControl(index: number) {
+    this.extraValeursFormArray.removeAt(index);
+  }
+
+  onAddExtraValeur() {
+    const selectedExtra = this.selectedExtraControl.value;
+    const valeur = this.extraValeurInputControl.value?.trim();
+    if (selectedExtra && valeur) {
+      this.addExtraValeurControl(valeur, selectedExtra.idExtra);
+      this.selectedExtraControl.reset();
+      this.extraValeurInputControl.reset();
+    }
   }
 
   ngOnInit() {
@@ -214,13 +243,11 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
       }
     }
     
-    // Ajouter les valeurs extra si elles existent
-    if (this.extraValeurs.length > 0) {
-      articleData.extraValeurs = this.extraValeurs.map(ev => ({
-        extra: ev.extra,
-        valeur: ev.valeur
-      }));
-      console.log('Valeurs extra ajoutées:', articleData.extraValeurs);
+    // Ajouter les valeurs extra du FormArray
+    const extraValeursRaw = this.extraValeursFormArray.value;
+    if (extraValeursRaw && extraValeursRaw.length > 0) {
+      articleData.extraValeurs = extraValeursRaw;
+      console.log('Valeurs extra ajoutées (FormArray):', articleData.extraValeurs);
     }
     
     // Nettoyer les valeurs null
@@ -331,13 +358,12 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
       code: '',
       categorie: ''
     };
-    
-    // Réinitialiser les valeurs extra
-    this.extraValeurs = [];
-    this.selectedExtra = null;
-    this.extraValeurInput = '';
-    
-    // Réinitialiser aussi le FormGroup
+    // Reset extraValeurs FormArray
+    while (this.extraValeursFormArray.length > 0) {
+      this.extraValeursFormArray.removeAt(0);
+    }
+    this.selectedExtraControl.reset();
+    this.extraValeurInputControl.reset();
     this.articleForm.reset();
   }
 
@@ -358,13 +384,14 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
           categorie: selectedArticle.categorie?.idCategorie || selectedArticle.idCategorie || ''
         };
         
-        // Charger les valeurs extra existantes
-        this.extraValeurs = [];
+        // Charger les valeurs extra existantes dans le FormArray
+        while (this.extraValeursFormArray.length > 0) {
+          this.extraValeursFormArray.removeAt(0);
+        }
         if (selectedArticle.extraValeurs && selectedArticle.extraValeurs.length > 0) {
-          this.extraValeurs = selectedArticle.extraValeurs.map((ev: any) => ({
-            extra: ev.extra,
-            valeur: ev.valeur
-          }));
+          selectedArticle.extraValeurs.forEach((ev: any) => {
+            this.addExtraValeurControl(ev.valeur, ev.extra?.idExtra);
+          });
         }
         
         // Synchroniser le FormGroup avec formData
@@ -722,34 +749,17 @@ export class ArticlesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  addExtraValeur() {
-    if (this.selectedExtra && this.extraValeurInput.trim()) {
-      // Vérifier si cet extra n'est pas déjà ajouté
-      const existingIndex = this.extraValeurs.findIndex(ev => ev.extra.idExtra === this.selectedExtra!.idExtra);
-      
-      if (existingIndex >= 0) {
-        // Mettre à jour la valeur existante
-        this.extraValeurs[existingIndex].valeur = this.extraValeurInput.trim();
-      } else {
-        // Ajouter une nouvelle valeur extra
-        this.extraValeurs.push({
-          extra: this.selectedExtra,
-          valeur: this.extraValeurInput.trim()
-        });
-      }
-      
-      // Réinitialiser les champs
-      this.selectedExtra = null;
-      this.extraValeurInput = '';
-    }
-  }
-
-  removeExtraValeur(index: number) {
-    this.extraValeurs.splice(index, 1);
-  }
-
+  // Méthode pour obtenir la valeur d'un extra
   getExtraValeur(extraId: number): string {
-    const extraValeur = this.extraValeurs.find(ev => ev.extra.idExtra === extraId);
-    return extraValeur ? extraValeur.valeur : '';
+    const extraValeurControl = this.extraValeursFormArray.controls.find(
+      (control) => control.get('extra')?.get('idExtra')?.value === extraId
+    );
+    return extraValeurControl ? extraValeurControl.get('valeur')?.value : '';
+  }
+
+  // Helper to get extra libelle by id for template
+  getExtraLibelleById(id: number): string | undefined {
+    const found = this.extras.find(e => e.idExtra === id);
+    return found ? found.libelle : undefined;
   }
 }

@@ -231,53 +231,45 @@
           <!-- Interface d'ajout de valeur extra -->
           <div class="flex gap-2 mb-4">
             <select
-              [(ngModel)]="selectedExtra"
+              [formControl]="selectedExtraControl"
               class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
               <option [ngValue]="null">Sélectionner un extra</option>
-              @for (extra of extras; track extra.idExtra) {
-              <option [value]="extra">{{ extra.libelle }}</option>
-              }
+              <option *ngFor="let extra of extras" [ngValue]="extra">{{ extra.libelle }}</option>
             </select>
             <input
               type="text"
-              [(ngModel)]="extraValeurInput"
+              [formControl]="extraValeurInputControl"
               placeholder="Valeur"
               class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
             <button
               type="button"
-              (click)="addExtraValeur()"
-              [disabled]="!selectedExtra || !extraValeurInput.trim()"
+              (click)="onAddExtraValeur()"
               class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium">
               Ajouter
             </button>
           </div>
           
           <!-- Liste des valeurs extra ajoutées -->
-          @if (extraValeurs.length > 0) {
-          <div class="space-y-2">
+          <div *ngIf="extraValeursFormArray.length > 0" class="space-y-2">
             <h5 class="text-xs font-medium text-gray-700">Valeurs extra ajoutées :</h5>
-            @for (extraValeur of extraValeurs; track extraValeur.extra.idExtra; let i = $index) {
-            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+            <div *ngFor="let extraValeurCtrl of extraValeursFormArray.controls; let i = index" class="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
               <div class="flex-1">
-                <span class="text-sm font-medium text-gray-900">{{ extraValeur.extra.libelle }}:</span>
-                <span class="text-sm text-gray-700 ml-2">{{ extraValeur.valeur }}</span>
+                <span class="text-sm font-medium text-gray-900">{{ getExtraLibelleById(extraValeurCtrl.value.extra.idExtra) }}:</span>
+                <span class="text-sm text-gray-700 ml-2">{{ extraValeurCtrl.value.valeur }}</span>
               </div>
               <button
                 type="button"
-                (click)="removeExtraValeur(i)"
+                (click)="removeExtraValeurControl(i)"
                 class="text-red-600 hover:text-red-800 p-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </div>
-            }
           </div>
-          } @else {
-          <div class="text-center py-4 text-gray-500 text-sm">
+          <div *ngIf="extraValeursFormArray.length === 0" class="text-center py-4 text-gray-500 text-sm">
             Aucune valeur extra ajoutée
           </div>
-          }
         </div>
 
         <div class="flex justify-end gap-5">
@@ -429,7 +421,7 @@
                   </div>
                   <div class="info-item">
                     <span class="label text-sm font-medium text-gray-600">Description:</span>
-                    <span class="value text-sm text-gray-900">{{ selectedArticleForDetail?.description }}</span>
+                    <span class="value text-xs text-gray-900">{{ selectedArticleForDetail?.description }}</span>
                   </div>
                   <div class="info-item">
                     <span class="label text-sm font-medium text-gray-600">Prix:</span>
