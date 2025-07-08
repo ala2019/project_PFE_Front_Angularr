@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Menu } from 'src/app/core/constants/menu';
 import { MenuItem, SubMenuItem } from 'src/app/core/models/menu.model';
+import { AuthService } from 'src/app/core/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,9 +14,27 @@ export class MenuService implements OnDestroy {
   private _pagesMenu = signal<MenuItem[]>([]);
   private _subscription = new Subscription();
 
-  constructor(private router: Router) {
-    /** Set dynamic menu */
-    this._pagesMenu.set(Menu.pages);
+  constructor(private router: Router, private authService: AuthService) {
+    /** Set dynamic menu based on role */
+    const roles = this.authService.getUserRoles();
+    let filteredMenu = Menu.pages;
+    if (!roles.includes('administrateur')) {
+      // Only show Dashboard and Liste des articles for non-admins
+      filteredMenu = [
+        {
+          group: 'Menu',
+          separator: false,
+          items: Menu.pages[0].items.filter(
+            (item) =>
+              item.label === 'Liste des articles' ||
+              item.label === 'Liste des articles' ||
+              item.label === 'Commandes' ||
+              item.label === 'Liste des mouvements',
+          ),
+        },
+      ];
+    }
+    this._pagesMenu.set(filteredMenu);
 
     let sub = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
