@@ -70,12 +70,12 @@ export class Menu {
           label: 'Paramétrage globale',
           route: '/parametrage',
           children: [
+            { label: 'Gestion Utilisateurs ', route: '/parametrage/gestionusers' },
             { label: 'Categorie Article ', route: '/parametrage/categoriearticle' },
             { label: 'Extra ', route: '/parametrage/extra' },
             { label: 'Devises ', route: '/parametrage/devise' },
             { label: 'Fournisseur / Client ', route: '/parametrage/fournisseur-client' },
             { label: 'Region / Magasin ', route: '/parametrage/region-magasin' },
-            { label: 'Gestion Utilisateurs ', route: '/parametrage/gestionusers' },
               // { label: 'List des fournisseurs ', route: '/parametrage/fouenisseur' },
             //{ label: 'List des clients ', route: '/parametrage/client' },
             //{ label: 'List des regions ', route: '/parametrage/regions' },

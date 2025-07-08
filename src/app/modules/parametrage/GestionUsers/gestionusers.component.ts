@@ -34,6 +34,8 @@ export class GestionusersComponent implements OnInit {
   formData: any = this.resetForm();
   isEditing = false;
   showPassword = false;
+  notificationMessage: string | null = null;
+  notificationType: 'success' | 'error' = 'success';
 
   // Role options
   roles = [
@@ -63,7 +65,6 @@ export class GestionusersComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('❌ Erreur de connexion au backend:', error);
-        alert('Erreur de connexion au backend. Vérifiez que le serveur est démarré.');
       }
     });
   }
@@ -133,7 +134,7 @@ export class GestionusersComponent implements OnInit {
     // Validation de base pour les champs communs
     if (!this.formData.email || !this.formData.login || !this.formData.role) {
       console.error('Champs requis manquants');
-      alert('Veuillez remplir tous les champs obligatoires');
+      this.showNotification('Veuillez remplir tous les champs obligatoires', 'error');
       return;
     }
 
@@ -142,14 +143,14 @@ export class GestionusersComponent implements OnInit {
       // Pour ADMIN : région obligatoire, magasin non obligatoire
       if (!this.formData.region) {
         console.error('Région requise pour un administrateur');
-        alert('Une région est requise pour un administrateur');
+        this.showNotification('Une région est requise pour un administrateur', 'error');
         return;
       }
     } else if (this.formData.role === 'commercial') {
       // Pour Commercial : magasin obligatoire, région non obligatoire
       if (!this.formData.magasin) {
         console.error('Magasin requis pour un commercial');
-        alert('Un magasin est requis pour un commercial');
+        this.showNotification('Un magasin est requis pour un commercial', 'error');
         return;
       }
     }
@@ -157,21 +158,21 @@ export class GestionusersComponent implements OnInit {
     // Check if passwords match for new users
     if (!this.isEditing && this.formData.password !== this.formData.confirmPassword) {
       console.error('Les mots de passe ne correspondent pas');
-      alert('Les mots de passe ne correspondent pas');
+      this.showNotification('Les mots de passe ne correspondent pas', 'error');
       return;
     }
 
     // Check if password is provided for new users
     if (!this.isEditing && !this.formData.password) {
       console.error('Mot de passe requis pour un nouvel utilisateur');
-      alert('Un mot de passe est requis pour un nouvel utilisateur');
+      this.showNotification('Un mot de passe est requis pour un nouvel utilisateur', 'error');
       return;
     }
 
     // For editing, if password is provided, it should match confirmPassword
     if (this.isEditing && this.formData.password && this.formData.password !== this.formData.confirmPassword) {
       console.error('Les mots de passe ne correspondent pas');
-      alert('Les mots de passe ne correspondent pas');
+      this.showNotification('Les mots de passe ne correspondent pas', 'error');
       return;
     }
 
@@ -213,13 +214,13 @@ export class GestionusersComponent implements OnInit {
       this.userManagementService.update(this.formData.idUser, userData).subscribe({
         next: (response: any) => {
           console.log('Utilisateur mis à jour:', response);
-          alert('Utilisateur mis à jour avec succès');
+          this.showNotification('Utilisateur mis à jour avec succès', 'success');
           this.getUsers(); // Refresh the list
           this.afterSave();
         },
         error: (error: any) => {
           console.error('Erreur lors de la mise à jour:', error);
-          alert('Erreur lors de la mise à jour: ' + (error.error?.message || error.message || 'Erreur inconnue'));
+          this.showNotification('Erreur lors de la mise à jour: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
         }
       });
     } else {
@@ -227,13 +228,13 @@ export class GestionusersComponent implements OnInit {
       this.userManagementService.create(userData).subscribe({
         next: (response: any) => {
           console.log('Utilisateur créé:', response);
-          alert('Utilisateur créé avec succès');
+          this.showNotification('Utilisateur créé avec succès', 'success');
           this.getUsers(); // Refresh the list
           this.afterSave();
         },
         error: (error: any) => {
           console.error('Erreur lors de la création:', error);
-          alert('Erreur lors de la création: ' + (error.error?.message || error.message || 'Erreur inconnue'));
+          this.showNotification('Erreur lors de la création: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
         }
       });
     }
@@ -269,14 +270,14 @@ export class GestionusersComponent implements OnInit {
     this.userManagementService.delete(id).subscribe({
       next: (response: any) => {
         console.log('Utilisateur supprimé avec succès:', response);
-        alert('Utilisateur supprimé avec succès');
+        this.showNotification('Utilisateur supprimé avec succès', 'success');
         this.users = this.users.filter((u) => u.idUser !== id);
         this.selectdID = null;
         this.selectedUser = null;
       },
       error: (error: any) => {
         console.error('Erreur lors de la suppression:', error);
-        alert('Erreur lors de la suppression: ' + (error.error?.message || error.message || 'Erreur inconnue'));
+        this.showNotification('Erreur lors de la suppression: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
       }
     });
   }
@@ -369,5 +370,17 @@ export class GestionusersComponent implements OnInit {
 
   getFilteredCount(): number {
     return this.filteredUsers.length;
+  }
+
+  showNotification(message: string, type: 'success' | 'error' = 'success') {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    setTimeout(() => {
+      this.notificationMessage = null;
+    }, 3000);
+  }
+
+  closeNotification() {
+    this.notificationMessage = null;
   }
 }
