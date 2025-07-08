@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PopupComponent } from '../../shared/popup/popup.component';
 import { UserService } from 'src/app/core/services/user.service';
+import { UserManagementService } from 'src/app/core/services/user-management.service';
 import { MagasinService } from 'src/app/core/services/magasin.service';
 import { RegionService } from 'src/app/core/services/region.service';
 
@@ -42,6 +43,7 @@ export class GestionusersComponent implements OnInit {
 
   constructor(
     private userService: UserService,
+    private userManagementService: UserManagementService,
     private magasinService: MagasinService,
     private regionService: RegionService
   ) {}
@@ -55,11 +57,11 @@ export class GestionusersComponent implements OnInit {
 
   testBackendConnection(): void {
     console.log('Test de connexion au backend...');
-    this.userService.getAll().subscribe({
-      next: (data) => {
+    this.userManagementService.getAll().subscribe({
+      next: (data: any) => {
         console.log('✅ Connexion au backend réussie');
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('❌ Erreur de connexion au backend:', error);
         alert('Erreur de connexion au backend. Vérifiez que le serveur est démarré.');
       }
@@ -103,18 +105,20 @@ export class GestionusersComponent implements OnInit {
   }
 
   getUsers(): void {
-    this.userService.getAll().subscribe({
-      next: (value) => {
+    this.userManagementService.getAll().subscribe({
+      next: (value: any) => {
         this.users = value;
         this.filteredUsers = [...this.users];
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erreur lors du chargement des utilisateurs:', err);
       },
     });
   }
 
   save(): void {
+
+    
     console.log('=== DÉBUT DE LA MÉTHODE SAVE ===');
     console.log('formData complet:', this.formData);
     console.log('Propriétés de formData:', Object.keys(this.formData));
@@ -176,14 +180,15 @@ export class GestionusersComponent implements OnInit {
     const userData = {
       email: this.formData.email,
       login: this.formData.login,
-      motDePasse: this.formData.password, // Changement du nom du champ
-      role: selectedRole ? {
+      motDePasse: this.formData.password,
+      roles: selectedRole ? [{
         idRole: selectedRole.idRole,
         role: selectedRole.value
-      } : null,
+      }] : [],
       magasin: this.formData.magasin ? { idMagasin: Number(this.formData.magasin) } : null,
       region: this.formData.region ? { idRegion: Number(this.formData.region) } : null,
     };
+
 
     // For editing, remove password if it's empty
     if (this.isEditing && !this.formData.password) {
@@ -197,7 +202,7 @@ export class GestionusersComponent implements OnInit {
     console.log('Email:', userData.email);
     console.log('Login:', userData.login);
     console.log('MotDePasse:', userData.motDePasse);
-    console.log('Role:', userData.role);
+    console.log('Role:', userData.roles);
     console.log('Magasin ID:', userData.magasin);
     console.log('Region ID:', userData.region);
     console.log('JSON stringifié:', JSON.stringify(userData, null, 2));
@@ -205,28 +210,28 @@ export class GestionusersComponent implements OnInit {
 
     if (this.isEditing) {
       // Update existing user
-      this.userService.update(this.formData.idUser, userData).subscribe({
-        next: (response) => {
+      this.userManagementService.update(this.formData.idUser, userData).subscribe({
+        next: (response: any) => {
           console.log('Utilisateur mis à jour:', response);
           alert('Utilisateur mis à jour avec succès');
           this.getUsers(); // Refresh the list
           this.afterSave();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Erreur lors de la mise à jour:', error);
           alert('Erreur lors de la mise à jour: ' + (error.error?.message || error.message || 'Erreur inconnue'));
         }
       });
     } else {
       // Add new user
-      this.userService.create(userData).subscribe({
-        next: (response) => {
+      this.userManagementService.create(userData).subscribe({
+        next: (response: any) => {
           console.log('Utilisateur créé:', response);
           alert('Utilisateur créé avec succès');
           this.getUsers(); // Refresh the list
           this.afterSave();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Erreur lors de la création:', error);
           alert('Erreur lors de la création: ' + (error.error?.message || error.message || 'Erreur inconnue'));
         }
@@ -261,15 +266,15 @@ export class GestionusersComponent implements OnInit {
   }
 
   delete(id: number): void {
-    this.userService.delete(id).subscribe({
-      next: (response) => {
+    this.userManagementService.delete(id).subscribe({
+      next: (response: any) => {
         console.log('Utilisateur supprimé avec succès:', response);
         alert('Utilisateur supprimé avec succès');
         this.users = this.users.filter((u) => u.idUser !== id);
         this.selectdID = null;
         this.selectedUser = null;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Erreur lors de la suppression:', error);
         alert('Erreur lors de la suppression: ' + (error.error?.message || error.message || 'Erreur inconnue'));
       }
@@ -299,6 +304,8 @@ export class GestionusersComponent implements OnInit {
     this.createPopUp = true;
     this.isEditing = false;
     this.formData = this.resetForm();
+    this.loadMagasins();
+    this.loadRegions();
   }
 
   closeModal(): void {

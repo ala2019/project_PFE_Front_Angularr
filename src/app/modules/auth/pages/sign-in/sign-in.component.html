@@ -35,14 +35,13 @@
           <input
             type="text"
             id="email"
-            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': submitted && f['email'].errors, 'border-gray-300 focus:border-blue-500 focus:ring-blue-500': !submitted || !f['email'].errors }"
+            [ngClass]="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': submitted && f['login'].errors, 'border-gray-300 focus:border-blue-500 focus:ring-blue-500': !submitted || !f['login'].errors }"
             class="block w-full pl-12 pr-4 py-4 border-2 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-opacity-20 transition-all duration-200 text-lg"
             placeholder="Votre login"
-            formControlName="email" />
+            formControlName="login" />
         </div>
-        <div *ngIf="submitted && f['email'].errors" class="mt-3 text-sm text-red-600 font-medium">
-          <div *ngIf="f['email'].errors['required']">Le login est requis</div>
-          <div *ngIf="f['email'].errors['email']">Veuillez saisir un login valide</div>
+        <div *ngIf="submitted && f['login'].errors" class="mt-3 text-sm text-red-600 font-medium">
+          <div *ngIf="f['login'].errors['required']">Le login est requis</div>
         </div>
       </div>
 

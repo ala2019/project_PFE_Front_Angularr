@@ -423,7 +423,7 @@ export class CmdventetComponent implements OnInit {
   // Get stock status class
   getStockStatusClass(stock: number): string {
     if (stock > 10) return 'bg-green-100 text-green-800';
-    if (stock > 5) return 'bg-yellow-100 text-yellow-800';
+    if (stock > 5) return 'bg-yellow-50 text-yellow-800';
     return 'bg-red-100 text-red-800';
   }
 

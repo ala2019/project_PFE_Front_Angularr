@@ -637,7 +637,7 @@ export class MouvementComponent implements OnInit {
   getStatutClass(statut: string): string {
     switch (statut) {
       case 'EN_COURS':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-50 text-yellow-800';
       case 'TERMINE':
         return 'bg-green-100 text-green-800';
       case 'ANNULE':
