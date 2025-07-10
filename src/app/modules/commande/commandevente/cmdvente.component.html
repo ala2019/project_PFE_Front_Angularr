@@ -845,6 +845,12 @@
         class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
         🖨️ Imprimer la facture
       </button>
+      <button
+        type="button"
+        (click)="generateFacturePdf()"
+        class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+        Télécharger PDF
+      </button>
     </div>
   </div>
 </app-popup>
@@ -973,7 +979,33 @@
 <!-- Facture Form Popup -->
 @if (showFactureForm) {
 <app-popup>
-  <div popup-content class="w-[800px] max-w-4xl">
+  <style>
+    .facture-print-scroll {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    @media print {
+      .facture-print-scroll {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+      .app-popup__close, .app-popup__actions, .no-print, .rounded-lg.bg-gray-300, .rounded-lg.bg-orange-600 {
+        display: none !important;
+      }
+      app-popup, .facture-print-scroll {
+        width: 210mm !important;
+        min-height: 297mm !important;
+        max-width: 210mm !important;
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+    }
+  </style>
+  <div popup-content class="w-[800px] max-w-4xl facture-print-scroll">
     <div class="mb-6 flex items-center justify-between">
       <h3 class="text-xl font-semibold text-gray-800">Générer une facture</h3>
       <button (click)="closeFactureForm()" class="text-gray-400 hover:text-gray-600">
@@ -1002,7 +1034,7 @@
             <p><strong>Email:</strong> {{ getSelectedClient()?.email }}</p>
             }
             @if (getSelectedClient()?.devise) {
-            <p><strong>Devise:</strong> {{ getSelectedClient()?.devise?.code || getSelectedClient()?.devise }}</p>
+            <p><strong>Devise:</strong> {{ getSelectedClient()?.devise?.code || getSelectedClient()?.devise?.devise }}</p>
             }
           </div>
         </div>
@@ -1019,7 +1051,7 @@
     </div>
     }
 
-    <form [formGroup]="factureForm" (ngSubmit)="printFacture()" class="space-y-6">
+    <form [formGroup]="factureForm" (ngSubmit)="generateFacturePdf()" class="space-y-6">
       <!-- Facture Information -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
@@ -1069,10 +1101,10 @@
                   <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle || commande.libCmd }}</td>
                   <td class="px-3 py-2 text-sm text-gray-900">{{ (commande.dateCmd || commande.dateCommande) | date : 'dd/MM/yyyy' }}</td>
                   <td class="px-3 py-2 text-sm text-gray-900">
-                    {{ (commande.montantHt || 0) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+                    {{ getCommandeMontantHt(commande) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
                   </td>
                   <td class="px-3 py-2 text-sm font-medium text-gray-900">
-                    {{ (commande.montantTtc || commande.montantTotal || 0) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+                    {{ getCommandeMontantTtc(commande) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
                   </td>
                   <td class="px-3 py-2 text-sm">
                     <button 
@@ -1094,6 +1126,7 @@
                             <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Article</th>
                             <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Quantité</th>
                             <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Prix Unitaire</th>
+                            <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">TVA</th>
                             <th class="px-2 py-1 text-left text-xs font-medium text-gray-600">Sous-total</th>
                           </tr>
                         </thead>
@@ -1101,8 +1134,9 @@
                           <tr *ngFor="let ligne of commande.lignes || commande.detailCmds">
                             <td class="px-2 py-1 text-sm">{{ ligne.description || ligne.article?.description }}</td>
                             <td class="px-2 py-1 text-sm">{{ ligne.quantite }}</td>
-                            <td class="px-2 py-1 text-sm">{{ (ligne.prixUnitaire || ligne.prix || 0) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
-                            <td class="px-2 py-1 text-sm">{{ (ligne.sousTotal || (ligne.quantite * (ligne.prixUnitaire || ligne.prix || 0))) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
+                            <td class="px-2 py-1 text-sm">{{ ligne.article?.prix | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
+                            <td class="px-2 py-1 text-sm">{{ ligne?.article?.tva }} %</td>
+                            <td class="px-2 py-1 text-sm">{{ (ligne.quantite * (ligne.article?.prix || 0)) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -1119,17 +1153,21 @@
           <div class="w-64 space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total HT:</span>
-              <span class="font-medium">{{ calculateFactureTotalHt() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</span>
+              <span class="font-medium">
+                {{ getFactureTotalHt() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+              </span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total TVA:</span>
-              <span class="font-medium">{{ calculateFactureTotalTva() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</span>
+              <span class="font-medium">
+                {{ getFactureTotalTva() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+              </span>
             </div>
             <div class="flex justify-between border-t pt-2">
               <span class="text-sm font-semibold">Total TTC:</span>
-              <span class="text-lg font-bold">{{
-                calculateFactureTotal() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2'
-              }}</span>
+              <span class="text-lg font-bold">
+                {{ getFactureTotalTtc() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+              </span>
             </div>
           </div>
         </div>

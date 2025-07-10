@@ -8,6 +8,7 @@ import { MagasinService } from 'src/app/core/services/magasin.service';
 import { StockService } from 'src/app/core/services/stock.service';
 import { FactureService, FactureData } from 'src/app/core/services/facture.service';
 import { FACTURE_CONFIG } from 'src/app/core/constants/facture.config';
+declare var html2pdf: any;
 
 @Component({
   selector: 'app-cmdvente',
@@ -71,7 +72,7 @@ export class CmdventetComponent implements OnInit {
   expandedCommandes = new Set<number>();
   generatedFacture: FactureData | null = null;
   isGeneratingFacture = false;
-  
+
   // Popups d'alerte
   showMagasinAlert = false;
   showLoadingAlert = false;
@@ -140,14 +141,14 @@ export class CmdventetComponent implements OnInit {
     this.service.getAll().subscribe({
       next: (data) => {
         data = (data || []).filter((commande: any) => commande.type === 'VENTE');
-        
+
         // Trier les commandes par date de commande (du plus récent au plus ancien)
         data.sort((a: any, b: any) => {
           const dateA = new Date(a.dateCmd || a.dateCommande);
           const dateB = new Date(b.dateCmd || b.dateCommande);
           return dateB.getTime() - dateA.getTime();
         });
-        
+
         this.allCommandes = data;
         this.commandes = data;
         this.filteredCommandes = [...data];
@@ -309,10 +310,10 @@ export class CmdventetComponent implements OnInit {
 
     // Restaurer toutes les commandes
     this.filteredCommandes = [...this.allCommandes];
-    
+
     // Appliquer le tri après avoir restauré les données
     this.sortCommandesByDate();
-    
+
     this.totalItems = this.filteredCommandes.length;
     this.currentPage = 1;
     console.log('Filtres effacés, affichage de toutes les commandes:', this.filteredCommandes.length);
@@ -988,53 +989,17 @@ export class CmdventetComponent implements OnInit {
     }
   }
 
-
-
   printFacture(): void {
-    if (this.factureForm.valid) {
-      this.isGeneratingFacture = true;
-      
-      const factureData: FactureData = {
-        numFacture: this.factureForm.value.numFacture,
-        datefacture: new Date(this.factureForm.value.dateFacture).toISOString(),
-        totalHT: this.calculateFactureTotalHt(),
-        totalTva: this.calculateFactureTotalTva(),
-        totalTTC: this.calculateFactureTotal(),
-        commandes: this.factureForm.value.commandes,
-        clientId: this.factureForm.value.clientId,
-      };
-
-      // Appeler l'API pour générer la facture
-      this.factureService.genererFacture(factureData).subscribe({
-        next: (generatedFacture) => {
-          this.generatedFacture = generatedFacture;
-          this.showFacturePreview = true;
-          this.showFactureForm = false;
-          this.showFactureSuccessAlert = true;
-          this.isGeneratingFacture = false;
-          
-          // Incrémenter le compteur de factures pour la prochaine facture
-          this.factureCounter++;
-          
-          // Masquer l'alerte de succès après 3 secondes
-          setTimeout(() => {
-            this.showFactureSuccessAlert = false;
-          }, 3000);
-        },
-        error: (error) => {
-          console.error('Erreur lors de la génération de la facture:', error);
-          this.isGeneratingFacture = false;
-          alert('Erreur lors de la génération de la facture. Veuillez réessayer.');
-        }
-      });
-    }
+    window.print();
   }
 
   generateFactureHtml(factureData: any): string {
-    const client = this.clients.find((c) => c.idPersonne === factureData.clientId || c.idClient === factureData.clientId);
+    const client = this.clients.find(
+      (c) => c.idPersonne === factureData.clientId || c.idClient === factureData.clientId,
+    );
     const clientName = client ? client.nomPersonne : 'Client inconnu';
     const clientDevise = client?.devise?.code || 'TND';
-    
+
     return `
       <!DOCTYPE html>
       <html lang="fr">
@@ -1292,9 +1257,19 @@ export class CmdventetComponent implements OnInit {
             <p><strong>Email:</strong> ${FACTURE_CONFIG.company.email}</p>
             <p><strong>Matricule fiscale:</strong> ${FACTURE_CONFIG.company.matriculeFiscale}</p>
             <p><strong>Code TVA:</strong> ${FACTURE_CONFIG.company.codeTVA}</p>
-            ${FACTURE_CONFIG.company.siteWeb ? `<p><strong>Site web:</strong> ${FACTURE_CONFIG.company.siteWeb}</p>` : ''}
-            ${FACTURE_CONFIG.company.capital ? `<p><strong>Capital:</strong> ${FACTURE_CONFIG.company.capital}</p>` : ''}
-            ${FACTURE_CONFIG.company.registreCommerce ? `<p><strong>Registre de commerce:</strong> ${FACTURE_CONFIG.company.registreCommerce}</p>` : ''}
+            ${
+              FACTURE_CONFIG.company.siteWeb
+                ? `<p><strong>Site web:</strong> ${FACTURE_CONFIG.company.siteWeb}</p>`
+                : ''
+            }
+            ${
+              FACTURE_CONFIG.company.capital ? `<p><strong>Capital:</strong> ${FACTURE_CONFIG.company.capital}</p>` : ''
+            }
+            ${
+              FACTURE_CONFIG.company.registreCommerce
+                ? `<p><strong>Registre de commerce:</strong> ${FACTURE_CONFIG.company.registreCommerce}</p>`
+                : ''
+            }
           </div>
 
           <!-- Détails de la facture -->
@@ -1339,7 +1314,9 @@ export class CmdventetComponent implements OnInit {
                   <td>${commande.libelle || commande.libCmd}</td>
                   <td style="text-align: right;">${(commande.montantHt || 0).toFixed(3)} ${clientDevise}</td>
                   <td style="text-align: right;">${(commande.montantTva || 0).toFixed(3)} ${clientDevise}</td>
-                  <td style="text-align: right;"><strong>${(commande.montantTtc || commande.montantTotal || 0).toFixed(3)} ${clientDevise}</strong></td>
+                  <td style="text-align: right;"><strong>${(commande.montantTtc || commande.montantTotal || 0).toFixed(
+                    3,
+                  )} ${clientDevise}</strong></td>
                 </tr>
               `,
                 )
@@ -1353,7 +1330,9 @@ export class CmdventetComponent implements OnInit {
               <strong>Total HT:</strong> ${factureData.totalHT.toFixed(3)} ${clientDevise}
             </div>
             <div class="total-line">
-              <strong>Total TVA (${FACTURE_CONFIG.tvaRate}%):</strong> ${factureData.totalTva.toFixed(3)} ${clientDevise}
+              <strong>Total TVA (${FACTURE_CONFIG.tvaRate}%):</strong> ${factureData.totalTva.toFixed(
+      3,
+    )} ${clientDevise}
             </div>
             <div class="total-line total-ttc">
               <strong>Total TTC:</strong> ${factureData.totalTTC.toFixed(3)} ${clientDevise}
@@ -1367,7 +1346,7 @@ export class CmdventetComponent implements OnInit {
           <div class="legal-notice">
             <h4>Mentions légales</h4>
             <p><strong>Conformément à la législation fiscale tunisienne :</strong></p>
-            ${FACTURE_CONFIG.legalNotice.map(notice => `<p>• ${notice}</p>`).join('')}
+            ${FACTURE_CONFIG.legalNotice.map((notice) => `<p>• ${notice}</p>`).join('')}
           </div>
 
           <!-- Section signatures -->
@@ -1386,8 +1365,12 @@ export class CmdventetComponent implements OnInit {
           <div class="footer">
             <p><strong>${FACTURE_CONFIG.company.raisonSociale}</strong></p>
             <p>${FACTURE_CONFIG.footerText}</p>
-            <p>Matricule fiscale: ${FACTURE_CONFIG.company.matriculeFiscale} | Code TVA: ${FACTURE_CONFIG.company.codeTVA}</p>
-            <p>Facture générée le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+            <p>Matricule fiscale: ${FACTURE_CONFIG.company.matriculeFiscale} | Code TVA: ${
+      FACTURE_CONFIG.company.codeTVA
+    }</p>
+            <p>Facture générée le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString(
+      'fr-FR',
+    )}</p>
           </div>
         </div>
       </body>
@@ -1516,10 +1499,9 @@ export class CmdventetComponent implements OnInit {
     return devise?.tauxChange || 1;
   }
 
-  toFix(prix: number){
+  toFix(prix: number) {
     return parseFloat(prix.toFixed(2));
   }
-
 
   // Obtenir le symbole de devise pour l'affichage des montants
   get getDeviseSymbol(): string {
@@ -1602,5 +1584,45 @@ export class CmdventetComponent implements OnInit {
       const dateB = new Date(b.dateCmd || b.dateCommande);
       return dateB.getTime() - dateA.getTime();
     });
+  }
+
+  // Calculate Montant HT for a commande (sum of quantite * article.prix)
+  public getCommandeMontantHt(commande: any): number {
+    const lignes = commande.detailCmds || commande.lignes || [];
+    return lignes.reduce((sum: number, l: any) => sum + l.quantite * (l.article?.prix || 0), 0);
+  }
+
+  // Calculate Montant TTC for a commande (sum of quantite * article.prix * (1 + tva/100))
+  public getCommandeMontantTtc(commande: any): number {
+    const lignes = commande.detailCmds || commande.lignes || [];
+    return lignes.reduce(
+      (sum: number, l: any) => sum + l.quantite * (l.article?.prix || 0) * (1 + (l.article?.tva || 0) / 100),
+      0,
+    );
+  }
+
+  // Calculate total HT for all selected commandes
+  public getFactureTotalHt(): number {
+    return this.selectedCommandes.reduce(
+      (total: number, commande: any) => total + this.getCommandeMontantHt(commande),
+      0,
+    );
+  }
+
+  // Calculate total TTC for all selected commandes
+  public getFactureTotalTtc(): number {
+    return this.selectedCommandes.reduce(
+      (total: number, commande: any) => total + this.getCommandeMontantTtc(commande),
+      0,
+    );
+  }
+
+  // Calculate total TVA for all selected commandes
+  public getFactureTotalTva(): number {
+    return this.getFactureTotalTtc() - this.getFactureTotalHt();
+  }
+
+  generateFacturePdf(): void {
+    window.print();
   }
 }

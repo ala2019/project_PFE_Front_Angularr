@@ -22,6 +22,10 @@ export class MouvementService {
     return this.http.put(`${this.apiUrlDetail}/${id}`, data);
   }
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
+  }
+
   /*
   getById(id: number): Observable<Mouvement> {
     return this.http.get<Mouvement>(`${this.baseUrl}/${id}`);
@@ -35,9 +39,6 @@ export class MouvementService {
     return this.http.put<Mouvement>(`${this.baseUrl}/${id}`, mouvement);
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
-  }
 
   filter(filters: MouvementFilter): Observable<Mouvement[]> {
     return this.http.post<Mouvement[]>(`${this.baseUrl}/filter`, filters);

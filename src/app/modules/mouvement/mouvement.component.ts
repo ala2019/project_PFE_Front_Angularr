@@ -525,10 +525,20 @@ export class MouvementComponent implements OnInit {
 
   deleteMouvement(): void {
     if (this.selectedId) {
-      this.mouvements = this.mouvements.filter((m) => m.idMouvement !== this.selectedId);
-      this.filteredMouvements = [...this.mouvements];
-      this.totalItems = this.mouvements.length;
-      this.closeModal();
+      this.mouvementService.delete(this.selectedId).subscribe({
+        next: (response: any) => {
+          this.mouvements = this.mouvements.filter((m) => m.idMouvement !== this.selectedId);
+          this.filteredMouvements = [...this.mouvements];
+          this.totalItems = this.mouvements.length;
+          this.closeModal();
+        },
+        error: (err: any) => {
+          this.mouvements = this.mouvements.filter((m) => m.idMouvement !== this.selectedId);
+          this.filteredMouvements = [...this.mouvements];
+          this.totalItems = this.mouvements.length;
+          this.closeModal();
+        },
+      });
     }
   }
 
