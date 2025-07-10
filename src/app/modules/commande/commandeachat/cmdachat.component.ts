@@ -40,6 +40,11 @@ export class CmdAchatComponent implements OnInit {
   articleSearchFilter = '';
   selectedArticle: any | null = null;
 
+  // Pagination pour la sélection d'articles
+  articleCurrentPage = 1;
+  articleItemsPerPage = 5;
+  articleTotalItems = 0;
+
   // Forms
   commandeForm!: FormGroup;
   lineForm!: FormGroup;
@@ -650,12 +655,14 @@ export class CmdAchatComponent implements OnInit {
     this.articleSelectionPopUp = true;
     this.selectedArticle = null;
     this.articleSearchFilter = '';
+    this.articleCurrentPage = 1; // Réinitialiser la pagination
   }
 
   closeArticleSelection(): void {
     this.articleSelectionPopUp = false;
     this.selectedArticle = null;
     this.articleSearchFilter = '';
+    this.articleCurrentPage = 1; // Réinitialiser la pagination
   }
 
   getFilteredArticles(): any[] {
@@ -670,6 +677,30 @@ export class CmdAchatComponent implements OnInit {
         article.reference.toLowerCase().includes(filter) ||
         article.description.toLowerCase().includes(filter),
     );
+  }
+
+  // Méthodes de pagination pour les articles
+  get paginatedArticles(): any[] {
+    const filteredArticles = this.getFilteredArticles();
+    this.articleTotalItems = filteredArticles.length;
+    const startIndex = (this.articleCurrentPage - 1) * this.articleItemsPerPage;
+    const endIndex = startIndex + this.articleItemsPerPage;
+    return filteredArticles.slice(startIndex, endIndex);
+  }
+
+  get articleTotalPages(): number {
+    return Math.ceil(this.articleTotalItems / this.articleItemsPerPage);
+  }
+
+  changeArticlePage(page: number): void {
+    if (page >= 1 && page <= this.articleTotalPages) {
+      this.articleCurrentPage = page;
+    }
+  }
+
+  // Méthode pour réinitialiser la pagination des articles lors de la recherche
+  onArticleSearchChange(): void {
+    this.articleCurrentPage = 1;
   }
 
   selectArticle(article: any): void {
