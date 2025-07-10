@@ -789,6 +789,67 @@
 </app-popup>
 }
 
+<!-- Facture Preview Popup -->
+@if (showFacturePreview && generatedFacture) {
+<app-popup>
+  <div popup-content class="w-[900px] max-w-5xl">
+    <div class="mb-6 flex items-center justify-between">
+      <h3 class="text-xl font-semibold text-gray-800">Aperçu de la facture générée</h3>
+      <button (click)="closeFacturePreview()" class="text-gray-400 hover:text-gray-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Facture Info -->
+    <div class="mb-4 rounded-lg border border-green-200 bg-green-50 p-4">
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div>
+          <h4 class="text-sm font-semibold text-green-800 mb-2">Informations facture</h4>
+          <div class="space-y-1 text-sm text-green-700">
+            <p><strong>Numéro:</strong> {{ generatedFacture.numFacture }}</p>
+            <p><strong>Date:</strong> {{ generatedFacture.datefacture | date : 'dd/MM/yyyy' }}</p>
+            <p><strong>ID Facture:</strong> {{ generatedFacture.idFacture }}</p>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-green-800 mb-2">Montants</h4>
+          <div class="space-y-1 text-sm text-green-700">
+            <p><strong>Total HT:</strong> {{ generatedFacture.totalHT | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
+            <p><strong>Total TVA:</strong> {{ generatedFacture.totalTva | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
+            <p><strong>Total TTC:</strong> {{ generatedFacture.totalTTC | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-green-800 mb-2">Client</h4>
+          <div class="space-y-1 text-sm text-green-700">
+            <p><strong>Nom:</strong> {{ getSelectedClient()?.nomPersonne }}</p>
+            <p><strong>Devise:</strong> {{ getClientDeviseSymbol() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Actions -->
+    <div class="flex justify-end gap-3 border-t pt-6">
+      <button
+        type="button"
+        (click)="closeFacturePreview()"
+        class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400">
+        Fermer
+      </button>
+      <button
+        type="button"
+        (click)="printGeneratedFacture()"
+        class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+        🖨️ Imprimer la facture
+      </button>
+    </div>
+  </div>
+</app-popup>
+}
+
 <!-- Magasin Alert Popup -->
 @if (showMagasinAlert) {
 <app-popup>
@@ -879,6 +940,36 @@
 </app-popup>
 }
 
+<!-- Facture Success Alert Popup -->
+@if (showFactureSuccessAlert) {
+<app-popup>
+  <div popup-content class="w-[400px] max-w-sm">
+    <div class="text-center">
+      <svg class="mx-auto h-12 w-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">Facture générée avec succès !</h3>
+      <p class="mt-2 text-sm text-gray-500">
+        La facture a été générée et enregistrée dans le système.
+      </p>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button
+        type="button"
+        (click)="closeFactureSuccessAlert()"
+        class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+        Parfait !
+      </button>
+    </div>
+  </div>
+</app-popup>
+}
+
 <!-- Facture Form Popup -->
 @if (showFactureForm) {
 <app-popup>
@@ -894,8 +985,37 @@
 
     <!-- Client Info -->
     @if (selectedCommandes.length > 0) {
-    <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
-      <p class="text-sm text-blue-800"><strong>Client:</strong> {{ selectedCommandes[0]?.client }}</p>
+    <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+      @if (getSelectedClient()) {
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div>
+          <h4 class="text-sm font-semibold text-blue-800 mb-2">Informations client</h4>
+          <div class="space-y-1 text-sm text-blue-700">
+            <p><strong>Nom:</strong> {{ getSelectedClient()?.nomPersonne }}</p>
+            @if (getSelectedClient()?.adresse) {
+            <p><strong>Adresse:</strong> {{ getSelectedClient()?.adresse }}</p>
+            }
+            @if (getSelectedClient()?.telephone) {
+            <p><strong>Téléphone:</strong> {{ getSelectedClient()?.telephone }}</p>
+            }
+            @if (getSelectedClient()?.email) {
+            <p><strong>Email:</strong> {{ getSelectedClient()?.email }}</p>
+            }
+            @if (getSelectedClient()?.devise) {
+            <p><strong>Devise:</strong> {{ getSelectedClient()?.devise?.code || getSelectedClient()?.devise }}</p>
+            }
+          </div>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-blue-800 mb-2">Résumé de la facture</h4>
+          <div class="space-y-1 text-sm text-blue-700">
+            <p><strong>Nombre de commandes:</strong> {{ selectedCommandes.length }}</p>
+            <p><strong>Total HT:</strong> {{ calculateFactureTotalHt() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
+            <p><strong>Total TTC:</strong> {{ calculateFactureTotal() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
+          </div>
+        </div>
+      </div>
+      }
     </div>
     }
 
@@ -938,6 +1058,7 @@
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Date</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Montant HT</th>
                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Montant TTC</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
@@ -945,19 +1066,28 @@
                 <tr
                   class="cursor-pointer transition-colors duration-200 hover:bg-gray-50"
                   (click)="toggleCommandeDetails(commande.idCmd)">
-                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle }}</td>
-                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.dateCommande | date : 'dd/MM/yyyy' }}</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle || commande.libCmd }}</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">{{ (commande.dateCmd || commande.dateCommande) | date : 'dd/MM/yyyy' }}</td>
                   <td class="px-3 py-2 text-sm text-gray-900">
-                    {{ commande.montantHt | currency : 'EUR' : 'symbol' : '1.2-2' }}
+                    {{ (commande.montantHt || 0) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
                   </td>
                   <td class="px-3 py-2 text-sm font-medium text-gray-900">
-                    {{ commande.montantTtc | currency : 'EUR' : 'symbol' : '1.2-2' }}
+                    {{ (commande.montantTtc || commande.montantTotal || 0) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+                  </td>
+                  <td class="px-3 py-2 text-sm">
+                    <button 
+                      (click)="$event.stopPropagation(); toggleCommandeDetails(commande.idCmd)"
+                      class="text-blue-600 hover:text-blue-800">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </button>
                   </td>
                 </tr>
                 <tr *ngIf="expandedCommandes.has(commande.idCmd)">
-                  <td colspan="4" class="p-0">
+                  <td colspan="5" class="p-0">
                     <div class="bg-gray-100 p-4">
-                      <h5 class="mb-2 font-semibold">Détails de la commande : {{ commande.libelle }}</h5>
+                      <h5 class="mb-2 font-semibold">Détails de la commande : {{ commande.libelle || commande.libCmd }}</h5>
                       <table class="min-w-full rounded bg-white">
                         <thead class="bg-gray-200">
                           <tr>
@@ -968,11 +1098,11 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr *ngFor="let ligne of commande.lignes">
-                            <td class="px-2 py-1 text-sm">{{ ligne.description }}</td>
+                          <tr *ngFor="let ligne of commande.lignes || commande.detailCmds">
+                            <td class="px-2 py-1 text-sm">{{ ligne.description || ligne.article?.description }}</td>
                             <td class="px-2 py-1 text-sm">{{ ligne.quantite }}</td>
-                            <td class="px-2 py-1 text-sm">{{ ligne.prixUnitaire | currency : 'EUR' : 'symbol' }}</td>
-                            <td class="px-2 py-1 text-sm">{{ ligne.sousTotal | currency : 'EUR' : 'symbol' }}</td>
+                            <td class="px-2 py-1 text-sm">{{ (ligne.prixUnitaire || ligne.prix || 0) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
+                            <td class="px-2 py-1 text-sm">{{ (ligne.sousTotal || (ligne.quantite * (ligne.prixUnitaire || ligne.prix || 0))) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -989,16 +1119,16 @@
           <div class="w-64 space-y-2">
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total HT:</span>
-              <span class="font-medium">{{ calculateFactureTotalHt() | currency : 'EUR' : 'symbol' : '1.2-2' }}</span>
+              <span class="font-medium">{{ calculateFactureTotalHt() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm text-gray-600">Total TVA:</span>
-              <span class="font-medium">{{ calculateFactureTotalTva() | currency : 'EUR' : 'symbol' : '1.2-2' }}</span>
+              <span class="font-medium">{{ calculateFactureTotalTva() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</span>
             </div>
             <div class="flex justify-between border-t pt-2">
               <span class="text-sm font-semibold">Total TTC:</span>
               <span class="text-lg font-bold">{{
-                calculateFactureTotal() | currency : 'EUR' : 'symbol' : '1.2-2'
+                calculateFactureTotal() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2'
               }}</span>
             </div>
           </div>
@@ -1015,9 +1145,17 @@
         </button>
         <button
           type="submit"
-          [disabled]="factureForm.invalid"
+          [disabled]="factureForm.invalid || isGeneratingFacture"
           class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50">
-          🖨️ Imprimer la facture
+          @if (isGeneratingFacture) {
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Génération en cours...
+          } @else {
+          📄 Générer la facture
+          }
         </button>
       </div>
     </form>

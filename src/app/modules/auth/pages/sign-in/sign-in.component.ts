@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -21,7 +22,8 @@ export class SignInComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -39,6 +41,13 @@ export class SignInComponent implements OnInit {
     this.passwordTextType = !this.passwordTextType;
   }
 
+  // Effacer le message d'erreur quand l'utilisateur modifie les champs
+  clearErrorMessage() {
+    if (this.errorMessage) {
+      this.errorMessage = '';
+    }
+  }
+
   onSubmit() {
     this.submitted = true;
     if (this.form.invalid) return;
@@ -47,15 +56,24 @@ export class SignInComponent implements OnInit {
       next: (res) => {
         if (res && res.tokenValue) {
           this.authService.setToken(res.tokenValue);
-          alert('Connexion réussie !');
+          this.notificationService.success(
+            'Connexion réussie !',
+            'Vous êtes maintenant connecté à votre espace Gesti.Com'
+          );
           this.router.navigate(['/dashboard']);
         } else {
-          alert('Réponse inattendue du serveur.');
+          this.notificationService.error(
+            'Erreur de connexion',
+            'Réponse inattendue du serveur. Veuillez réessayer.'
+          );
         }
       },
       error: (error) => {
-        this.errorMessage = 'Login ou mot de passe incorrect';
-        alert('Login ou mot de passe incorrect');
+        this.errorMessage = '❌ Échec de connexion';
+        this.notificationService.error(
+          'Échec de connexion',
+          'Login ou mot de passe incorrect. Veuillez vérifier vos identifiants.'
+        );
       }
     });
   }

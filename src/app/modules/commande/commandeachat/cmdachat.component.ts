@@ -559,8 +559,11 @@ export class CmdAchatComponent implements OnInit {
   openMouvementPopup(): void {
     if (!this.selectedCommande) return;
 
+    // Générer automatiquement le libellé du mouvement
+    const libelleMouvement = `Pointage pour commande ${this.selectedCommande.libCmd}`;
+    
     this.mouvementForm.reset({
-      libelle: `Pointage pour commande ${this.selectedCommande.libCmd}`,
+      libelle: libelleMouvement,
       dateMouvement: new Date().toISOString().substring(0, 10),
       magasinId: '',
     });
@@ -592,7 +595,13 @@ export class CmdAchatComponent implements OnInit {
     }
 
     const formValue = this.mouvementForm.value;
+    
+    // S'assurer que le libellé est toujours défini
+    if (!formValue.libelle) {
+      formValue.libelle = `Pointage pour commande ${this.selectedCommande?.libCmd || 'N/A'}`;
+    }
     const newMouvement: any = {
+      libelle: formValue.libelle, // Ajout du libellé du formulaire
       signe: '+',
       dateMvt: new Date(formValue.dateMouvement).toISOString(),
       magasinDestinationId: formValue.magasinId,

@@ -6,6 +6,8 @@ import { PopupComponent } from '../../shared/popup/popup.component';
 import { FournisseurClientService } from 'src/app/core/services/fourisseur-client.service';
 import { MagasinService } from 'src/app/core/services/magasin.service';
 import { StockService } from 'src/app/core/services/stock.service';
+import { FactureService, FactureData } from 'src/app/core/services/facture.service';
+import { FACTURE_CONFIG } from 'src/app/core/constants/facture.config';
 
 @Component({
   selector: 'app-cmdvente',
@@ -63,9 +65,12 @@ export class CmdventetComponent implements OnInit {
   // Facture printing
   selectedCommandes: any[] = [];
   showFactureForm = false;
+  showFacturePreview = false;
   nextFactureNumber = 'FACT-2024-001';
   factureCounter = 1;
   expandedCommandes = new Set<number>();
+  generatedFacture: FactureData | null = null;
+  isGeneratingFacture = false;
   
   // Popups d'alerte
   showMagasinAlert = false;
@@ -78,6 +83,7 @@ export class CmdventetComponent implements OnInit {
   showNoCommandeAlert = false;
   showDifferentClientAlert = false;
   showDateRangeAlert = false;
+  showFactureSuccessAlert = false;
 
   // Pagination
   currentPage = 1;
@@ -93,6 +99,7 @@ export class CmdventetComponent implements OnInit {
     private fournisseurClientService: FournisseurClientService,
     private magasinService: MagasinService,
     private stockService: StockService,
+    private factureService: FactureService,
   ) {
     this.initForms();
   }
@@ -566,6 +573,10 @@ export class CmdventetComponent implements OnInit {
     this.showNoStockAlert = false;
   }
 
+  closeFactureSuccessAlert(): void {
+    this.showFactureSuccessAlert = false;
+  }
+
   // Update client TVA rate and devise when client changes
   onClientChange(): void {
     const clientId = this.commandeForm.get('clientId')?.value;
@@ -927,14 +938,16 @@ export class CmdventetComponent implements OnInit {
 
   openFactureForm(): void {
     if (this.selectedCommandes.length === 0) {
-      // Afficher une alerte ou un toast pour notifier l'utilisateur
       alert('Veuillez sélectionner au moins une commande pour générer une facture.');
       return;
     }
 
     // Vérifier que toutes les commandes sélectionnées appartiennent au même client
-    const firstClientId = this.selectedCommandes[0]?.clientId;
-    const allSameClient = this.selectedCommandes.every((cmd) => cmd.clientId === firstClientId);
+    const firstClientId = this.selectedCommandes[0]?.personne?.idPersonne || this.selectedCommandes[0]?.clientId;
+    const allSameClient = this.selectedCommandes.every((cmd) => {
+      const cmdClientId = cmd.personne?.idPersonne || cmd.clientId;
+      return cmdClientId === firstClientId;
+    });
 
     if (!allSameClient) {
       alert('Toutes les commandes sélectionnées doivent appartenir au même client.');
@@ -945,7 +958,7 @@ export class CmdventetComponent implements OnInit {
     this.factureForm.patchValue({
       numFacture: this.nextFactureNumber,
       dateFacture: new Date().toISOString().substring(0, 10),
-      clientId: firstClientId, // Set the client ID here
+      clientId: firstClientId,
       commandes: this.selectedCommandes.map((cmd) => cmd.idCmd),
     });
 
@@ -957,135 +970,425 @@ export class CmdventetComponent implements OnInit {
     this.selectedCommandes = [];
   }
 
-  calculateFactureTotal(): number {
-    return this.selectedCommandes.reduce((total, commande) => total + commande.montantTtc, 0);
+  closeFacturePreview(): void {
+    this.showFacturePreview = false;
+    this.generatedFacture = null;
+    this.selectedCommandes = [];
   }
 
-  calculateFactureTotalHt(): number {
-    return this.selectedCommandes.reduce((total, commande) => total + commande.montantHt, 0);
-  }
-
-  calculateFactureTotalTva(): number {
-    return this.selectedCommandes.reduce((total, commande) => total + commande.montantTva, 0);
-  }
-
-  printFacture(): void {
-    if (this.factureForm.valid) {
-      const factureData = {
-        ...this.factureForm.value,
-        totalHt: this.calculateFactureTotalHt(),
-        totalTva: this.calculateFactureTotalTva(),
-        totalTtc: this.calculateFactureTotal(),
-        client: this.clients.find((c) => c.idClient === this.factureForm.value.clientId)?.nom,
-        commandes: this.selectedCommandes,
-      };
-
-      // Générer le contenu HTML de la facture
-      const factureHtml = this.generateFactureHtml(factureData);
-
-      // Ouvrir la fenêtre d'impression
+  printGeneratedFacture(): void {
+    if (this.generatedFacture) {
+      const factureHtml = this.generateFactureHtml(this.generatedFacture);
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(factureHtml);
         printWindow.document.close();
         printWindow.print();
       }
+    }
+  }
 
-      // Incrémenter le compteur de factures pour la prochaine facture
-      this.factureCounter++;
 
-      this.closeFactureForm();
+
+  printFacture(): void {
+    if (this.factureForm.valid) {
+      this.isGeneratingFacture = true;
+      
+      const factureData: FactureData = {
+        numFacture: this.factureForm.value.numFacture,
+        datefacture: new Date(this.factureForm.value.dateFacture).toISOString(),
+        totalHT: this.calculateFactureTotalHt(),
+        totalTva: this.calculateFactureTotalTva(),
+        totalTTC: this.calculateFactureTotal(),
+        commandes: this.factureForm.value.commandes,
+        clientId: this.factureForm.value.clientId,
+      };
+
+      // Appeler l'API pour générer la facture
+      this.factureService.genererFacture(factureData).subscribe({
+        next: (generatedFacture) => {
+          this.generatedFacture = generatedFacture;
+          this.showFacturePreview = true;
+          this.showFactureForm = false;
+          this.showFactureSuccessAlert = true;
+          this.isGeneratingFacture = false;
+          
+          // Incrémenter le compteur de factures pour la prochaine facture
+          this.factureCounter++;
+          
+          // Masquer l'alerte de succès après 3 secondes
+          setTimeout(() => {
+            this.showFactureSuccessAlert = false;
+          }, 3000);
+        },
+        error: (error) => {
+          console.error('Erreur lors de la génération de la facture:', error);
+          this.isGeneratingFacture = false;
+          alert('Erreur lors de la génération de la facture. Veuillez réessayer.');
+        }
+      });
     }
   }
 
   generateFactureHtml(factureData: any): string {
+    const client = this.clients.find((c) => c.idPersonne === factureData.clientId || c.idClient === factureData.clientId);
+    const clientName = client ? client.nomPersonne : 'Client inconnu';
+    const clientDevise = client?.devise?.code || 'TND';
+    
     return `
       <!DOCTYPE html>
-      <html>
+      <html lang="fr">
       <head>
+        <meta charset="UTF-8">
         <title>Facture ${factureData.numFacture}</title>
         <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .facture-info { display: flex; justify-content: space-between; margin-bottom: 20px; }
-          .client-info { margin-bottom: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; }
-          .totals { text-align: right; margin-top: 20px; }
-          .total-line { margin: 5px 0; }
-          .footer { margin-top: 40px; text-align: center; font-size: 12px; }
+          @page {
+            size: A4;
+            margin: 1cm;
+          }
+          
+          * {
+            box-sizing: border-box;
+          }
+          
+          body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: white;
+            color: #000;
+            font-size: 12px;
+            line-height: 1.4;
+          }
+          
+          .facture-container {
+            max-width: 21cm;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border: 2px solid #000;
+          }
+          
+          .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            border-bottom: 2px solid #000;
+            padding-bottom: 15px;
+          }
+          
+          .header h1 {
+            color: #000;
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          
+          .header h2 {
+            color: #000;
+            margin: 5px 0 0 0;
+            font-size: 16px;
+            font-weight: normal;
+          }
+          
+          .company-info {
+            text-align: left;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #000;
+            background: #f9f9f9;
+          }
+          
+          .company-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          
+          .company-info p {
+            margin: 2px 0;
+            font-size: 11px;
+          }
+          
+          .facture-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #000;
+          }
+          
+          .facture-details .left, .facture-details .right {
+            flex: 1;
+          }
+          
+          .facture-details h4 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          
+          .facture-details p {
+            margin: 2px 0;
+            font-size: 11px;
+          }
+          
+          .client-info { 
+            margin-bottom: 20px; 
+            padding: 10px;
+            border: 1px solid #000;
+            background: #f9f9f9;
+          }
+          
+          .client-info h3 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          
+          .client-info p {
+            margin: 2px 0;
+            font-size: 11px;
+          }
+          
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 20px; 
+            border: 1px solid #000;
+          }
+          
+          th, td { 
+            border: 1px solid #000; 
+            padding: 6px; 
+            text-align: left; 
+            font-size: 10px;
+            vertical-align: top;
+          }
+          
+          th { 
+            background: #f0f0f0;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9px;
+          }
+          
+          .totals { 
+            text-align: right; 
+            margin-top: 20px; 
+            padding: 10px;
+            border: 1px solid #000;
+            background: #f9f9f9;
+          }
+          
+          .total-line { 
+            margin: 3px 0; 
+            font-size: 11px;
+          }
+          
+          .total-ttc {
+            font-size: 14px;
+            font-weight: bold;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 5px;
+          }
+          
+          .footer { 
+            margin-top: 30px; 
+            text-align: center; 
+            font-size: 10px;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+          }
+          
+          .footer p {
+            margin: 2px 0;
+          }
+          
+          .logo {
+            max-width: 120px;
+            max-height: 60px;
+            margin-bottom: 10px;
+          }
+          
+          .legal-notice {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #000;
+            background: #f9f9f9;
+            font-size: 9px;
+          }
+          
+          .legal-notice h4 {
+            margin: 0 0 5px 0;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          
+          .legal-notice p {
+            margin: 2px 0;
+          }
+          
+          .signature-section {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+          }
+          
+          .signature-box {
+            width: 45%;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #000;
+          }
+          
+          .signature-box h4 {
+            margin: 0 0 20px 0;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          
+          .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 30px;
+            padding-top: 5px;
+            font-size: 9px;
+          }
+          
           @media print {
-            body { margin: 0; }
+            body { 
+              margin: 0; 
+              background: white;
+            }
+            .facture-container {
+              border: none;
+              padding: 0;
+            }
             .no-print { display: none; }
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1>FACTURE</h1>
-          <h2>${factureData.numFacture}</h2>
-        </div>
-
-        <div class="facture-info">
-          <div>
-            <strong>Date de facture:</strong> ${new Date(factureData.dateFacture).toLocaleDateString('fr-FR')}
+        <div class="facture-container">
+          <!-- En-tête -->
+          <div class="header">
+            <img src="assets/LOGO_Gesti.png" alt="Logo" class="logo">
+            <h1>FACTURE</h1>
+            <h2>${factureData.numFacture}</h2>
           </div>
-          <div>
-            <strong>Client:</strong> ${factureData.client}
+
+          <!-- Informations de l'entreprise -->
+          <div class="company-info">
+            <h3>Informations de l'entreprise</h3>
+            <p><strong>Raison sociale:</strong> ${FACTURE_CONFIG.company.raisonSociale}</p>
+            <p><strong>Adresse:</strong> ${FACTURE_CONFIG.company.adresse}</p>
+            <p><strong>Téléphone:</strong> ${FACTURE_CONFIG.company.telephone}</p>
+            <p><strong>Email:</strong> ${FACTURE_CONFIG.company.email}</p>
+            <p><strong>Matricule fiscale:</strong> ${FACTURE_CONFIG.company.matriculeFiscale}</p>
+            <p><strong>Code TVA:</strong> ${FACTURE_CONFIG.company.codeTVA}</p>
+            ${FACTURE_CONFIG.company.siteWeb ? `<p><strong>Site web:</strong> ${FACTURE_CONFIG.company.siteWeb}</p>` : ''}
+            ${FACTURE_CONFIG.company.capital ? `<p><strong>Capital:</strong> ${FACTURE_CONFIG.company.capital}</p>` : ''}
+            ${FACTURE_CONFIG.company.registreCommerce ? `<p><strong>Registre de commerce:</strong> ${FACTURE_CONFIG.company.registreCommerce}</p>` : ''}
           </div>
-        </div>
 
-        <div class="client-info">
-          <strong>Adresse de facturation:</strong><br>
-          ${factureData.client}<br>
-          <!-- Adresse complète du client -->
-        </div>
+          <!-- Détails de la facture -->
+          <div class="facture-details">
+            <div class="left">
+              <h4>Informations de facturation</h4>
+              <p><strong>Date de facture:</strong> ${new Date(factureData.datefacture).toLocaleDateString('fr-FR')}</p>
+              <p><strong>Numéro de facture:</strong> ${factureData.numFacture}</p>
+              <p><strong>ID Facture:</strong> ${factureData.idFacture}</p>
+              <p><strong>Mode de paiement:</strong> À définir</p>
+            </div>
+            <div class="right">
+              <h4>Informations client</h4>
+              <p><strong>Nom/Raison sociale:</strong> ${clientName}</p>
+              ${client?.adresse ? `<p><strong>Adresse:</strong> ${client.adresse}</p>` : ''}
+              ${client?.telephone ? `<p><strong>Téléphone:</strong> ${client.telephone}</p>` : ''}
+              ${client?.email ? `<p><strong>Email:</strong> ${client.email}</p>` : ''}
+              ${client?.codeClient ? `<p><strong>Code client:</strong> ${client.codeClient}</p>` : ''}
+              ${client?.devise ? `<p><strong>Devise:</strong> ${client.devise.code || client.devise}</p>` : ''}
+            </div>
+          </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Commande</th>
-              <th>Date</th>
-              <th>Libellé</th>
-              <th>Montant HT</th>
-              <th>TVA</th>
-              <th>Montant TTC</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${factureData.commandes
-              .map(
-                (commande: any) => `
+          <!-- Tableau des commandes -->
+          <table>
+            <thead>
               <tr>
-                <td>CMD-${commande.idCmd}</td>
-                <td>${new Date(commande.dateCommande).toLocaleDateString('fr-FR')}</td>
-                <td>${commande.libelle}</td>
-                <td>${commande.montantHt.toFixed(2)} €</td>
-                <td>${commande.montantTva.toFixed(2)} €</td>
-                <td>${commande.montantTtc.toFixed(2)} €</td>
+                <th>N° Commande</th>
+                <th>Date Commande</th>
+                <th>Libellé</th>
+                <th>Montant HT</th>
+                                 <th>TVA (${FACTURE_CONFIG.tvaRate}%)</th>
+                <th>Montant TTC</th>
               </tr>
-            `,
-              )
-              .join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${this.selectedCommandes
+                .map(
+                  (commande: any) => `
+                <tr>
+                  <td><strong>CMD-${commande.idCmd}</strong></td>
+                  <td>${new Date(commande.dateCmd || commande.dateCommande).toLocaleDateString('fr-FR')}</td>
+                  <td>${commande.libelle || commande.libCmd}</td>
+                  <td style="text-align: right;">${(commande.montantHt || 0).toFixed(3)} ${clientDevise}</td>
+                  <td style="text-align: right;">${(commande.montantTva || 0).toFixed(3)} ${clientDevise}</td>
+                  <td style="text-align: right;"><strong>${(commande.montantTtc || commande.montantTotal || 0).toFixed(3)} ${clientDevise}</strong></td>
+                </tr>
+              `,
+                )
+                .join('')}
+            </tbody>
+          </table>
 
-        <div class="totals">
-          <div class="total-line">
-            <strong>Total HT:</strong> ${factureData.totalHt.toFixed(2)} €
+          <!-- Totaux -->
+          <div class="totals">
+            <div class="total-line">
+              <strong>Total HT:</strong> ${factureData.totalHT.toFixed(3)} ${clientDevise}
+            </div>
+            <div class="total-line">
+              <strong>Total TVA (${FACTURE_CONFIG.tvaRate}%):</strong> ${factureData.totalTva.toFixed(3)} ${clientDevise}
+            </div>
+            <div class="total-line total-ttc">
+              <strong>Total TTC:</strong> ${factureData.totalTTC.toFixed(3)} ${clientDevise}
+            </div>
+            <div class="total-line" style="margin-top: 10px;">
+              <strong>Arrondi:</strong> ${Math.round(factureData.totalTTC)} ${clientDevise}
+            </div>
           </div>
-          <div class="total-line">
-            <strong>Total TVA:</strong> ${factureData.totalTva.toFixed(2)} €
-          </div>
-          <div class="total-line">
-            <strong>Total TTC:</strong> ${factureData.totalTtc.toFixed(2)} €
-          </div>
-        </div>
 
-        <div class="footer">
-          <p>Merci pour votre confiance</p>
-          <p>Cette facture est générée automatiquement</p>
+          <!-- Mentions légales -->
+          <div class="legal-notice">
+            <h4>Mentions légales</h4>
+            <p><strong>Conformément à la législation fiscale tunisienne :</strong></p>
+            ${FACTURE_CONFIG.legalNotice.map(notice => `<p>• ${notice}</p>`).join('')}
+          </div>
+
+          <!-- Section signatures -->
+          <div class="signature-section">
+            <div class="signature-box">
+              <h4>Signature du client</h4>
+              <div class="signature-line">Signature et cachet</div>
+            </div>
+            <div class="signature-box">
+              <h4>Signature de l'entreprise</h4>
+              <div class="signature-line">Signature et cachet</div>
+            </div>
+          </div>
+
+          <!-- Pied de page -->
+          <div class="footer">
+            <p><strong>${FACTURE_CONFIG.company.raisonSociale}</strong></p>
+            <p>${FACTURE_CONFIG.footerText}</p>
+            <p>Matricule fiscale: ${FACTURE_CONFIG.company.matriculeFiscale} | Code TVA: ${FACTURE_CONFIG.company.codeTVA}</p>
+            <p>Facture générée le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+          </div>
         </div>
       </body>
       </html>
@@ -1151,6 +1454,28 @@ export class CmdventetComponent implements OnInit {
     // Recherche par idPersonne ou idClient
     const client = this.clients.find((c) => c.idPersonne === clientId || c.idClient === clientId);
     return client ? client.nomPersonne || client.nom : clientId;
+  }
+
+  // Méthode pour calculer les totaux des commandes sélectionnées avec gestion des données manquantes
+  calculateFactureTotalHt(): number {
+    return this.selectedCommandes.reduce((total, commande) => {
+      const montantHt = commande.montantHt || 0;
+      return total + montantHt;
+    }, 0);
+  }
+
+  calculateFactureTotalTva(): number {
+    return this.selectedCommandes.reduce((total, commande) => {
+      const montantTva = commande.montantTva || 0;
+      return total + montantTva;
+    }, 0);
+  }
+
+  calculateFactureTotal(): number {
+    return this.selectedCommandes.reduce((total, commande) => {
+      const montantTtc = commande.montantTtc || commande.montantTotal || 0;
+      return total + montantTtc;
+    }, 0);
   }
 
   getMagasinName(magasinId: any): string {
@@ -1222,6 +1547,25 @@ export class CmdventetComponent implements OnInit {
       return client.devise;
     }
     return '€';
+  }
+
+  // Obtenir le client sélectionné pour la facture
+  getSelectedClient(): any {
+    if (this.selectedCommandes.length === 0) return null;
+    const clientId = this.selectedCommandes[0]?.personne?.idPersonne || this.selectedCommandes[0]?.clientId;
+    return this.clients.find((c) => c.idPersonne === clientId || c.idClient === clientId);
+  }
+
+  // Obtenir le symbole de devise du client sélectionné
+  getClientDeviseSymbol(): string {
+    const client = this.getSelectedClient();
+    if (client && client.devise) {
+      if (typeof client.devise === 'object' && client.devise !== null) {
+        return client.devise.symbole || client.devise.code || client.devise.nom || 'TND';
+      }
+      return client.devise;
+    }
+    return 'TND';
   }
 
   // Appliquer les filtres automatiquement quand les valeurs changent
