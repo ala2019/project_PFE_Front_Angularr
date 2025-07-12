@@ -20,7 +20,9 @@ export class RegionService {
     return this.http.put<any>(`${this.apiUrl}/update/${id}`, region);
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
+  delete(id: number): Observable<any> {
+    //return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete(`${this.apiUrl}/delete/${id}`, { responseType: 'text' });
+
   }
 }

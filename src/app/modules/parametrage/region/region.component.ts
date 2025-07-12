@@ -12,6 +12,10 @@ import { FormsModule } from '@angular/forms';
   imports: [AngularSvgIconModule, CommonModule, PopupComponent, FormsModule],
 })
 export class RegionComponent implements OnInit {
+  // Notification management
+  notificationMessage: string | null = null;
+  notificationType: 'success' | 'error' = 'success';
+  
   protected regionList: any[] = [];
   protected selectdID!: any;
   protected deletedPopUp = false;
@@ -60,21 +64,26 @@ export class RegionComponent implements OnInit {
   delete() {
     this.regionService.delete(this.selectdID).subscribe({
       next: (response: any) => {
+        this.showNotification('Région supprimée avec succès', 'success');
         this.getAll();
+        this.selectdID = null;
       },
       error: (error) => {
         console.error('Erreur lors de la suppression:', error);
-        this.getAll();
+        this.showNotification('Suppression impossible : cette région contient  des magasins.', 'error');
+        this.selectdID = null;
       },
     });
-    this.selectdID = null;
   }
+
+  
 
   onSubmit() {
     if (this.formData.nomRegion.trim() && this.formData.codeRegion.trim()) {
       this.regionService.create(this.formData).subscribe({
         next: (response: any) => {
           console.log('Région créée:', response);
+          this.showNotification('Région ajoutée avec succès', 'success');
           this.getAll();
           this.formData = {
             idRegion: null,
@@ -85,6 +94,7 @@ export class RegionComponent implements OnInit {
         },
         error: (error) => {
           console.error('Erreur lors de la création:', error);
+          this.showNotification('Erreur lors de l\'ajout: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
         },
       });
     }
@@ -110,12 +120,14 @@ export class RegionComponent implements OnInit {
     if (this.formData.nomRegion.trim() && this.formData.codeRegion.trim() && this.formData.idRegion !== null) {
       this.regionService.update(this.formData.idRegion, this.formData).subscribe({
         next: (response: any) => {
+          this.showNotification('Région modifiée avec succès', 'success');
           this.getAll();
           this.formData = { nomRegion: '', idRegion: null, codeRegion: '' };
           this.updatePopUp = false;
         },
         error: (err) => {
           console.error('Update error', err);
+          this.showNotification('Erreur lors de la modification: ' + (err.error?.message || err.message || 'Erreur inconnue'), 'error');
         }
       });
     }
@@ -148,6 +160,19 @@ export class RegionComponent implements OnInit {
 
   getFilteredCount(): number {
     return this.filteredRegions.length;
+  }
+
+  // Méthodes de notification
+  showNotification(message: string, type: 'success' | 'error' = 'success') {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    setTimeout(() => {
+      this.notificationMessage = null;
+    }, 3000);
+  }
+
+  closeNotification() {
+    this.notificationMessage = null;
   }
 
 }

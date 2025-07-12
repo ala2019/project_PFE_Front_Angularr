@@ -11,6 +11,11 @@ import { PopupComponent } from '../../shared/popup/popup.component';
   imports: [CommonModule, FormsModule, PopupComponent],
 })
 export class CategoriearticleComponent implements OnInit {
+
+  // Notification management
+  notificationMessage: string | null = null;
+  notificationType: 'success' | 'error' = 'success';
+  
   // Popup management
   createPopUp = false;
   deletedPopUp = false;
@@ -44,9 +49,25 @@ export class CategoriearticleComponent implements OnInit {
 
   save(): void {
     if (this.isEditing) {
-      this.service.updateCategorie(this.formData.idCategorie, this.formData).subscribe(() => this.afterSave());
+      this.service.updateCategorie(this.formData.idCategorie, this.formData).subscribe({
+        next: () => {
+          this.showNotification('Catégorie modifiée avec succès', 'success');
+          this.afterSave();
+        },
+        error: (error) => {
+          this.showNotification('Erreur lors de la modification: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
+        }
+      });
     } else {
-      this.service.addCategorie(this.formData).subscribe(() => this.afterSave());
+      this.service.addCategorie(this.formData).subscribe({
+        next: () => {
+          this.showNotification('Catégorie ajoutée avec succès', 'success');
+          this.afterSave();
+        },
+        error: (error) => {
+          this.showNotification('Erreur lors de l\'ajout: ' + (error.error?.message || error.message || 'Erreur inconnue'), 'error');
+        }
+      });
     }
   }
 
@@ -71,13 +92,13 @@ export class CategoriearticleComponent implements OnInit {
         this.selectdID = null;
         this.selectedCategorie = null;
 
+        this.showNotification('Catégorie supprimée avec succès', 'success');
         console.log('Listes mises à jour après suppression');
       },
       error: (error) => {
-        // Mettre à jour les listes locales
-        this.categories = this.categories.filter((cat) => cat.idCategorie !== id);
-        this.filteredCategories = this.filteredCategories.filter((cat) => cat.idCategorie !== id);
+        console.log('Suppression impossible : la catégorie contient encore des articles, ID:', id);
 
+        this.showNotification('Suppression impossible : cette catégorie contient des articles.', 'error');
         // Réinitialiser la sélection
         this.selectdID = null;
         this.selectedCategorie = null;
@@ -142,5 +163,18 @@ export class CategoriearticleComponent implements OnInit {
       nomCategorie: '',
     };
     this.filteredCategories = [...this.categories];
+  }
+
+  // Méthodes de notification
+  showNotification(message: string, type: 'success' | 'error' = 'success') {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    setTimeout(() => {
+      this.notificationMessage = null;
+    }, 3000);
+  }
+
+  closeNotification() {
+    this.notificationMessage = null;
   }
 }

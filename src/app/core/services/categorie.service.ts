@@ -22,7 +22,9 @@ export class CategorieArticleService {
     return this.http.put<any>(`${this.apiUrl}/update/${id}`, categorie);
   }
 
-  deleteCategorie(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
+  deleteCategorie(id: number): Observable<any> {
+   // return this.http.delete<void>(`${this.apiUrl}/delete/${id}`,{responseType: 'text' });
+   return this.http.delete(`${this.apiUrl}/delete/${id}`, { responseType: 'text' });
+
   }
 }

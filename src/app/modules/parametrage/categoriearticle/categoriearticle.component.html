@@ -46,6 +46,12 @@
 </app-popup>
 }
 
+<!-- Notification container -->
+<div *ngIf="notificationMessage" [ngClass]="'gestionusers-notification ' + notificationType" (click)="closeNotification()">
+  <span>{{ notificationMessage }}</span>
+  <button type="button" style="background:transparent;border:none;color:white;font-size:1.2em;line-height:1;cursor:pointer;margin-left:auto;" (click)="closeNotification(); $event.stopPropagation()">&times;</button>
+</div>
+
 <!-- Titre de l'interface -->
 <div class="mb-6">
   <h1 class="text-2xl font-bold text-gray-900">Liste des catégories d'articles</h1>

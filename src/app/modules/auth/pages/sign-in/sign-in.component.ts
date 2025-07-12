@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+import { MenuService } from 'src/app/modules/layout/services/menu.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -23,7 +24,8 @@ export class SignInComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private menuService: MenuService
   ) {}
 
   ngOnInit(): void {
@@ -56,6 +58,8 @@ export class SignInComponent implements OnInit {
       next: (res) => {
         if (res && res.tokenValue) {
           this.authService.setToken(res.tokenValue);
+          // Rafraîchir le menu après connexion
+          this.menuService.refreshMenu();
           this.notificationService.success(
             'Connexion réussie !',
             'Vous êtes maintenant connecté à votre espace Gesti.Com'

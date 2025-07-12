@@ -17,23 +17,34 @@ export class MenuService implements OnDestroy {
   constructor(private router: Router, private authService: AuthService) {
     /** Set dynamic menu based on role */
     const roles = this.authService.getUserRoles();
-    let filteredMenu = Menu.pages;
-    if (!roles.includes('administrateur')) {
-      // Only show Dashboard and Liste des articles for non-admins
+    console.log('MenuService - roles récupérés:', roles);
+    console.log('MenuService - est administrateur:', roles.includes('administrateur'));
+    
+    let filteredMenu: MenuItem[];
+    
+    if (roles.includes('administrateur')) {
+      // Administrateurs voient le menu complet
+      console.log('MenuService - Affichage du menu complet pour administrateur');
+      filteredMenu = Menu.pages;
+    } else {
+      // Non-administrateurs voient seulement certains éléments
+      console.log('MenuService - Affichage du menu filtré pour non-administrateur');
       filteredMenu = [
         {
           group: 'Menu',
           separator: false,
           items: Menu.pages[0].items.filter(
-            (item) =>
+            (item) => 
               item.label === 'Liste des articles' ||
-              item.label === 'Liste des articles' ||
+              item.label === 'Etat des stocks' ||
               item.label === 'Commandes' ||
               item.label === 'Liste des mouvements',
           ),
         },
       ];
     }
+    
+    console.log('MenuService - Menu final:', filteredMenu);
     this._pagesMenu.set(filteredMenu);
 
     let sub = this.router.events.subscribe((event) => {
@@ -101,6 +112,37 @@ export class MenuService implements OnDestroy {
       fragment: 'ignored',
       matrixParams: 'ignored',
     });
+  }
+
+  public refreshMenu(): void {
+    console.log('MenuService - Rafraîchissement du menu');
+    const roles = this.authService.getUserRoles();
+    console.log('MenuService - roles récupérés lors du rafraîchissement:', roles);
+    
+    let filteredMenu: MenuItem[];
+    
+    if (roles.includes('administrateur')) {
+      console.log('MenuService - Affichage du menu complet pour administrateur');
+      filteredMenu = Menu.pages;
+    } else {
+      console.log('MenuService - Affichage du menu filtré pour non-administrateur');
+      filteredMenu = [
+        {
+          group: 'Menu',
+          separator: false,
+          items: Menu.pages[0].items.filter(
+            (item) => 
+              item.label === 'Liste des articles' ||
+              item.label === 'Etat des stocks' ||
+              item.label === 'Commandes' ||
+              item.label === 'Liste des mouvements',
+          ),
+        },
+      ];
+    }
+    
+    console.log('MenuService - Menu final après rafraîchissement:', filteredMenu);
+    this._pagesMenu.set(filteredMenu);
   }
 
   ngOnDestroy(): void {
