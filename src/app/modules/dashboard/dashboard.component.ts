@@ -12,10 +12,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     // Exemple de notification de bienvenue
-    this.notificationService.success(
-      'Bienvenue sur le tableau de bord !',
-      'Vous êtes maintenant connecté à votre espace de gestion.'
-    );
   }
 
   // Exemple de méthodes pour tester les différents types de notifications

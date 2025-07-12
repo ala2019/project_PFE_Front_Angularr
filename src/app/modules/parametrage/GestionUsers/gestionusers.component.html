@@ -24,11 +24,13 @@
           name="email"
           [(ngModel)]="formData.email"
           required
+          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
           #emailInput="ngModel"
           placeholder="exemple@email.com"
           class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
         <div *ngIf="emailInput.invalid && emailInput.touched" class="mt-1 text-xs text-red-500">
-          Veuillez saisir une adresse email valide.
+          <span *ngIf="emailInput.errors?.['required']">L'adresse email est requise.</span>
+          <span *ngIf="emailInput.errors?.['email'] || emailInput.errors?.['pattern']">Veuillez saisir une adresse email valide (exemple: nom&#64;domaine.com).</span>
         </div>
       </div>
 

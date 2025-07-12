@@ -413,9 +413,9 @@ export class CmdventetComponent implements OnInit {
       // Vérifier que la quantité ne dépasse pas le stock disponible
 
       // Vérifier que la quantité est au moins égale à 1
-      if (newQuantity < 1) {
-        this.showQuantityAlert = true;
-        event.target.value = 1;
+      if (newQuantity > stockDisponible) {
+        alert(`La quantité ne peut pas dépasser le stock disponible (${stockDisponible} unités)`);
+        event.target.value = Math.min(newQuantity, stockDisponible);
         return;
       }
 
@@ -1380,9 +1380,18 @@ export class CmdventetComponent implements OnInit {
 
   // Pagination methods
   getPaginatedCommandes(): any[] {
+    // Sort by libelle/libCmd before pagination (descending string order)
+    const sortedCommandes = [...this.filteredCommandes].sort((a: any, b: any) => {
+      const libelleA = (a.libelle || a.libCmd || '').toString();
+      const libelleB = (b.libelle || b.libCmd || '').toString();
+
+      // Sort in descending alphabetical order
+      return libelleB.localeCompare(libelleA); // Descending: "Commande 4" comes before "Commande 3"
+    });
+
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    return this.filteredCommandes.slice(startIndex, endIndex);
+    return sortedCommandes.slice(startIndex, endIndex);
   }
 
   get totalPages(): number {

@@ -44,3 +44,30 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+// Styles pour les toggle switches
+.filter-item {
+  .peer:checked ~ div {
+    background-color: #dc2626; // red-600 pour le filtre de rupture de stock
+  }
+  
+  .peer:focus ~ div {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  }
+}
+
+// Styles spécifiques pour le toggle switch de stock faible (orange)
+.filter-item {
+  .peer:checked ~ div[class*="bg-orange-600"] {
+    background-color: #ea580c; // orange-600
+  }
+  
+  .peer:focus ~ div[class*="bg-orange-600"] {
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+  }
+}
+
+// Animation pour les toggle switches
+.peer:checked ~ div::after {
+  transform: translateX(100%);
+}

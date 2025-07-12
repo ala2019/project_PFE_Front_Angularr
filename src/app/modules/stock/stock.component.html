@@ -116,6 +116,37 @@
         </div>
       </div>
 
+      <!-- Out of Stock Filter -->
+      <div class="filter-item">
+        <label class="flex items-center gap-2">
+          <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+          Articles en rupture/alerte
+        </label>
+        <div class="flex items-center">
+          <label class="relative inline-flex cursor-pointer items-center">
+            <input
+              type="checkbox"
+              [(ngModel)]="filters.showOutOfStock"
+              (change)="onOutOfStockFilterChange()"
+              class="peer sr-only" />
+            <div class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300"></div>
+            <span class="ml-3 text-sm font-medium text-gray-900">
+              @if (filters.showOutOfStock) {
+                Afficher uniquement
+              } @else {
+                Tous les articles
+              }
+            </span>
+          </label>
+        </div>
+      </div>
+
       <!-- Filter Actions -->
       <div class="flex items-end gap-2">
         <button
@@ -293,14 +324,22 @@
         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
     </svg>
     <h3 class="mt-2 text-sm font-medium text-gray-900">
-      @if (hasActiveFilters()) {
+      @if (filters.showOutOfStock) {
+        Aucun article en rupture de stock
+      } @else if (filters.showLowStock) {
+        Aucun article en stock faible
+      } @else if (hasActiveFilters()) {
         Aucun article trouvé avec les filtres actuels
       } @else {
         Aucun article en stock dans ce magasin
       }
     </h3>
     <p class="mt-1 text-sm text-gray-500">
-      @if (hasActiveFilters()) {
+      @if (filters.showOutOfStock) {
+        Tous les articles ont un stock suffisant dans ce magasin.
+      } @else if (filters.showLowStock) {
+        Aucun article n'a un stock inférieur au minimum requis.
+      } @else if (hasActiveFilters()) {
         Essayez de modifier vos critères de recherche ou d'effacer les filtres.
       } @else {
         Ce magasin ne contient actuellement aucun article en stock.

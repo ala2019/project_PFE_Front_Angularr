@@ -5,18 +5,22 @@
       <h3 class="text-lg font-medium text-gray-900">Filtres de recherche</h3>
     </div>
     @if (hasActiveFilters()) {
-    <span class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+    <span class="rounded-full bg-blue-100 px-2 py-1 text-sm text-blue-600">
       {{ getFilteredCount() }} résultat(s) trouvé(s)
     </span>
     }
   </div>
-  
+
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
     <!-- Libellé commande -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
         Libellé commande
       </label>
@@ -32,33 +36,58 @@
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
         Date de début
       </label>
-      <input type="date" [(ngModel)]="filters.dateDebut" (input)="onFilterChange()" [max]="filters.dateFin" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+      <input
+        type="date"
+        [(ngModel)]="filters.dateDebut"
+        (input)="onFilterChange()"
+        [max]="filters.dateFin"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
     </div>
 
     <!-- Date de fin -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
         Date de fin
       </label>
-      <input type="date" [(ngModel)]="filters.dateFin" (input)="onFilterChange()" [min]="filters.dateDebut" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
+      <input
+        type="date"
+        [(ngModel)]="filters.dateFin"
+        (input)="onFilterChange()"
+        [min]="filters.dateDebut"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200" />
     </div>
 
     <!-- Client -->
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
         </svg>
         Client
       </label>
-      <select [(ngModel)]="filters.client" (change)="onFilterChange()" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+      <select
+        [(ngModel)]="filters.client"
+        (change)="onFilterChange()"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
         <option value="">Tous les clients</option>
         <option *ngFor="let client of clients" [value]="client.idClient">
           {{ client.nomPersonne }}
@@ -70,11 +99,18 @@
     <div class="filter-item">
       <label>
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
         </svg>
         Magasin
       </label>
-      <select [(ngModel)]="filters.magasin" (change)="onFilterChange()" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+      <select
+        [(ngModel)]="filters.magasin"
+        (change)="onFilterChange()"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
         <option value="">Tous les magasins</option>
         <option *ngFor="let magasin of magasins" [value]="magasin.idMagasin">
           {{ magasin.nomMagasin }}
@@ -89,8 +125,8 @@
         class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
         🔍 Appliquer
       </button>
-      <button 
-        (click)="clearFilters()" 
+      <button
+        (click)="clearFilters()"
         [disabled]="!hasActiveFilters()"
         class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50">
         🗑️ Effacer
@@ -157,7 +193,7 @@
       <button
         (click)="openFactureForm()"
         class="rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700">
-        📄 Imprimer facture
+        📄 Générer une facture
       </button>
     </div>
     }
@@ -663,7 +699,7 @@
 <!-- Article Selection Popup -->
 @if (articleSelectionPopUp) {
 <app-popup>
-  <div popup-content class="w-[900px] max-w-5xl">
+  <div popup-content class="facture-print-scroll w-[900px] max-w-5xl">
     <div class="mb-6 flex items-center justify-between">
       <h3 class="text-xl font-semibold text-gray-800">Sélectionner des articles</h3>
       <button (click)="closeArticleSelection()" class="text-gray-400 hover:text-gray-600">
@@ -720,7 +756,9 @@
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Référence</th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Description</th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Prix</th>
-
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              Stock disponible
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
@@ -741,6 +779,19 @@
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">{{ article.description }}</td>
             <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
               {{ article.prix | currency : 'TND' : 'symbol' : '1.2-2' }}
+            </td>
+            <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
+              <span
+                [class]="
+                  article.stockDisponible > 10
+                    ? 'bg-green-100 text-green-800'
+                    : article.stockDisponible > 5
+                    ? 'bg-yellow-50 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+                "
+                class="inline-flex rounded-full px-2 py-1 text-xs font-semibold">
+                {{ article.stockDisponible }} unités
+              </span>
             </td>
           </tr>
         </tbody>
@@ -806,7 +857,7 @@
     <div class="mb-4 rounded-lg border border-green-200 bg-green-50 p-4">
       <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
         <div>
-          <h4 class="text-sm font-semibold text-green-800 mb-2">Informations facture</h4>
+          <h4 class="mb-2 text-sm font-semibold text-green-800">Informations facture</h4>
           <div class="space-y-1 text-sm text-green-700">
             <p><strong>Numéro:</strong> {{ generatedFacture.numFacture }}</p>
             <p><strong>Date:</strong> {{ generatedFacture.datefacture | date : 'dd/MM/yyyy' }}</p>
@@ -814,15 +865,24 @@
           </div>
         </div>
         <div>
-          <h4 class="text-sm font-semibold text-green-800 mb-2">Montants</h4>
+          <h4 class="mb-2 text-sm font-semibold text-green-800">Montants</h4>
           <div class="space-y-1 text-sm text-green-700">
-            <p><strong>Total HT:</strong> {{ generatedFacture.totalHT | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
-            <p><strong>Total TVA:</strong> {{ generatedFacture.totalTva | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
-            <p><strong>Total TTC:</strong> {{ generatedFacture.totalTTC | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
+            <p>
+              <strong>Total HT:</strong>
+              {{ generatedFacture.totalHT | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+            </p>
+            <p>
+              <strong>Total TVA:</strong>
+              {{ generatedFacture.totalTva | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+            </p>
+            <p>
+              <strong>Total TTC:</strong>
+              {{ generatedFacture.totalTTC | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+            </p>
           </div>
         </div>
         <div>
-          <h4 class="text-sm font-semibold text-green-800 mb-2">Client</h4>
+          <h4 class="mb-2 text-sm font-semibold text-green-800">Client</h4>
           <div class="space-y-1 text-sm text-green-700">
             <p><strong>Nom:</strong> {{ getSelectedClient()?.nomPersonne }}</p>
             <p><strong>Devise:</strong> {{ getClientDeviseSymbol() }}</p>
@@ -869,9 +929,7 @@
           d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
       </svg>
       <h3 class="mt-4 text-lg font-medium text-gray-900">Sélection de magasin requise</h3>
-      <p class="mt-2 text-sm text-gray-500">
-        Veuillez d'abord sélectionner un magasin avant d'ajouter des articles.
-      </p>
+      <p class="mt-2 text-sm text-gray-500">Veuillez d'abord sélectionner un magasin avant d'ajouter des articles.</p>
     </div>
 
     <div class="mt-6 flex justify-end">
@@ -929,9 +987,7 @@
           d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
       </svg>
       <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun stock disponible</h3>
-      <p class="mt-2 text-sm text-gray-500">
-        Aucun article disponible en stock dans ce magasin.
-      </p>
+      <p class="mt-2 text-sm text-gray-500">Aucun article disponible en stock dans ce magasin.</p>
     </div>
 
     <div class="mt-6 flex justify-end">
@@ -959,9 +1015,7 @@
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>
       <h3 class="mt-4 text-lg font-medium text-gray-900">Facture générée avec succès !</h3>
-      <p class="mt-2 text-sm text-gray-500">
-        La facture a été générée et enregistrée dans le système.
-      </p>
+      <p class="mt-2 text-sm text-gray-500">La facture a été générée et enregistrée dans le système.</p>
     </div>
 
     <div class="mt-6 flex justify-end">
@@ -989,10 +1043,15 @@
         max-height: none !important;
         overflow: visible !important;
       }
-      .app-popup__close, .app-popup__actions, .no-print, .rounded-lg.bg-gray-300, .rounded-lg.bg-orange-600 {
+      .app-popup__close,
+      .app-popup__actions,
+      .no-print,
+      .rounded-lg.bg-gray-300,
+      .rounded-lg.bg-orange-600 {
         display: none !important;
       }
-      app-popup, .facture-print-scroll {
+      app-popup,
+      .facture-print-scroll {
         width: 210mm !important;
         min-height: 297mm !important;
         max-width: 210mm !important;
@@ -1005,9 +1064,9 @@
       }
     }
   </style>
-  <div popup-content class="w-[800px] max-w-4xl facture-print-scroll">
+  <div popup-content class="facture-print-scroll w-[800px] max-w-4xl">
     <div class="mb-6 flex items-center justify-between">
-      <h3 class="text-xl font-semibold text-gray-800">Générer une facture</h3>
+      <h3 class="text-xl font-semibold text-gray-800">Imprimer facture</h3>
       <button (click)="closeFactureForm()" class="text-gray-400 hover:text-gray-600">
         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -1021,29 +1080,34 @@
       @if (getSelectedClient()) {
       <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
-          <h4 class="text-sm font-semibold text-blue-800 mb-2">Informations client</h4>
+          <h4 class="mb-2 text-sm font-semibold text-blue-800">Informations client</h4>
           <div class="space-y-1 text-sm text-blue-700">
             <p><strong>Nom:</strong> {{ getSelectedClient()?.nomPersonne }}</p>
             @if (getSelectedClient()?.adresse) {
             <p><strong>Adresse:</strong> {{ getSelectedClient()?.adresse }}</p>
-            }
-            @if (getSelectedClient()?.telephone) {
+            } @if (getSelectedClient()?.telephone) {
             <p><strong>Téléphone:</strong> {{ getSelectedClient()?.telephone }}</p>
-            }
-            @if (getSelectedClient()?.email) {
+            } @if (getSelectedClient()?.email) {
             <p><strong>Email:</strong> {{ getSelectedClient()?.email }}</p>
-            }
-            @if (getSelectedClient()?.devise) {
-            <p><strong>Devise:</strong> {{ getSelectedClient()?.devise?.code || getSelectedClient()?.devise?.devise }}</p>
+            } @if (getSelectedClient()?.devise) {
+            <p>
+              <strong>Devise:</strong> {{ getSelectedClient()?.devise?.code || getSelectedClient()?.devise?.devise }}
+            </p>
             }
           </div>
         </div>
         <div>
-          <h4 class="text-sm font-semibold text-blue-800 mb-2">Résumé de la facture</h4>
+          <h4 class="mb-2 text-sm font-semibold text-blue-800">Résumé de la facture</h4>
           <div class="space-y-1 text-sm text-blue-700">
             <p><strong>Nombre de commandes:</strong> {{ selectedCommandes.length }}</p>
-            <p><strong>Total HT:</strong> {{ calculateFactureTotalHt() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
-            <p><strong>Total TTC:</strong> {{ calculateFactureTotal() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</p>
+            <p>
+              <strong>Total HT:</strong>
+              {{ getFactureTotalHt() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+            </p>
+            <p>
+              <strong>Total TTC:</strong>
+              {{ getFactureTotalTtc() | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+            </p>
           </div>
         </div>
       </div>
@@ -1099,7 +1163,9 @@
                   class="cursor-pointer transition-colors duration-200 hover:bg-gray-50"
                   (click)="toggleCommandeDetails(commande.idCmd)">
                   <td class="px-3 py-2 text-sm text-gray-900">{{ commande.libelle || commande.libCmd }}</td>
-                  <td class="px-3 py-2 text-sm text-gray-900">{{ (commande.dateCmd || commande.dateCommande) | date : 'dd/MM/yyyy' }}</td>
+                  <td class="px-3 py-2 text-sm text-gray-900">
+                    {{ commande.dateCmd || commande.dateCommande | date : 'dd/MM/yyyy' }}
+                  </td>
                   <td class="px-3 py-2 text-sm text-gray-900">
                     {{ getCommandeMontantHt(commande) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
                   </td>
@@ -1107,7 +1173,7 @@
                     {{ getCommandeMontantTtc(commande) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
                   </td>
                   <td class="px-3 py-2 text-sm">
-                    <button 
+                    <button
                       (click)="$event.stopPropagation(); toggleCommandeDetails(commande.idCmd)"
                       class="text-blue-600 hover:text-blue-800">
                       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1119,7 +1185,9 @@
                 <tr *ngIf="expandedCommandes.has(commande.idCmd)">
                   <td colspan="5" class="p-0">
                     <div class="bg-gray-100 p-4">
-                      <h5 class="mb-2 font-semibold">Détails de la commande : {{ commande.libelle || commande.libCmd }}</h5>
+                      <h5 class="mb-2 font-semibold">
+                        Détails de la commande : {{ commande.libelle || commande.libCmd }}
+                      </h5>
                       <table class="min-w-full rounded bg-white">
                         <thead class="bg-gray-200">
                           <tr>
@@ -1134,9 +1202,16 @@
                           <tr *ngFor="let ligne of commande.lignes || commande.detailCmds">
                             <td class="px-2 py-1 text-sm">{{ ligne.description || ligne.article?.description }}</td>
                             <td class="px-2 py-1 text-sm">{{ ligne.quantite }}</td>
-                            <td class="px-2 py-1 text-sm">{{ ligne.article?.prix | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
+                            <td class="px-2 py-1 text-sm">
+                              {{ ligne.article?.prix | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}
+                            </td>
                             <td class="px-2 py-1 text-sm">{{ ligne?.article?.tva }} %</td>
-                            <td class="px-2 py-1 text-sm">{{ (ligne.quantite * (ligne.article?.prix || 0)) | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2' }}</td>
+                            <td class="px-2 py-1 text-sm">
+                              {{
+                                ligne.quantite * (ligne.article?.prix || 0)
+                                  | currency : getClientDeviseSymbol() : 'symbol' : '1.2-2'
+                              }}
+                            </td>
                           </tr>
                         </tbody>
                       </table>
@@ -1186,14 +1261,18 @@
           [disabled]="factureForm.invalid || isGeneratingFacture"
           class="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50">
           @if (isGeneratingFacture) {
-          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg
+            class="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Génération en cours...
-          } @else {
-          📄 Générer la facture
-          }
+          Génération en cours... } @else { 📄 Imprimer facture }
         </button>
       </div>
     </form>

@@ -67,8 +67,6 @@ export class CmdAchatComponent implements OnInit {
   // Status options
   statuts = [
     { value: 'LANCE', label: 'Lancé' },
-    { value: 'LIVRE_PARTIELLEMENT', label: 'Livré partiellement' },
-    { value: 'LIVRE_TOTAL', label: 'Livré totalement' },
   ];
 
   // Pagination
@@ -788,9 +786,17 @@ export class CmdAchatComponent implements OnInit {
 
   // Pagination methods
   get paginatedCommandes(): any[] {
+    // Sort by libelle/libCmd before pagination (descending string order)
+    const sortedCommandes = [...this.commandes].sort((a: any, b: any) => {
+      const libelleA = (a.libelle || a.libCmd || '').toString();
+      const libelleB = (b.libelle || b.libCmd || '').toString();
+      
+      // Sort in descending alphabetical order
+      return libelleB.localeCompare(libelleA); // Descending: "Commande 4" comes before "Commande 3"
+    });
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    return this.commandes.slice(startIndex, endIndex);
+    return sortedCommandes.slice(startIndex, endIndex);
   }
 
   get totalPages(): number {

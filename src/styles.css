@@ -291,3 +291,33 @@ select {
 [type='radio'] {
   @apply h-4 w-4 rounded-sm border border-[#0762ee] bg-[#a8a29e70] checked:border-primary checked:bg-primary indeterminate:border-primary indeterminate:bg-primary focus:ring-2 focus:ring-primary;
 }
+
+.facture-print-scroll {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+@media print {
+  .facture-print-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .app-popup__close,
+  .app-popup__actions,
+  .no-print,
+  .rounded-lg.bg-gray-300,
+  .rounded-lg.bg-orange-600 {
+    display: none !important;
+  }
+  app-popup,
+  .facture-print-scroll {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-width: 210mm !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+}

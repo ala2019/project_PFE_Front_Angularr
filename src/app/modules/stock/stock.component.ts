@@ -38,6 +38,8 @@ export class StockComponent implements OnInit {
     magasin: null as number | null,
     devise: 'EUR',
     searchTerm: '',
+    showOutOfStock: false, // Filtre pour les articles en rupture de stock
+    showLowStock: false, // Filtre pour les articles en stock faible (quantité < stock minimum)
   };
 
   // State management
@@ -81,6 +83,8 @@ export class StockComponent implements OnInit {
       magasinId: [null, []],
       devise: ['EUR', []],
       searchTerm: ['', []],
+      showOutOfStock: [false, []],
+      showLowStock: [false, []],
     });
   }
 
@@ -278,6 +282,24 @@ export class StockComponent implements OnInit {
         }
       }
 
+      // Filtre pour les articles en rupture de stock
+      if (this.filters.showOutOfStock) {
+        const currentStock = this.getStockByMagasin(article);
+        const stockMin = article.stockMin || 0;
+        if (currentStock > stockMin) {
+          return false; // Exclure les articles qui ne sont pas en rupture/alerte
+        }
+      }
+
+      // Filtre pour les articles en stock faible (quantité < stock minimum)
+      if (this.filters.showLowStock) {
+        const currentStock = this.getStockByMagasin(article);
+        const stockMin = article.stockMin || 0;
+        if (currentStock >= stockMin) {
+          return false; // Exclure les articles qui ont un stock suffisant
+        }
+      }
+
       return true;
     });
 
@@ -300,17 +322,41 @@ export class StockComponent implements OnInit {
     this.searchTerm = '';
     this.filters.searchTerm = '';
     this.filters.devise = 'EUR';
+    this.filters.showOutOfStock = false;
+    this.filters.showLowStock = false;
     this.selectedDevise = 'EUR';
     
     this.filterForm.patchValue({
       searchTerm: '',
       devise: 'EUR',
+      showOutOfStock: false,
+      showLowStock: false,
     });
     
     // Réappliquer les filtres pour afficher tous les articles
     this.applyFilters();
     
     console.log('Filtres effacés, affichage de tous les articles');
+  }
+
+  // Méthode spécifique pour effacer uniquement le filtre de rupture de stock
+  clearOutOfStockFilter(): void {
+    this.filters.showOutOfStock = false;
+    this.filterForm.patchValue({
+      showOutOfStock: false,
+    });
+    this.applyFilters();
+    console.log('Filtre de rupture de stock effacé');
+  }
+
+  // Méthode spécifique pour effacer uniquement le filtre de stock faible
+  clearLowStockFilter(): void {
+    this.filters.showLowStock = false;
+    this.filterForm.patchValue({
+      showLowStock: false,
+    });
+    this.applyFilters();
+    console.log('Filtre de stock faible effacé');
   }
 
   // Stock methods
@@ -416,7 +462,7 @@ export class StockComponent implements OnInit {
 
   // Nouvelle méthode pour compter les articles en alerte
   getAlertCount(): number {
-    return this.filteredArticles.filter((article) => article.quantite < 1).length;
+    return this.filteredArticles.filter((article) => article.quantite < article.stockMin || 1).length;
   }
 
   // Nouvelle méthode pour compter les articles en stock (quantité > 0)
@@ -427,6 +473,42 @@ export class StockComponent implements OnInit {
   // Nouvelle méthode pour obtenir les articles en alerte
   getAlertArticles(): any[] {
     return this.filteredArticles.filter((article) => this.isStockAlert(article));
+  }
+
+  // Méthode pour compter les articles en rupture/alerte de stock (quantité <= stock minimum)
+  getOutOfStockCount(): number {
+    return this.articles.filter((article) => {
+      const currentStock = this.getStockByMagasin(article);
+      const stockMin = article.stockMin || 0;
+      return currentStock <= stockMin;
+    }).length;
+  }
+
+  // Méthode pour obtenir les articles en rupture de stock (pour le filtre)
+  getOutOfStockArticles(): any[] {
+    return this.articles.filter((article) => {
+      const currentStock = this.getStockByMagasin(article);
+      const stockMin = article.stockMin || 0;
+      return currentStock <= stockMin;
+    });
+  }
+
+  // Méthode pour compter les articles en stock faible (quantité < stock minimum)
+  getLowStockCount(): number {
+    return this.articles.filter((article) => {
+      const currentStock = this.getStockByMagasin(article);
+      const stockMin = article.stockMin || 0;
+      return currentStock < stockMin && currentStock > 0; // Stock faible mais pas en rupture
+    }).length;
+  }
+
+  // Méthode pour obtenir les articles en stock faible (pour le filtre)
+  getLowStockArticles(): any[] {
+    return this.articles.filter((article) => {
+      const currentStock = this.getStockByMagasin(article);
+      const stockMin = article.stockMin || 0;
+      return currentStock < stockMin && currentStock > 0; // Stock faible mais pas en rupture
+    });
   }
 
   // Magasin methods
@@ -463,6 +545,16 @@ export class StockComponent implements OnInit {
 
   onDeviseChange(): void {
     this.selectedDevise = this.filters.devise;
+  }
+
+  onOutOfStockFilterChange(): void {
+    // Appliquer les filtres immédiatement quand le filtre de rupture de stock change
+    this.applyFilters();
+  }
+
+  onLowStockFilterChange(): void {
+    // Appliquer les filtres immédiatement quand le filtre de stock faible change
+    this.applyFilters();
   }
 
   // Pagination methods
@@ -550,12 +642,28 @@ export class StockComponent implements OnInit {
   hasActiveFilters(): boolean {
     const hasSearchTerm = Boolean(this.filters.searchTerm && this.filters.searchTerm.trim() !== '');
     const hasCustomDevise = Boolean(this.filters.devise && this.filters.devise !== 'EUR');
-    return hasSearchTerm || hasCustomDevise;
+    const hasOutOfStockFilter = Boolean(this.filters.showOutOfStock);
+    const hasLowStockFilter = Boolean(this.filters.showLowStock);
+    return hasSearchTerm || hasCustomDevise || hasOutOfStockFilter || hasLowStockFilter;
   }
 
   // Obtenir le nombre de résultats filtrés
   getFilteredCount(): number {
     return this.filteredArticles.length;
+  }
+
+  // Obtenir la description du filtre actif
+  getActiveFilterDescription(): string {
+    if (this.filters.showOutOfStock) {
+      return `Articles en rupture/alerte de stock (${this.getOutOfStockCount()} article(s))`;
+    }
+    if (this.filters.showLowStock) {
+      return `Articles en stock faible (${this.getLowStockCount()} article(s))`;
+    }
+    if (this.filters.searchTerm && this.filters.searchTerm.trim()) {
+      return `Recherche: "${this.filters.searchTerm}" (${this.getFilteredCount()} résultat(s))`;
+    }
+    return '';
   }
 
   // Méthode de test pour la recherche
